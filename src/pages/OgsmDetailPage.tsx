@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Input } from '@/components/ui/input';
+import { OgsmHeader } from '@/components/OgsmHeader';
+import { OgsmBoard } from '@/components/OgsmBoard';
 import type { OGSM } from '@/types';
 
 /**
@@ -22,76 +23,18 @@ const MOCK_OGSM: OGSM = {
  */
 export function OgsmDetailPage() {
     const [ogsm, setOgsm] = useState<OGSM>(MOCK_OGSM);
-    const [isEditingName, setIsEditingName] = useState(false);
-    const [nameValue, setNameValue] = useState(ogsm.name);
 
     /**
-     * Handle name edit start
+     * Handle OGSM name change
      */
-    const handleNameClick = () => {
-        setIsEditingName(true);
-        setNameValue(ogsm.name);
-    };
-
-    /**
-     * Handle name save
-     */
-    const handleNameSave = () => {
-        setOgsm({ ...ogsm, name: nameValue });
-        setIsEditingName(false);
-    };
-
-    /**
-     * Handle name blur
-     */
-    const handleNameBlur = () => {
-        handleNameSave();
-    };
-
-    /**
-     * Handle name key press (Enter to save)
-     */
-    const handleNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleNameSave();
-        } else if (e.key === 'Escape') {
-            setNameValue(ogsm.name);
-            setIsEditingName(false);
-        }
+    const handleNameChange = (newName: string) => {
+        setOgsm({ ...ogsm, name: newName });
     };
 
     return (
         <div className="flex h-full flex-col">
-            {/* Header */}
-            <header className="border-b bg-background px-8 py-6">
-                {isEditingName ? (
-                    <Input
-                        type="text"
-                        value={nameValue}
-                        onChange={(e) => setNameValue(e.target.value)}
-                        onBlur={handleNameBlur}
-                        onKeyDown={handleNameKeyDown}
-                        className="text-2xl font-bold"
-                        autoFocus
-                    />
-                ) : (
-                    <h1
-                        className="cursor-pointer text-2xl font-bold text-foreground hover:text-primary"
-                        onClick={handleNameClick}
-                    >
-                        {ogsm.name}
-                    </h1>
-                )}
-            </header>
-
-            {/* Main Board - Empty Placeholder */}
-            <main className="flex-1 overflow-auto bg-muted/20 p-8">
-                <div className="flex h-full items-center justify-center">
-                    <p className="text-muted-foreground">
-                        Main board content will be implemented here
-                    </p>
-                </div>
-            </main>
+            <OgsmHeader name={ogsm.name} onNameChange={handleNameChange} />
+            <OgsmBoard ogsm={ogsm} />
         </div>
     );
 }
