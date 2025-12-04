@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
+import { RouterProvider } from 'react-router';
 import { seedDatabase } from '@/utils/seedData';
 import * as api from '@/api';
 import { clearAllStorage } from '@/utils/storage';
+import { router } from '@/router';
 
 /**
  * Extend Window interface for OGSM API
@@ -38,11 +40,7 @@ function App() {
         }
     }, []);
 
-    return (
-        <div>
-            <p>Hello, World</p>
-        </div>
-    );
+    return <RouterProvider router={router} />;
 }
 
 export default App;
