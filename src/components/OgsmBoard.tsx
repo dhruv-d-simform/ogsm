@@ -11,12 +11,12 @@ interface OgsmBoardProps {
  * Main board component for OGSM
  * Displays the OGSM objectives, goals, strategies, and measures
  */
-export function OgsmBoard({ ogsm: _ogsm }: OgsmBoardProps) {
+export function OgsmBoard({ ogsm }: OgsmBoardProps) {
     return (
         <main className="flex-1 overflow-auto bg-muted/20 p-8">
             <div className="flex h-full flex-col gap-6">
                 {/* Objective Section */}
-                <ObjectiveSection />
+                <ObjectiveSection objective={ogsm.objective} />
 
                 {/* Goals and Strategy Sections - Side by Side */}
                 <div className="flex flex-1 gap-6">
