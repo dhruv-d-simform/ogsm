@@ -169,14 +169,14 @@ export function Sidebar() {
     }, [searchQuery]);
 
     return (
-        <aside className="flex h-full w-80 flex-col border-r border-border bg-card">
+        <aside className="flex h-screen w-80 flex-col border-r border-border bg-card">
             {/* Fixed Header - App Title */}
-            <div className="border-b border-border px-6 py-4">
+            <div className="shrink-0 border-b border-border px-6 py-4">
                 <h1 className="text-2xl font-bold text-foreground">OGSM</h1>
             </div>
 
             {/* Fixed Search Bar */}
-            <div className="border-b border-border px-4 py-3">
+            <div className="shrink-0 border-b border-border px-4 py-3">
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -192,7 +192,7 @@ export function Sidebar() {
             </div>
 
             {/* Scrollable OGSM List */}
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 overflow-hidden">
                 <div className="space-y-1 p-2">
                     {filteredOgsmList.length === 0 ? (
                         <div className="px-4 py-8 text-center text-sm text-muted-foreground">
@@ -231,7 +231,7 @@ export function Sidebar() {
             </ScrollArea>
 
             {/* Fixed Bottom - Create Button */}
-            <div className="border-t border-border p-4">
+            <div className="shrink-0 border-t border-border p-4">
                 <Button className="w-full" size="lg">
                     <Plus className="mr-2 h-4 w-4" />
                     Create New OGSM
