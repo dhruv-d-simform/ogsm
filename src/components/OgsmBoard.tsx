@@ -13,13 +13,13 @@ interface OgsmBoardProps {
  */
 export function OgsmBoard({ ogsm }: OgsmBoardProps) {
     return (
-        <main className="flex-1 overflow-auto bg-muted/20 p-8">
-            <div className="flex h-full flex-col gap-6">
+        <main className="flex flex-1 flex-col overflow-hidden bg-muted/20 p-8">
+            <div className="flex min-h-0 flex-1 flex-col gap-6">
                 {/* Objective Section */}
                 <ObjectiveSection objective={ogsm.objective} />
 
                 {/* Goals and Strategy Sections - Side by Side */}
-                <div className="flex flex-1 gap-6">
+                <div className="flex min-h-0 flex-1 gap-6">
                     {/* Goals Section - 20% width */}
                     <div className="w-[20%]">
                         <GoalsSection />
