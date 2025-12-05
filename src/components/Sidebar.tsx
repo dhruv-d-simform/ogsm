@@ -3,7 +3,18 @@ import { Link, useParams } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, Plus } from 'lucide-react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Search, Plus, Trash2 } from 'lucide-react';
 import type { OGSM } from '@/types';
 
 /**
@@ -156,6 +167,17 @@ export function Sidebar() {
     const [searchQuery, setSearchQuery] = useState('');
     const { id: selectedOgsmId } = useParams();
 
+    /**
+     * Handle clearing all data and resetting to mock data
+     */
+    const handleClearData = () => {
+        // Clear all localStorage data
+        localStorage.clear();
+
+        // Redirect to home and force full page reload
+        window.location.href = '/';
+    };
+
     // Filter OGSM list based on search query
     const filteredOgsmList = useMemo(() => {
         const query = searchQuery.toLowerCase().trim();
@@ -170,9 +192,46 @@ export function Sidebar() {
 
     return (
         <aside className="flex h-screen w-80 flex-col border-r border-border bg-card">
-            {/* Fixed Header - App Title */}
+            {/* Fixed Header - App Title with Clear Data Button */}
             <div className="shrink-0 border-b border-border px-6 py-4">
-                <h1 className="text-2xl font-bold text-foreground">OGSM</h1>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-bold text-foreground">OGSM</h1>
+
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                title="Clear all data"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    Are you sure you want to delete all the
+                                    data?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    All of your current data will be deleted and
+                                    mock data of around 10–15 OGSMs will be
+                                    created.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={handleClearData}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                    Delete All Data
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
             </div>
 
             {/* Fixed Search Bar */}
