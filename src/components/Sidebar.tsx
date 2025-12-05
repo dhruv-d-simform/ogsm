@@ -3,151 +3,19 @@ import { Link, useParams } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, Plus } from 'lucide-react';
-import type { OGSM } from '@/types';
-
-/**
- * Mock OGSM data for the sidebar
- * This will be replaced by real API calls later
- */
-const MOCK_OGSM_DATA: OGSM[] = [
-    {
-        id: '1',
-        name: 'Q1 2024 Revenue Growth',
-        objective: 'Increase quarterly revenue by 25% through market expansion',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-01-15T10:00:00Z',
-        updatedAt: '2024-01-15T10:00:00Z',
-    },
-    {
-        id: '2',
-        name: 'Customer Retention Initiative',
-        objective: 'Improve customer retention rate to 95% by end of Q2',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-01-20T14:30:00Z',
-        updatedAt: '2024-01-20T14:30:00Z',
-    },
-    {
-        id: '3',
-        name: 'Product Launch 2024',
-        objective:
-            'Successfully launch 3 new product features with 80% adoption',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-02-01T09:15:00Z',
-        updatedAt: '2024-02-01T09:15:00Z',
-    },
-    {
-        id: '4',
-        name: 'Team Expansion Plan',
-        objective: 'Grow engineering team by 40% while maintaining quality',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-02-05T11:00:00Z',
-        updatedAt: '2024-02-05T11:00:00Z',
-    },
-    {
-        id: '5',
-        name: 'Cost Optimization Strategy',
-        objective: 'Reduce operational costs by 15% without impacting quality',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-02-10T16:45:00Z',
-        updatedAt: '2024-02-10T16:45:00Z',
-    },
-    {
-        id: '6',
-        name: 'Customer Support Excellence',
-        objective: 'Achieve 98% customer satisfaction score in support',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-02-15T13:20:00Z',
-        updatedAt: '2024-02-15T13:20:00Z',
-    },
-    {
-        id: '7',
-        name: 'Digital Transformation',
-        objective: 'Complete digital transformation of core business processes',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-02-20T10:30:00Z',
-        updatedAt: '2024-02-20T10:30:00Z',
-    },
-    {
-        id: '8',
-        name: 'Market Share Growth',
-        objective: 'Increase market share from 12% to 18% by year end',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-03-01T08:00:00Z',
-        updatedAt: '2024-03-01T08:00:00Z',
-    },
-    {
-        id: '9',
-        name: 'Employee Engagement Plan',
-        objective: 'Boost employee engagement score to 85% or higher',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-03-05T15:10:00Z',
-        updatedAt: '2024-03-05T15:10:00Z',
-    },
-    {
-        id: '10',
-        name: 'Quality Assurance Improvement',
-        objective: 'Reduce bug count by 50% through enhanced QA processes',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-03-10T12:00:00Z',
-        updatedAt: '2024-03-10T12:00:00Z',
-    },
-    {
-        id: '11',
-        name: 'Sales Pipeline Optimization',
-        objective: 'Increase sales pipeline velocity by 30% in Q2',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-03-15T09:45:00Z',
-        updatedAt: '2024-03-15T09:45:00Z',
-    },
-    {
-        id: '12',
-        name: 'Innovation Sprint 2024',
-        objective: 'Launch 5 innovative experiments with measurable impact',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-03-20T14:00:00Z',
-        updatedAt: '2024-03-20T14:00:00Z',
-    },
-    {
-        id: '13',
-        name: 'Partnership Development',
-        objective: 'Establish 10 strategic partnerships to expand reach',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-03-25T11:30:00Z',
-        updatedAt: '2024-03-25T11:30:00Z',
-    },
-    {
-        id: '14',
-        name: 'Brand Awareness Campaign',
-        objective: 'Increase brand recognition by 40% in target markets',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-04-01T10:15:00Z',
-        updatedAt: '2024-04-01T10:15:00Z',
-    },
-    {
-        id: '15',
-        name: 'Sustainability Initiative',
-        objective: 'Reduce carbon footprint by 25% through green practices',
-        goalIds: [],
-        strategyIds: [],
-        createdAt: '2024-04-05T13:45:00Z',
-        updatedAt: '2024-04-05T13:45:00Z',
-    },
-];
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Search, Plus, Trash2, Loader2 } from 'lucide-react';
+import { useOGSMs } from '@/hooks/useOgsm';
 
 /**
  * Sidebar component with search, OGSM list, and create button
@@ -156,23 +24,74 @@ export function Sidebar() {
     const [searchQuery, setSearchQuery] = useState('');
     const { id: selectedOgsmId } = useParams();
 
+    // Fetch OGSM data using TanStack Query
+    const { data: ogsms = [], isLoading, isError, error } = useOGSMs();
+
+    /**
+     * Handle clearing all data and resetting to mock data
+     */
+    const handleClearData = () => {
+        // Clear all localStorage data
+        localStorage.clear();
+
+        // Redirect to home and force full page reload
+        window.location.href = '/';
+    };
+
     // Filter OGSM list based on search query
     const filteredOgsmList = useMemo(() => {
         const query = searchQuery.toLowerCase().trim();
-        if (!query) return MOCK_OGSM_DATA;
+        if (!query) return ogsms;
 
-        return MOCK_OGSM_DATA.filter(
+        return ogsms.filter(
             (ogsm) =>
                 ogsm.name.toLowerCase().includes(query) ||
                 ogsm.objective.toLowerCase().includes(query)
         );
-    }, [searchQuery]);
+    }, [searchQuery, ogsms]);
 
     return (
         <aside className="flex h-screen w-80 flex-col border-r border-border bg-card">
-            {/* Fixed Header - App Title */}
+            {/* Fixed Header - App Title with Clear Data Button */}
             <div className="shrink-0 border-b border-border px-6 py-4">
-                <h1 className="text-2xl font-bold text-foreground">OGSM</h1>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-bold text-foreground">OGSM</h1>
+
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                title="Clear all data"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    Are you sure you want to delete all the
+                                    data?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    All of your current data will be deleted and
+                                    mock data of around 10–15 OGSMs will be
+                                    created.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={handleClearData}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                    Delete All Data
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
             </div>
 
             {/* Fixed Search Bar */}
@@ -194,9 +113,29 @@ export function Sidebar() {
             {/* Scrollable OGSM List */}
             <ScrollArea className="flex-1 overflow-hidden">
                 <div className="space-y-1 p-2">
-                    {filteredOgsmList.length === 0 ? (
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                            <p className="mt-3 text-sm text-muted-foreground">
+                                Loading OGSM plans...
+                            </p>
+                        </div>
+                    ) : isError ? (
+                        <div className="px-4 py-8 text-center">
+                            <p className="text-sm text-destructive">
+                                Error loading OGSM plans
+                            </p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                {error instanceof Error
+                                    ? error.message
+                                    : 'Unknown error'}
+                            </p>
+                        </div>
+                    ) : filteredOgsmList.length === 0 ? (
                         <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                            No OGSM plans found
+                            {searchQuery
+                                ? 'No OGSM plans found'
+                                : 'No OGSM plans yet. Create your first one!'}
                         </div>
                     ) : (
                         filteredOgsmList.map((ogsm) => {

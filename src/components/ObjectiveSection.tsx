@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ObjectiveSectionProps {
     objective: string;
+    onObjectiveChange?: (newObjective: string) => void;
 }
 
 /**
@@ -9,9 +10,19 @@ interface ObjectiveSectionProps {
  * Displays the main objective at the top of the OGSM board
  * Supports inline editing on click
  */
-export function ObjectiveSection({ objective }: ObjectiveSectionProps) {
+export function ObjectiveSection({
+    objective,
+    onObjectiveChange,
+}: ObjectiveSectionProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState(objective);
+
+    /**
+     * Sync local state when prop changes
+     */
+    useEffect(() => {
+        setLocalValue(objective);
+    }, [objective]);
 
     /**
      * Handle click to enter edit mode
@@ -21,9 +32,15 @@ export function ObjectiveSection({ objective }: ObjectiveSectionProps) {
     };
 
     /**
-     * Handle blur to exit edit mode
+     * Handle blur to save and exit edit mode
      */
     const handleBlur = () => {
+        const trimmedValue = localValue.trim();
+        if (trimmedValue && trimmedValue !== objective && onObjectiveChange) {
+            onObjectiveChange(trimmedValue);
+        } else {
+            setLocalValue(objective);
+        }
         setIsEditing(false);
     };
 
@@ -32,6 +49,18 @@ export function ObjectiveSection({ objective }: ObjectiveSectionProps) {
      */
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLocalValue(e.target.value);
+    };
+
+    /**
+     * Handle key down (Enter to save, Escape to cancel)
+     */
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleBlur();
+        } else if (e.key === 'Escape') {
+            setLocalValue(objective);
+            setIsEditing(false);
+        }
     };
 
     return (
@@ -44,13 +73,15 @@ export function ObjectiveSection({ objective }: ObjectiveSectionProps) {
                         value={localValue}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        onKeyDown={handleKeyDown}
                         autoFocus
                         className="flex-1 bg-transparent text-lg outline-none"
                     />
                 ) : (
                     <p
                         onClick={handleClick}
-                        className="flex-1 cursor-pointer truncate text-lg"
+                        className="flex-1 cursor-pointer truncate text-lg hover:opacity-80"
+                        title="Click to edit"
                     >
                         {localValue}
                     </p>

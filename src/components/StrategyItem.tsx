@@ -1,23 +1,65 @@
-import type { Strategy, KPI, Action, Task } from '@/types';
+import { useStrategy } from '@/hooks/useStrategy';
+import { DashboardKpiItem } from '@/components/DashboardKpiItem';
+import { ActionItem } from '@/components/ActionItem';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface StrategyItemProps {
-    strategy: Strategy;
-    dashboardKpis: KPI[];
-    actions: Array<{
-        action: Action;
-        tasks: Task[];
-    }>;
+    strategyId: string;
 }
 
 /**
  * StrategyItem Component
- * Displays a single strategy with its dashboard KPIs and actions
+ * Fetches and displays a single strategy with its dashboard KPIs and actions
  */
-export function StrategyItem({
-    strategy,
-    dashboardKpis,
-    actions,
-}: StrategyItemProps) {
+export function StrategyItem({ strategyId }: StrategyItemProps) {
+    const { data: strategy, isLoading, isError } = useStrategy(strategyId);
+
+    // Loading state - skeleton UI to prevent layout shift
+    if (isLoading) {
+        return (
+            <div className="shadow-sm">
+                <div className="flex">
+                    {/* Strategy Name Column - 25% */}
+                    <div className="w-[25%] border-r border-gray-200 p-4">
+                        <Skeleton className="h-5 w-full" />
+                    </div>
+
+                    {/* Dashboard KPIs Column - 25% */}
+                    <div className="w-[25%] border-r border-gray-200">
+                        <div className="p-4">
+                            <Skeleton className="h-5 w-3/4" />
+                        </div>
+                    </div>
+
+                    {/* Actions Column - 50% */}
+                    <div className="w-[50%]">
+                        <div>
+                            {/* Action Skeleton */}
+                            <div className="p-4">
+                                <Skeleton className="h-5 w-full" />
+                            </div>
+                            {/* Tasks Skeleton */}
+                            <div className="bg-gray-50">
+                                <div className="border-t border-gray-200 py-2 pl-8 pr-4">
+                                    <Skeleton className="h-5 w-3/4" />
+                                </div>
+                                <div className="border-t border-gray-200 py-2 pl-8 pr-4">
+                                    <Skeleton className="h-5 w-3/4" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Error or not found - don't render anything
+    if (isError || !strategy) {
+        return null;
+    }
+
+    // Success state - render strategy with dashboard KPIs and actions
     return (
         <div className="shadow-sm">
             <div className="flex">
@@ -28,19 +70,14 @@ export function StrategyItem({
 
                 {/* Dashboard KPIs Column - 25% */}
                 <div className="w-[25%] border-r border-gray-200">
-                    {dashboardKpis.length > 0 ? (
+                    {strategy.dashboardKpiIds.length > 0 ? (
                         <div>
-                            {dashboardKpis.map((kpi, index) => (
-                                <div
-                                    key={kpi.id}
-                                    className={`p-4 ${
-                                        index > 0
-                                            ? 'border-t border-gray-200'
-                                            : ''
-                                    }`}
-                                >
-                                    <p className="text-sm">{kpi.name}</p>
-                                </div>
+                            {strategy.dashboardKpiIds.map((kpiId, index) => (
+                                <DashboardKpiItem
+                                    key={kpiId}
+                                    kpiId={kpiId}
+                                    showBorder={index > 0}
+                                />
                             ))}
                         </div>
                     ) : (
@@ -52,41 +89,18 @@ export function StrategyItem({
 
                 {/* Actions Column - 50% */}
                 <div className="w-[50%]">
-                    {actions.length > 0 ? (
+                    {strategy.actionIds.length > 0 ? (
                         <div>
-                            {actions.map((actionWithTasks, index) => (
+                            {strategy.actionIds.map((actionId, index) => (
                                 <div
-                                    key={actionWithTasks.action.id}
+                                    key={actionId}
                                     className={
                                         index > 0
                                             ? 'border-t border-gray-200'
                                             : ''
                                     }
                                 >
-                                    {/* Action Name */}
-                                    <div className="p-4">
-                                        <p className="text-sm font-medium">
-                                            {actionWithTasks.action.name}
-                                        </p>
-                                    </div>
-
-                                    {/* Tasks */}
-                                    {actionWithTasks.tasks.length > 0 && (
-                                        <div className="bg-gray-50">
-                                            {actionWithTasks.tasks.map(
-                                                (task) => (
-                                                    <div
-                                                        key={task.id}
-                                                        className="border-t border-gray-200 py-2 pl-8 pr-4"
-                                                    >
-                                                        <p className="text-sm text-gray-600">
-                                                            {task.name}
-                                                        </p>
-                                                    </div>
-                                                )
-                                            )}
-                                        </div>
-                                    )}
+                                    <ActionItem actionId={actionId} />
                                 </div>
                             ))}
                         </div>
