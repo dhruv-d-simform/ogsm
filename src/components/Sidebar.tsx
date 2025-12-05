@@ -85,7 +85,11 @@ export function Sidebar() {
             {/* Fixed Header - App Title with Clear Data Button */}
             <div className="shrink-0 border-b border-border px-6 py-4">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold text-foreground">OGSM</h1>
+                    <Link to="/">
+                        <h1 className="cursor-pointer text-2xl font-bold text-foreground hover:text-blue-600 transition-colors">
+                            OGSM
+                        </h1>
+                    </Link>
 
                     <AlertDialog>
                         <AlertDialogTrigger asChild>

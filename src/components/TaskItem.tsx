@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { useTask, useUpdateTask, useDeleteTask } from '@/hooks/useTask';
 import { Skeleton } from '@/components/ui/skeleton';
 import { X } from 'lucide-react';
@@ -17,6 +18,7 @@ export function TaskItem({ taskId, onTaskDeleted }: TaskItemProps) {
     const { data: task, isLoading, isError, isFetching } = useTask(taskId);
     const updateTaskMutation = useUpdateTask();
     const deleteTaskMutation = useDeleteTask();
+    const { isReadOnly } = useReadOnly();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
@@ -39,7 +41,13 @@ export function TaskItem({ taskId, onTaskDeleted }: TaskItemProps) {
      * Prevent editing if mutation is in progress or data is being refetched
      */
     const handleClick = () => {
-        if (updateTaskMutation.isPending || isFetching || pendingValue) return;
+        if (
+            isReadOnly ||
+            updateTaskMutation.isPending ||
+            isFetching ||
+            pendingValue
+        )
+            return;
         if (task) {
             setLocalValue(task.name);
         }
@@ -132,20 +140,22 @@ export function TaskItem({ taskId, onTaskDeleted }: TaskItemProps) {
             ) : (
                 <p
                     onClick={handleClick}
-                    className={`cursor-pointer text-sm text-gray-600 hover:opacity-70 ${
+                    className={`${
+                        isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
+                    } text-sm text-gray-600 ${
                         updateTaskMutation.isPending || pendingValue
                             ? 'opacity-50'
                             : ''
                     }`}
-                    title="Click to edit"
+                    title={isReadOnly ? '' : 'Click to edit'}
                 >
                     {pendingValue ||
                         (updateTaskMutation.isPending ? localValue : task.name)}
                 </p>
             )}
 
-            {/* Delete Button - Visible on Hover, Hidden in Edit Mode */}
-            {isHovered && !isEditing && (
+            {/* Delete Button - Visible on Hover, Hidden in Edit Mode and Read-Only */}
+            {isHovered && !isEditing && !isReadOnly && (
                 <button
                     onClick={handleDeleteTask}
                     disabled={deleteTaskMutation.isPending}

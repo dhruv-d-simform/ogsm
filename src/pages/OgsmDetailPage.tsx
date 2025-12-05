@@ -1,9 +1,11 @@
 import { useParams } from 'react-router';
+import { useEffect } from 'react';
 import { Loader2, AlertCircle, FileQuestion } from 'lucide-react';
 import { OgsmHeader } from '@/components/OgsmHeader';
 import { OgsmBoard } from '@/components/OgsmBoard';
 import { useOGSM, useUpdateOGSM } from '@/hooks/useOgsm';
 import { Button } from '@/components/ui/button';
+import { ReadOnlyProvider } from '@/contexts/ReadOnlyContext';
 
 /**
  * OGSM detail page - displays the main area with header and board
@@ -14,6 +16,18 @@ export function OgsmDetailPage() {
 
     // Fetch OGSM data using TanStack Query
     const { data: ogsm, isLoading, isError, error } = useOGSM(id || '');
+
+    // Update page title when OGSM data is loaded
+    useEffect(() => {
+        if (ogsm?.name) {
+            document.title = ogsm.name;
+        }
+
+        // Cleanup: reset to default title when component unmounts
+        return () => {
+            document.title = 'OGSM';
+        };
+    }, [ogsm?.name]);
 
     // Mutation hook for updating OGSM
     const updateOgsmMutation = useUpdateOGSM();
@@ -123,9 +137,14 @@ export function OgsmDetailPage() {
 
     // Success state - render OGSM
     return (
-        <div className="flex h-full flex-col">
-            <OgsmHeader name={ogsm.name} onNameChange={handleNameChange} />
-            <OgsmBoard ogsm={ogsm} onObjectiveChange={handleObjectiveChange} />
-        </div>
+        <ReadOnlyProvider>
+            <div className="flex h-full flex-col">
+                <OgsmHeader name={ogsm.name} onNameChange={handleNameChange} />
+                <OgsmBoard
+                    ogsm={ogsm}
+                    onObjectiveChange={handleObjectiveChange}
+                />
+            </div>
+        </ReadOnlyProvider>
     );
 }

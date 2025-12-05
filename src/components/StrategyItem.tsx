@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import {
     useStrategy,
     useUpdateStrategy,
@@ -25,6 +26,7 @@ export function StrategyItem({
     strategyId,
     onStrategyDeleted,
 }: StrategyItemProps) {
+    const { isReadOnly } = useReadOnly();
     const {
         data: strategy,
         isLoading,
@@ -61,7 +63,12 @@ export function StrategyItem({
      * Prevent editing if mutation is in progress or data is being refetched
      */
     const handleClick = () => {
-        if (updateStrategyMutation.isPending || isFetching || pendingValue)
+        if (
+            isReadOnly ||
+            updateStrategyMutation.isPending ||
+            isFetching ||
+            pendingValue
+        )
             return;
         if (strategy) {
             setLocalValue(strategy.name);
@@ -299,12 +306,16 @@ export function StrategyItem({
                     ) : (
                         <p
                             onClick={handleClick}
-                            className={`cursor-pointer text-sm font-medium hover:opacity-70 ${
+                            className={`${
+                                isReadOnly
+                                    ? ''
+                                    : 'cursor-pointer hover:opacity-70'
+                            } text-sm font-medium ${
                                 updateStrategyMutation.isPending || pendingValue
                                     ? 'opacity-50'
                                     : ''
                             }`}
-                            title="Click to edit"
+                            title={isReadOnly ? '' : 'Click to edit'}
                         >
                             {pendingValue ||
                                 (updateStrategyMutation.isPending
@@ -313,8 +324,8 @@ export function StrategyItem({
                         </p>
                     )}
 
-                    {/* Delete Button - Visible on Hover, Hidden in Edit Mode */}
-                    {isHovered && !isEditing && (
+                    {/* Delete Button - Visible on Hover, Hidden in Edit Mode and Read-Only */}
+                    {isHovered && !isEditing && !isReadOnly && (
                         <button
                             onClick={handleDeleteStrategy}
                             disabled={deleteStrategyMutation.isPending}
@@ -343,8 +354,8 @@ export function StrategyItem({
                                 />
                             ))}
 
-                            {/* Add New KPI Input - Visible on Hover */}
-                            {isKpiHovered && (
+                            {/* Add New KPI Input - Visible on Hover, Hidden in Read-Only */}
+                            {isKpiHovered && !isReadOnly && (
                                 <div className="border-t border-gray-200 p-4">
                                     <input
                                         type="text"
@@ -363,7 +374,7 @@ export function StrategyItem({
                         </div>
                     ) : (
                         <div className="p-4">
-                            {isKpiHovered ? (
+                            {isKpiHovered && !isReadOnly ? (
                                 <input
                                     type="text"
                                     value={newKpiName}
@@ -407,8 +418,8 @@ export function StrategyItem({
                                 </div>
                             ))}
 
-                            {/* Add New Action Input - Visible on Hover */}
-                            {isActionHovered && (
+                            {/* Add New Action Input - Visible on Hover, Hidden in Read-Only */}
+                            {isActionHovered && !isReadOnly && (
                                 <div className="border-t border-gray-200 p-4">
                                     <input
                                         type="text"
@@ -429,7 +440,7 @@ export function StrategyItem({
                         </div>
                     ) : (
                         <div className="p-4">
-                            {isActionHovered ? (
+                            {isActionHovered && !isReadOnly ? (
                                 <input
                                     type="text"
                                     value={newActionName}

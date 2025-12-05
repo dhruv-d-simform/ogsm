@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useReadOnly } from '@/contexts/ReadOnlyContext';
+import { SectionHeader } from '@/components/SectionHeader';
 
 interface ObjectiveSectionProps {
     objective: string;
@@ -16,6 +18,7 @@ export function ObjectiveSection({
 }: ObjectiveSectionProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState(objective);
+    const { isReadOnly } = useReadOnly();
 
     /**
      * Sync local state when prop changes
@@ -28,6 +31,7 @@ export function ObjectiveSection({
      * Handle click to enter edit mode
      */
     const handleClick = () => {
+        if (isReadOnly) return;
         setIsEditing(true);
     };
 
@@ -66,7 +70,11 @@ export function ObjectiveSection({
     return (
         <div className="rounded-lg bg-blue-900 p-6 text-white">
             <div className="flex items-center gap-3">
-                <span className="text-lg font-semibold">Objective</span>
+                <SectionHeader
+                    initial="O"
+                    label="Objective"
+                    description="The overarching goal or aspiration that defines what you want to achieve. It should be clear, inspiring, and provide direction for all other elements of your OGSM plan."
+                />
                 {isEditing ? (
                     <input
                         type="text"
@@ -80,8 +88,10 @@ export function ObjectiveSection({
                 ) : (
                     <p
                         onClick={handleClick}
-                        className="flex-1 cursor-pointer truncate text-lg hover:opacity-80"
-                        title="Click to edit"
+                        className={`flex-1 truncate text-lg ${
+                            isReadOnly ? '' : 'cursor-pointer hover:opacity-80'
+                        }`}
+                        title={isReadOnly ? localValue : 'Click to edit'}
                     >
                         {localValue}
                     </p>

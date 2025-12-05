@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { useAction, useUpdateAction, useDeleteAction } from '@/hooks/useAction';
 import { useCreateTask } from '@/hooks/useTask';
 import { TaskItem } from '@/components/TaskItem';
@@ -16,6 +17,7 @@ interface ActionItemProps {
  * Supports inline editing and deletion
  */
 export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
+    const { isReadOnly } = useReadOnly();
     const {
         data: action,
         isLoading,
@@ -49,7 +51,12 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
      * Prevent editing if mutation is in progress or data is being refetched
      */
     const handleClick = () => {
-        if (updateActionMutation.isPending || isFetching || pendingValue)
+        if (
+            isReadOnly ||
+            updateActionMutation.isPending ||
+            isFetching ||
+            pendingValue
+        )
             return;
         if (action) {
             setLocalValue(action.name);
@@ -219,12 +226,14 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                 ) : (
                     <p
                         onClick={handleClick}
-                        className={`cursor-pointer text-sm font-medium hover:opacity-70 ${
+                        className={`${
+                            isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
+                        } text-sm font-medium ${
                             updateActionMutation.isPending || pendingValue
                                 ? 'opacity-50'
                                 : ''
                         }`}
-                        title="Click to edit"
+                        title={isReadOnly ? '' : 'Click to edit'}
                     >
                         {pendingValue ||
                             (updateActionMutation.isPending
@@ -233,8 +242,8 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                     </p>
                 )}
 
-                {/* Delete Button - Visible on Hover, Hidden in Edit Mode */}
-                {isHovered && !isEditing && (
+                {/* Delete Button - Visible on Hover, Hidden in Edit Mode and Read-Only */}
+                {isHovered && !isEditing && !isReadOnly && (
                     <button
                         onClick={handleDeleteAction}
                         disabled={deleteActionMutation.isPending}
@@ -257,8 +266,8 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                         />
                     ))}
 
-                    {/* Add New Task Input - Visible on Hover */}
-                    {isTaskHovered && (
+                    {/* Add New Task Input - Visible on Hover, Hidden in Read-Only */}
+                    {isTaskHovered && !isReadOnly && (
                         <div className="border-t border-gray-200 py-2 pl-8 pr-4">
                             <input
                                 type="text"
@@ -275,8 +284,8 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                 </div>
             )}
 
-            {/* Show Task section even when empty, on hover */}
-            {action.taskIds.length === 0 && isTaskHovered && (
+            {/* Show Task section even when empty, on hover, Hidden in Read-Only */}
+            {action.taskIds.length === 0 && isTaskHovered && !isReadOnly && (
                 <div className="bg-gray-50">
                     <div className="py-2 pl-8 pr-4">
                         <input

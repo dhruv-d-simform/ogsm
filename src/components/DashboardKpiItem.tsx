@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { useKPI, useUpdateKPI, useDeleteKPI } from '@/hooks/useKpi';
 import { Skeleton } from '@/components/ui/skeleton';
 import { X } from 'lucide-react';
@@ -19,6 +20,7 @@ export function DashboardKpiItem({
     showBorder = false,
     onKpiDeleted,
 }: DashboardKpiItemProps) {
+    const { isReadOnly } = useReadOnly();
     const { data: kpi, isLoading, isError, isFetching } = useKPI(kpiId);
     const updateKpiMutation = useUpdateKPI();
     const deleteKpiMutation = useDeleteKPI();
@@ -44,7 +46,13 @@ export function DashboardKpiItem({
      * Prevent editing if mutation is in progress or data is being refetched
      */
     const handleClick = () => {
-        if (updateKpiMutation.isPending || isFetching || pendingValue) return;
+        if (
+            isReadOnly ||
+            updateKpiMutation.isPending ||
+            isFetching ||
+            pendingValue
+        )
+            return;
         if (kpi) {
             setLocalValue(kpi.name);
         }
@@ -139,20 +147,22 @@ export function DashboardKpiItem({
             ) : (
                 <p
                     onClick={handleClick}
-                    className={`cursor-pointer text-sm hover:opacity-70 ${
+                    className={`${
+                        isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
+                    } text-sm ${
                         updateKpiMutation.isPending || pendingValue
                             ? 'opacity-50'
                             : ''
                     }`}
-                    title="Click to edit"
+                    title={isReadOnly ? '' : 'Click to edit'}
                 >
                     {pendingValue ||
                         (updateKpiMutation.isPending ? localValue : kpi.name)}
                 </p>
             )}
 
-            {/* Delete Button - Visible on Hover, Hidden in Edit Mode */}
-            {isHovered && !isEditing && (
+            {/* Delete Button - Visible on Hover, Hidden in Edit Mode and Read-Only */}
+            {isHovered && !isEditing && !isReadOnly && (
                 <button
                     onClick={handleDeleteKpi}
                     disabled={deleteKpiMutation.isPending}

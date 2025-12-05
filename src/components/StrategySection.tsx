@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { StrategyItem } from '@/components/StrategyItem';
 import { useCreateStrategy } from '@/hooks/useStrategy';
+import { SectionHeader } from '@/components/SectionHeader';
 
 interface StrategySectionProps {
     strategyIds: string[];
@@ -18,6 +20,7 @@ export function StrategySection({
     onStrategyCreated,
     onStrategyDeleted,
 }: StrategySectionProps) {
+    const { isReadOnly } = useReadOnly();
     const [isHovered, setIsHovered] = useState(false);
     const [newStrategyName, setNewStrategyName] = useState('');
     const createStrategyMutation = useCreateStrategy();
@@ -66,10 +69,18 @@ export function StrategySection({
             {/* Main Header - Strategy and Measures */}
             <div className="flex rounded-t-lg bg-blue-900 text-white">
                 <div className="w-[25%] border-r border-white p-4">
-                    <h2 className="text-lg font-semibold">Strategy</h2>
+                    <SectionHeader
+                        initial="S"
+                        label="Strategy"
+                        description="High-level approaches or methods used to achieve your goals. Strategies define how you will accomplish your objectives and should be actionable and aligned with your goals."
+                    />
                 </div>
                 <div className="w-[75%] p-4">
-                    <h2 className="text-lg font-semibold">Measures</h2>
+                    <SectionHeader
+                        initial="M"
+                        label="Measures"
+                        description="Key Performance Indicators (KPIs) and actions that track progress and implementation of your strategies. Measures include both metrics to monitor performance and specific tasks to execute your plan."
+                    />
                 </div>
             </div>
 
@@ -90,22 +101,24 @@ export function StrategySection({
             <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
                     <div className="flex flex-col gap-4">
-                        {strategyIds.length > 0 ? (
-                            strategyIds.map((strategyId) => (
-                                <StrategyItem
-                                    key={strategyId}
-                                    strategyId={strategyId}
-                                    onStrategyDeleted={onStrategyDeleted}
-                                />
-                            ))
-                        ) : (
-                            <div className="p-8 text-center text-sm text-gray-500">
-                                No strategies yet. Add your first strategy!
-                            </div>
-                        )}
+                        {strategyIds.length > 0
+                            ? strategyIds.map((strategyId) => (
+                                  <StrategyItem
+                                      key={strategyId}
+                                      strategyId={strategyId}
+                                      onStrategyDeleted={onStrategyDeleted}
+                                  />
+                              ))
+                            : // Show empty state only in read-only mode or when input is not visible
+                              (isReadOnly || !isHovered) && (
+                                  <div className="p-8 text-center text-sm text-gray-500">
+                                      No strategies yet. Add your first
+                                      strategy!
+                                  </div>
+                              )}
 
-                        {/* Add New Strategy Input - Visible on Hover */}
-                        {isHovered && (
+                        {/* Add New Strategy Input - Visible on Hover, Hidden in Read-Only */}
+                        {isHovered && !isReadOnly && (
                             <div className="shadow-sm">
                                 <div className="flex">
                                     {/* Strategy Name Input - 25% */}

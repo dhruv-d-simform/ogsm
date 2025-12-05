@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { GoalItem } from '@/components/GoalItem';
 import { useCreateGoal } from '@/hooks/useGoal';
+import { SectionHeader } from '@/components/SectionHeader';
 
 interface GoalsSectionProps {
     goalIds: string[];
@@ -18,6 +20,7 @@ export function GoalsSection({
     onGoalCreated,
     onGoalDeleted,
 }: GoalsSectionProps) {
+    const { isReadOnly } = useReadOnly();
     const [isHovered, setIsHovered] = useState(false);
     const [newGoalName, setNewGoalName] = useState('');
     const createGoalMutation = useCreateGoal();
@@ -64,7 +67,11 @@ export function GoalsSection({
         >
             {/* Header */}
             <div className="rounded-t-lg bg-blue-900 p-4 text-white">
-                <h2 className="text-lg font-semibold">Goals</h2>
+                <SectionHeader
+                    initial="G"
+                    label="Goals"
+                    description="Specific, measurable targets that support your objective. Goals should be quantifiable and time-bound, providing clear milestones to track progress toward your objective."
+                />
             </div>
 
             {/* Content Area - Scrollable List */}
@@ -72,22 +79,23 @@ export function GoalsSection({
                 <ScrollArea className="h-full">
                     {/* Goals List */}
                     <div>
-                        {goalIds.length > 0 ? (
-                            goalIds.map((goalId) => (
-                                <GoalItem
-                                    key={goalId}
-                                    goalId={goalId}
-                                    onGoalDeleted={onGoalDeleted}
-                                />
-                            ))
-                        ) : (
-                            <div className="p-4 text-center text-sm text-gray-500">
-                                No goals yet. Add your first goal!
-                            </div>
-                        )}
+                        {goalIds.length > 0
+                            ? goalIds.map((goalId) => (
+                                  <GoalItem
+                                      key={goalId}
+                                      goalId={goalId}
+                                      onGoalDeleted={onGoalDeleted}
+                                  />
+                              ))
+                            : // Show empty state only in read-only mode or when input is not visible
+                              (isReadOnly || !isHovered) && (
+                                  <div className="p-4 text-center text-sm text-gray-500">
+                                      No goals yet. Add your first goal!
+                                  </div>
+                              )}
 
-                        {/* Add New Goal Input - Visible on Hover */}
-                        {isHovered && (
+                        {/* Add New Goal Input - Visible on Hover, Hidden in Read-Only */}
+                        {isHovered && !isReadOnly && (
                             <div className="border-t border-gray-200 p-3">
                                 <input
                                     type="text"
