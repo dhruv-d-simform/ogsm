@@ -92,19 +92,21 @@ export function StrategySection({
             <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
                     <div className="flex flex-col gap-4">
-                        {strategyIds.length > 0 ? (
-                            strategyIds.map((strategyId) => (
-                                <StrategyItem
-                                    key={strategyId}
-                                    strategyId={strategyId}
-                                    onStrategyDeleted={onStrategyDeleted}
-                                />
-                            ))
-                        ) : (
-                            <div className="p-8 text-center text-sm text-gray-500">
-                                No strategies yet. Add your first strategy!
-                            </div>
-                        )}
+                        {strategyIds.length > 0
+                            ? strategyIds.map((strategyId) => (
+                                  <StrategyItem
+                                      key={strategyId}
+                                      strategyId={strategyId}
+                                      onStrategyDeleted={onStrategyDeleted}
+                                  />
+                              ))
+                            : // Show empty state only in read-only mode or when input is not visible
+                              (isReadOnly || !isHovered) && (
+                                  <div className="p-8 text-center text-sm text-gray-500">
+                                      No strategies yet. Add your first
+                                      strategy!
+                                  </div>
+                              )}
 
                         {/* Add New Strategy Input - Visible on Hover, Hidden in Read-Only */}
                         {isHovered && !isReadOnly && (

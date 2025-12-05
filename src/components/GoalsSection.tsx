@@ -74,19 +74,20 @@ export function GoalsSection({
                 <ScrollArea className="h-full">
                     {/* Goals List */}
                     <div>
-                        {goalIds.length > 0 ? (
-                            goalIds.map((goalId) => (
-                                <GoalItem
-                                    key={goalId}
-                                    goalId={goalId}
-                                    onGoalDeleted={onGoalDeleted}
-                                />
-                            ))
-                        ) : (
-                            <div className="p-4 text-center text-sm text-gray-500">
-                                No goals yet. Add your first goal!
-                            </div>
-                        )}
+                        {goalIds.length > 0
+                            ? goalIds.map((goalId) => (
+                                  <GoalItem
+                                      key={goalId}
+                                      goalId={goalId}
+                                      onGoalDeleted={onGoalDeleted}
+                                  />
+                              ))
+                            : // Show empty state only in read-only mode or when input is not visible
+                              (isReadOnly || !isHovered) && (
+                                  <div className="p-4 text-center text-sm text-gray-500">
+                                      No goals yet. Add your first goal!
+                                  </div>
+                              )}
 
                         {/* Add New Goal Input - Visible on Hover, Hidden in Read-Only */}
                         {isHovered && !isReadOnly && (
