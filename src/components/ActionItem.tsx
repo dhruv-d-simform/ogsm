@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAction, useUpdateAction } from '@/hooks/useAction';
+import { useCreateTask } from '@/hooks/useTask';
 import { TaskItem } from '@/components/TaskItem';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -20,10 +21,13 @@ export function ActionItem({ actionId }: ActionItemProps) {
         isFetching,
     } = useAction(actionId);
     const updateActionMutation = useUpdateAction();
+    const createTaskMutation = useCreateTask();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
+    const [isTaskHovered, setIsTaskHovered] = useState(false);
+    const [newTaskName, setNewTaskName] = useState('');
 
     /**
      * Sync local state when action data changes and no mutation is pending
@@ -86,6 +90,45 @@ export function ActionItem({ actionId }: ActionItemProps) {
                 setLocalValue(action.name);
             }
             setIsEditing(false);
+        }
+    };
+
+    /**
+     * Handle creating a new Task
+     */
+    const handleCreateTask = () => {
+        const trimmedName = newTaskName.trim();
+        if (!trimmedName || !action) return;
+
+        createTaskMutation.mutate(
+            {
+                name: trimmedName,
+                status: 'pending',
+            },
+            {
+                onSuccess: (newTask) => {
+                    // Clear input
+                    setNewTaskName('');
+                    // Update action with new Task ID
+                    updateActionMutation.mutate({
+                        id: actionId,
+                        input: {
+                            taskIds: [...action.taskIds, newTask.id],
+                        },
+                    });
+                },
+            }
+        );
+    };
+
+    /**
+     * Handle key down in Task input (Enter to submit, Escape to clear)
+     */
+    const handleTaskKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleCreateTask();
+        } else if (e.key === 'Escape') {
+            setNewTaskName('');
         }
     };
 
@@ -154,10 +197,56 @@ export function ActionItem({ actionId }: ActionItemProps) {
 
             {/* Tasks */}
             {action.taskIds.length > 0 && (
-                <div className="bg-gray-50">
+                <div
+                    className="bg-gray-50"
+                    onMouseEnter={() => setIsTaskHovered(true)}
+                    onMouseLeave={() => setIsTaskHovered(false)}
+                >
                     {action.taskIds.map((taskId) => (
                         <TaskItem key={taskId} taskId={taskId} />
                     ))}
+
+                    {/* Add New Task Input - Visible on Hover */}
+                    {isTaskHovered && (
+                        <div className="border-t border-gray-200 py-2 pl-8 pr-4">
+                            <input
+                                type="text"
+                                value={newTaskName}
+                                onChange={(e) => setNewTaskName(e.target.value)}
+                                onKeyDown={handleTaskKeyDown}
+                                onBlur={handleCreateTask}
+                                placeholder="Add a new Task"
+                                disabled={createTaskMutation.isPending}
+                                className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                                autoFocus
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Show Task section even when empty, on hover */}
+            {action.taskIds.length === 0 && (
+                <div
+                    className="bg-gray-50"
+                    onMouseEnter={() => setIsTaskHovered(true)}
+                    onMouseLeave={() => setIsTaskHovered(false)}
+                >
+                    {isTaskHovered && (
+                        <div className="py-2 pl-8 pr-4">
+                            <input
+                                type="text"
+                                value={newTaskName}
+                                onChange={(e) => setNewTaskName(e.target.value)}
+                                onKeyDown={handleTaskKeyDown}
+                                onBlur={handleCreateTask}
+                                placeholder="Add a new Task"
+                                disabled={createTaskMutation.isPending}
+                                className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                                autoFocus
+                            />
+                        </div>
+                    )}
                 </div>
             )}
         </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGoal, useUpdateGoal } from '@/hooks/useGoal';
+import { useCreateKPI } from '@/hooks/useKpi';
 import { KPIItem } from '@/components/KPIItem';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -15,10 +16,13 @@ interface GoalItemProps {
 export function GoalItem({ goalId }: GoalItemProps) {
     const { data: goal, isLoading, isError, isFetching } = useGoal(goalId);
     const updateGoalMutation = useUpdateGoal();
+    const createKpiMutation = useCreateKPI();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
+    const [isKpiHovered, setIsKpiHovered] = useState(false);
+    const [newKpiName, setNewKpiName] = useState('');
 
     /**
      * Sync local state when goal data changes and no mutation is pending
@@ -80,6 +84,46 @@ export function GoalItem({ goalId }: GoalItemProps) {
                 setLocalValue(goal.name);
             }
             setIsEditing(false);
+        }
+    };
+
+    /**
+     * Handle creating a new KPI
+     */
+    const handleCreateKpi = () => {
+        const trimmedName = newKpiName.trim();
+        if (!trimmedName || !goal) return;
+
+        createKpiMutation.mutate(
+            {
+                name: trimmedName,
+                target: 0,
+                current: 0,
+            },
+            {
+                onSuccess: (newKpi) => {
+                    // Clear input
+                    setNewKpiName('');
+                    // Update goal with new KPI ID
+                    updateGoalMutation.mutate({
+                        id: goalId,
+                        input: {
+                            kpiIds: [...goal.kpiIds, newKpi.id],
+                        },
+                    });
+                },
+            }
+        );
+    };
+
+    /**
+     * Handle key down in KPI input (Enter to submit, Escape to clear)
+     */
+    const handleKpiKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleCreateKpi();
+        } else if (e.key === 'Escape') {
+            setNewKpiName('');
         }
     };
 
@@ -145,10 +189,56 @@ export function GoalItem({ goalId }: GoalItemProps) {
 
             {/* KPIs List */}
             {goal.kpiIds.length > 0 && (
-                <div className="bg-gray-50">
+                <div
+                    className="bg-gray-50"
+                    onMouseEnter={() => setIsKpiHovered(true)}
+                    onMouseLeave={() => setIsKpiHovered(false)}
+                >
                     {goal.kpiIds.map((kpiId) => (
                         <KPIItem key={kpiId} kpiId={kpiId} />
                     ))}
+
+                    {/* Add New KPI Input - Visible on Hover */}
+                    {isKpiHovered && (
+                        <div className="border-t border-gray-200 py-2 pl-6 pr-3">
+                            <input
+                                type="text"
+                                value={newKpiName}
+                                onChange={(e) => setNewKpiName(e.target.value)}
+                                onKeyDown={handleKpiKeyDown}
+                                onBlur={handleCreateKpi}
+                                placeholder="Add a new KPI"
+                                disabled={createKpiMutation.isPending}
+                                className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                                autoFocus
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Show KPI section even when empty, on hover */}
+            {goal.kpiIds.length === 0 && (
+                <div
+                    className="bg-gray-50"
+                    onMouseEnter={() => setIsKpiHovered(true)}
+                    onMouseLeave={() => setIsKpiHovered(false)}
+                >
+                    {isKpiHovered && (
+                        <div className="py-2 pl-6 pr-3">
+                            <input
+                                type="text"
+                                value={newKpiName}
+                                onChange={(e) => setNewKpiName(e.target.value)}
+                                onKeyDown={handleKpiKeyDown}
+                                onBlur={handleCreateKpi}
+                                placeholder="Add a new KPI"
+                                disabled={createKpiMutation.isPending}
+                                className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                                autoFocus
+                            />
+                        </div>
+                    )}
                 </div>
             )}
         </div>

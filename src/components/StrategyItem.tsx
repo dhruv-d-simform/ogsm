@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useStrategy, useUpdateStrategy } from '@/hooks/useStrategy';
+import { useCreateKPI } from '@/hooks/useKpi';
+import { useCreateAction } from '@/hooks/useAction';
 import { DashboardKpiItem } from '@/components/DashboardKpiItem';
 import { ActionItem } from '@/components/ActionItem';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,10 +23,16 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
         isFetching,
     } = useStrategy(strategyId);
     const updateStrategyMutation = useUpdateStrategy();
+    const createKpiMutation = useCreateKPI();
+    const createActionMutation = useCreateAction();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
+    const [isKpiHovered, setIsKpiHovered] = useState(false);
+    const [newKpiName, setNewKpiName] = useState('');
+    const [isActionHovered, setIsActionHovered] = useState(false);
+    const [newActionName, setNewActionName] = useState('');
 
     /**
      * Sync local state when strategy data changes and no mutation is pending
@@ -87,6 +95,88 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
                 setLocalValue(strategy.name);
             }
             setIsEditing(false);
+        }
+    };
+
+    /**
+     * Handle creating a new Dashboard KPI
+     */
+    const handleCreateKpi = () => {
+        const trimmedName = newKpiName.trim();
+        if (!trimmedName || !strategy) return;
+
+        createKpiMutation.mutate(
+            {
+                name: trimmedName,
+                target: 0,
+                current: 0,
+            },
+            {
+                onSuccess: (newKpi) => {
+                    // Clear input
+                    setNewKpiName('');
+                    // Update strategy with new KPI ID
+                    updateStrategyMutation.mutate({
+                        id: strategyId,
+                        input: {
+                            dashboardKpiIds: [
+                                ...strategy.dashboardKpiIds,
+                                newKpi.id,
+                            ],
+                        },
+                    });
+                },
+            }
+        );
+    };
+
+    /**
+     * Handle key down in KPI input (Enter to submit, Escape to clear)
+     */
+    const handleKpiKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleCreateKpi();
+        } else if (e.key === 'Escape') {
+            setNewKpiName('');
+        }
+    };
+
+    /**
+     * Handle creating a new Action
+     */
+    const handleCreateAction = () => {
+        const trimmedName = newActionName.trim();
+        if (!trimmedName || !strategy) return;
+
+        createActionMutation.mutate(
+            {
+                name: trimmedName,
+                taskIds: [],
+            },
+            {
+                onSuccess: (newAction) => {
+                    // Clear input
+                    setNewActionName('');
+                    // Update strategy with new Action ID
+                    updateStrategyMutation.mutate({
+                        id: strategyId,
+                        input: {
+                            actionIds: [...strategy.actionIds, newAction.id],
+                        },
+                    });
+                },
+            }
+        );
+    };
+
+    /**
+     * Handle key down in Action input (Enter to submit, Escape to clear)
+     */
+    const handleActionKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleCreateAction();
+        } else if (e.key === 'Escape') {
+            setNewActionName('');
         }
     };
 
@@ -170,7 +260,11 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
                 </div>
 
                 {/* Dashboard KPIs Column - 25% */}
-                <div className="w-[25%] border-r border-gray-200">
+                <div
+                    className="w-[25%] border-r border-gray-200"
+                    onMouseEnter={() => setIsKpiHovered(true)}
+                    onMouseLeave={() => setIsKpiHovered(false)}
+                >
                     {strategy.dashboardKpiIds.length > 0 ? (
                         <div>
                             {strategy.dashboardKpiIds.map((kpiId, index) => (
@@ -180,16 +274,55 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
                                     showBorder={index > 0}
                                 />
                             ))}
+
+                            {/* Add New KPI Input - Visible on Hover */}
+                            {isKpiHovered && (
+                                <div className="border-t border-gray-200 p-4">
+                                    <input
+                                        type="text"
+                                        value={newKpiName}
+                                        onChange={(e) =>
+                                            setNewKpiName(e.target.value)
+                                        }
+                                        onKeyDown={handleKpiKeyDown}
+                                        onBlur={handleCreateKpi}
+                                        placeholder="Add a new KPI"
+                                        disabled={createKpiMutation.isPending}
+                                        className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                                        autoFocus
+                                    />
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="p-4">
-                            <p className="text-sm text-gray-400">No KPIs</p>
+                            {isKpiHovered ? (
+                                <input
+                                    type="text"
+                                    value={newKpiName}
+                                    onChange={(e) =>
+                                        setNewKpiName(e.target.value)
+                                    }
+                                    onKeyDown={handleKpiKeyDown}
+                                    onBlur={handleCreateKpi}
+                                    placeholder="Add a new KPI"
+                                    disabled={createKpiMutation.isPending}
+                                    className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                                    autoFocus
+                                />
+                            ) : (
+                                <p className="text-sm text-gray-400">No KPIs</p>
+                            )}
                         </div>
                     )}
                 </div>
 
                 {/* Actions Column - 50% */}
-                <div className="w-[50%]">
+                <div
+                    className="w-[50%]"
+                    onMouseEnter={() => setIsActionHovered(true)}
+                    onMouseLeave={() => setIsActionHovered(false)}
+                >
                     {strategy.actionIds.length > 0 ? (
                         <div>
                             {strategy.actionIds.map((actionId, index) => (
@@ -204,10 +337,49 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
                                     <ActionItem actionId={actionId} />
                                 </div>
                             ))}
+
+                            {/* Add New Action Input - Visible on Hover */}
+                            {isActionHovered && (
+                                <div className="border-t border-gray-200 p-4">
+                                    <input
+                                        type="text"
+                                        value={newActionName}
+                                        onChange={(e) =>
+                                            setNewActionName(e.target.value)
+                                        }
+                                        onKeyDown={handleActionKeyDown}
+                                        onBlur={handleCreateAction}
+                                        placeholder="Add a new Action"
+                                        disabled={
+                                            createActionMutation.isPending
+                                        }
+                                        className="w-full bg-transparent text-sm font-medium text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-900"
+                                        autoFocus
+                                    />
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="p-4">
-                            <p className="text-sm text-gray-400">No Actions</p>
+                            {isActionHovered ? (
+                                <input
+                                    type="text"
+                                    value={newActionName}
+                                    onChange={(e) =>
+                                        setNewActionName(e.target.value)
+                                    }
+                                    onKeyDown={handleActionKeyDown}
+                                    onBlur={handleCreateAction}
+                                    placeholder="Add a new Action"
+                                    disabled={createActionMutation.isPending}
+                                    className="w-full bg-transparent text-sm font-medium text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-900"
+                                    autoFocus
+                                />
+                            ) : (
+                                <p className="text-sm text-gray-400">
+                                    No Actions
+                                </p>
+                            )}
                         </div>
                     )}
                 </div>
