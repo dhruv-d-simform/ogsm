@@ -1,5 +1,4 @@
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Input } from '@/components/ui/input';
 import { GoalItem } from '@/components/GoalItem';
 
 interface GoalsSectionProps {
@@ -34,15 +33,6 @@ export function GoalsSection({ goalIds }: GoalsSectionProps) {
                         )}
                     </div>
                 </ScrollArea>
-            </div>
-
-            {/* Add New Goal Input */}
-            <div className="border-t border-gray-300 p-3">
-                <Input
-                    type="text"
-                    placeholder="Add new goal..."
-                    className="text-sm"
-                />
             </div>
         </div>
     );
