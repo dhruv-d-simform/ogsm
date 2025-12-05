@@ -1,40 +1,131 @@
-import { useState } from 'react';
+import { useParams } from 'react-router';
+import { Loader2, AlertCircle, FileQuestion } from 'lucide-react';
 import { OgsmHeader } from '@/components/OgsmHeader';
 import { OgsmBoard } from '@/components/OgsmBoard';
-import type { OGSM } from '@/types';
-
-/**
- * Mock OGSM data embedded in component
- * This is the same data from seedData.ts for reference
- */
-const MOCK_OGSM: OGSM = {
-    id: 'mock-ogsm-1',
-    name: 'React Developer 5-Year Career Plan',
-    objective:
-        'Transform from a junior React developer into a recognized technical leader and industry influencer within 5 years, with deep expertise in React ecosystem, proven leadership capabilities, and a strong professional network.',
-    goalIds: [],
-    strategyIds: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-};
+import { useOGSM, useUpdateOGSM } from '@/hooks/useOgsm';
+import { Button } from '@/components/ui/button';
 
 /**
  * OGSM detail page - displays the main area with header and board
+ * Fetches real OGSM data based on URL params
  */
 export function OgsmDetailPage() {
-    const [ogsm, setOgsm] = useState<OGSM>(MOCK_OGSM);
+    const { id } = useParams<{ id: string }>();
+
+    // Fetch OGSM data using TanStack Query
+    const { data: ogsm, isLoading, isError, error } = useOGSM(id || '');
+
+    // Mutation hook for updating OGSM
+    const updateOgsmMutation = useUpdateOGSM();
 
     /**
      * Handle OGSM name change
      */
     const handleNameChange = (newName: string) => {
-        setOgsm({ ...ogsm, name: newName });
+        if (!id || !ogsm) return;
+
+        updateOgsmMutation.mutate({
+            id,
+            input: { name: newName },
+        });
     };
 
+    /**
+     * Handle OGSM objective change
+     */
+    const handleObjectiveChange = (newObjective: string) => {
+        if (!id || !ogsm) return;
+
+        updateOgsmMutation.mutate({
+            id,
+            input: { objective: newObjective },
+        });
+    };
+
+    // Loading state
+    if (isLoading) {
+        return (
+            <div className="flex h-full flex-col items-center justify-center bg-muted/20">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <p className="mt-4 text-lg text-muted-foreground">
+                    Loading OGSM...
+                </p>
+            </div>
+        );
+    }
+
+    // Error state - 404 Not Found
+    if (
+        isError &&
+        error instanceof Error &&
+        error.message.includes('not found')
+    ) {
+        return (
+            <div className="flex h-full flex-col items-center justify-center bg-muted/20 px-8">
+                <div className="flex max-w-md flex-col items-center text-center">
+                    <FileQuestion className="h-20 w-20 text-muted-foreground" />
+                    <h2 className="mt-6 text-2xl font-bold text-foreground">
+                        OGSM Not Found
+                    </h2>
+                    <p className="mt-3 text-muted-foreground">
+                        The OGSM plan you're looking for doesn't exist or may
+                        have been deleted.
+                    </p>
+                    <Button
+                        className="mt-6"
+                        onClick={() => (window.location.href = '/')}
+                    >
+                        Go to Home
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
+    // Generic error state
+    if (isError) {
+        return (
+            <div className="flex h-full flex-col items-center justify-center bg-muted/20 px-8">
+                <div className="flex max-w-md flex-col items-center text-center">
+                    <AlertCircle className="h-20 w-20 text-destructive" />
+                    <h2 className="mt-6 text-2xl font-bold text-foreground">
+                        Error Loading OGSM
+                    </h2>
+                    <p className="mt-3 text-muted-foreground">
+                        {error instanceof Error
+                            ? error.message
+                            : 'An unexpected error occurred while loading the OGSM plan.'}
+                    </p>
+                    <div className="mt-6 flex gap-3">
+                        <Button
+                            variant="outline"
+                            onClick={() => window.location.reload()}
+                        >
+                            Retry
+                        </Button>
+                        <Button onClick={() => (window.location.href = '/')}>
+                            Go to Home
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Data not available (shouldn't happen if query is configured correctly)
+    if (!ogsm) {
+        return (
+            <div className="flex h-full flex-col items-center justify-center bg-muted/20">
+                <p className="text-muted-foreground">No OGSM data available.</p>
+            </div>
+        );
+    }
+
+    // Success state - render OGSM
     return (
         <div className="flex h-full flex-col">
             <OgsmHeader name={ogsm.name} onNameChange={handleNameChange} />
-            <OgsmBoard ogsm={ogsm} />
+            <OgsmBoard ogsm={ogsm} onObjectiveChange={handleObjectiveChange} />
         </div>
     );
 }

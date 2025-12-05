@@ -5,18 +5,22 @@ import { StrategySection } from '@/components/StrategySection';
 
 interface OgsmBoardProps {
     ogsm: OGSM;
+    onObjectiveChange?: (newObjective: string) => void;
 }
 
 /**
  * Main board component for OGSM
  * Displays the OGSM objectives, goals, strategies, and measures
  */
-export function OgsmBoard({ ogsm }: OgsmBoardProps) {
+export function OgsmBoard({ ogsm, onObjectiveChange }: OgsmBoardProps) {
     return (
         <main className="flex flex-1 flex-col overflow-hidden bg-muted/20 p-8">
             <div className="flex min-h-0 flex-1 flex-col gap-6">
                 {/* Objective Section */}
-                <ObjectiveSection objective={ogsm.objective} />
+                <ObjectiveSection
+                    objective={ogsm.objective}
+                    onObjectiveChange={onObjectiveChange}
+                />
 
                 {/* Goals and Strategy Sections - Side by Side */}
                 <div className="flex min-h-0 flex-1 gap-6">
