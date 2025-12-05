@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { GoalItem } from '@/components/GoalItem';
 import { useCreateGoal } from '@/hooks/useGoal';
@@ -18,6 +19,7 @@ export function GoalsSection({
     onGoalCreated,
     onGoalDeleted,
 }: GoalsSectionProps) {
+    const { isReadOnly } = useReadOnly();
     const [isHovered, setIsHovered] = useState(false);
     const [newGoalName, setNewGoalName] = useState('');
     const createGoalMutation = useCreateGoal();
@@ -86,8 +88,8 @@ export function GoalsSection({
                             </div>
                         )}
 
-                        {/* Add New Goal Input - Visible on Hover */}
-                        {isHovered && (
+                        {/* Add New Goal Input - Visible on Hover, Hidden in Read-Only */}
+                        {isHovered && !isReadOnly && (
                             <div className="border-t border-gray-200 p-3">
                                 <input
                                     type="text"

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { StrategyItem } from '@/components/StrategyItem';
 import { useCreateStrategy } from '@/hooks/useStrategy';
@@ -18,6 +19,7 @@ export function StrategySection({
     onStrategyCreated,
     onStrategyDeleted,
 }: StrategySectionProps) {
+    const { isReadOnly } = useReadOnly();
     const [isHovered, setIsHovered] = useState(false);
     const [newStrategyName, setNewStrategyName] = useState('');
     const createStrategyMutation = useCreateStrategy();
@@ -104,8 +106,8 @@ export function StrategySection({
                             </div>
                         )}
 
-                        {/* Add New Strategy Input - Visible on Hover */}
-                        {isHovered && (
+                        {/* Add New Strategy Input - Visible on Hover, Hidden in Read-Only */}
+                        {isHovered && !isReadOnly && (
                             <div className="shadow-sm">
                                 <div className="flex">
                                     {/* Strategy Name Input - 25% */}

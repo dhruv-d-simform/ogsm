@@ -4,6 +4,7 @@ import { useCreateKPI } from '@/hooks/useKpi';
 import { KPIItem } from '@/components/KPIItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { X } from 'lucide-react';
+import { useReadOnly } from '@/contexts/ReadOnlyContext';
 
 interface GoalItemProps {
     goalId: string;
@@ -20,6 +21,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     const updateGoalMutation = useUpdateGoal();
     const createKpiMutation = useCreateKPI();
     const deleteGoalMutation = useDeleteGoal();
+    const { isReadOnly } = useReadOnly();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
@@ -44,7 +46,13 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
      * Prevent editing if mutation is in progress or data is being refetched
      */
     const handleClick = () => {
-        if (updateGoalMutation.isPending || isFetching || pendingValue) return;
+        if (
+            isReadOnly ||
+            updateGoalMutation.isPending ||
+            isFetching ||
+            pendingValue
+        )
+            return;
         if (goal) {
             setLocalValue(goal.name);
         }
@@ -210,12 +218,14 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                 ) : (
                     <p
                         onClick={handleClick}
-                        className={`cursor-pointer text-sm font-medium hover:opacity-70 ${
+                        className={`text-sm font-medium ${
+                            isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
+                        } ${
                             updateGoalMutation.isPending || pendingValue
                                 ? 'opacity-50'
                                 : ''
                         }`}
-                        title="Click to edit"
+                        title={isReadOnly ? '' : 'Click to edit'}
                     >
                         {pendingValue ||
                             (updateGoalMutation.isPending
@@ -225,8 +235,8 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                 )}
             </div>
 
-            {/* Delete Button - Visible on Hover, Hidden in Edit Mode */}
-            {isHovered && !isEditing && (
+            {/* Delete Button - Visible on Hover, Hidden in Edit Mode and Read-Only */}
+            {isHovered && !isEditing && !isReadOnly && (
                 <button
                     onClick={handleDeleteGoal}
                     disabled={deleteGoalMutation.isPending}
@@ -248,8 +258,8 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                         />
                     ))}
 
-                    {/* Add New KPI Input - Visible on Hover */}
-                    {isKpiHovered && (
+                    {/* Add New KPI Input - Visible on Hover, Hidden in Read-Only */}
+                    {isKpiHovered && !isReadOnly && (
                         <div className="border-t border-gray-200 py-2 pl-6 pr-3">
                             <input
                                 type="text"
@@ -266,8 +276,8 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                 </div>
             )}
 
-            {/* Show KPI section even when empty, on hover */}
-            {goal.kpiIds.length === 0 && isKpiHovered && (
+            {/* Show KPI section even when empty, on hover, but not in Read-Only */}
+            {goal.kpiIds.length === 0 && isKpiHovered && !isReadOnly && (
                 <div className="bg-gray-50">
                     <div className="py-2 pl-6 pr-3">
                         <input

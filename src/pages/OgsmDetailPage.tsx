@@ -4,6 +4,7 @@ import { OgsmHeader } from '@/components/OgsmHeader';
 import { OgsmBoard } from '@/components/OgsmBoard';
 import { useOGSM, useUpdateOGSM } from '@/hooks/useOgsm';
 import { Button } from '@/components/ui/button';
+import { ReadOnlyProvider } from '@/contexts/ReadOnlyContext';
 
 /**
  * OGSM detail page - displays the main area with header and board
@@ -123,9 +124,14 @@ export function OgsmDetailPage() {
 
     // Success state - render OGSM
     return (
-        <div className="flex h-full flex-col">
-            <OgsmHeader name={ogsm.name} onNameChange={handleNameChange} />
-            <OgsmBoard ogsm={ogsm} onObjectiveChange={handleObjectiveChange} />
-        </div>
+        <ReadOnlyProvider>
+            <div className="flex h-full flex-col">
+                <OgsmHeader name={ogsm.name} onNameChange={handleNameChange} />
+                <OgsmBoard
+                    ogsm={ogsm}
+                    onObjectiveChange={handleObjectiveChange}
+                />
+            </div>
+        </ReadOnlyProvider>
     );
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useReadOnly } from '@/contexts/ReadOnlyContext';
 
 interface ObjectiveSectionProps {
     objective: string;
@@ -16,6 +17,7 @@ export function ObjectiveSection({
 }: ObjectiveSectionProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState(objective);
+    const { isReadOnly } = useReadOnly();
 
     /**
      * Sync local state when prop changes
@@ -28,6 +30,7 @@ export function ObjectiveSection({
      * Handle click to enter edit mode
      */
     const handleClick = () => {
+        if (isReadOnly) return;
         setIsEditing(true);
     };
 
@@ -80,8 +83,10 @@ export function ObjectiveSection({
                 ) : (
                     <p
                         onClick={handleClick}
-                        className="flex-1 cursor-pointer truncate text-lg hover:opacity-80"
-                        title="Click to edit"
+                        className={`flex-1 truncate text-lg ${
+                            isReadOnly ? '' : 'cursor-pointer hover:opacity-80'
+                        }`}
+                        title={isReadOnly ? '' : 'Click to edit'}
                     >
                         {localValue}
                     </p>
