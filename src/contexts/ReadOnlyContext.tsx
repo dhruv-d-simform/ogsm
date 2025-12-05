@@ -1,5 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { useParams } from 'react-router';
+import { createContext, useContext, useState } from 'react';
 
 interface ReadOnlyContextType {
     isReadOnly: boolean;
@@ -10,20 +9,45 @@ const ReadOnlyContext = createContext<ReadOnlyContextType | undefined>(
     undefined
 );
 
+const READ_ONLY_STORAGE_KEY = 'ogsm-read-only-mode';
+
+/**
+ * Get read-only state from localStorage
+ */
+const getStoredReadOnlyState = (): boolean => {
+    try {
+        const stored = localStorage.getItem(READ_ONLY_STORAGE_KEY);
+        return stored === 'true';
+    } catch {
+        return false;
+    }
+};
+
+/**
+ * Save read-only state to localStorage
+ */
+const setStoredReadOnlyState = (value: boolean): void => {
+    try {
+        localStorage.setItem(READ_ONLY_STORAGE_KEY, String(value));
+    } catch {
+        // Ignore errors (e.g., localStorage not available)
+    }
+};
+
 /**
  * Provider for read-only mode state
- * Resets to false when OGSM ID changes
+ * Persists state in localStorage across sessions and navigation
  */
 export function ReadOnlyProvider({ children }: { children: React.ReactNode }) {
-    const [isReadOnly, setIsReadOnly] = useState(false);
-    const { id } = useParams();
+    const [isReadOnly, setIsReadOnlyState] = useState(getStoredReadOnlyState);
 
     /**
-     * Reset read-only mode when navigating to a different OGSM
+     * Wrapper to update both state and localStorage
      */
-    useEffect(() => {
-        setIsReadOnly(false);
-    }, [id]);
+    const setIsReadOnly = (value: boolean) => {
+        setIsReadOnlyState(value);
+        setStoredReadOnlyState(value);
+    };
 
     return (
         <ReadOnlyContext.Provider value={{ isReadOnly, setIsReadOnly }}>
