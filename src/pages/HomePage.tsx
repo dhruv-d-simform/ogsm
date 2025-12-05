@@ -1,7 +1,14 @@
+import { useEffect } from 'react';
+
 /**
  * Home page - shown when no OGSM is selected
  */
 export function HomePage() {
+    // Set page title to default when on home page
+    useEffect(() => {
+        document.title = 'OGSM';
+    }, []);
+
     return (
         <div className="flex h-full items-center justify-center">
             <div className="text-center">
