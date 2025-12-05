@@ -1,23 +1,27 @@
 import { useState, useEffect } from 'react';
-import { useTask, useUpdateTask } from '@/hooks/useTask';
+import { useTask, useUpdateTask, useDeleteTask } from '@/hooks/useTask';
 import { Skeleton } from '@/components/ui/skeleton';
+import { X } from 'lucide-react';
 
 interface TaskItemProps {
     taskId: string;
+    onTaskDeleted?: (taskId: string) => void;
 }
 
 /**
  * TaskItem Component
  * Fetches and displays a single task by its ID
- * Supports inline editing
+ * Supports inline editing and deletion
  */
-export function TaskItem({ taskId }: TaskItemProps) {
+export function TaskItem({ taskId, onTaskDeleted }: TaskItemProps) {
     const { data: task, isLoading, isError, isFetching } = useTask(taskId);
     const updateTaskMutation = useUpdateTask();
+    const deleteTaskMutation = useDeleteTask();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
+    const [isHovered, setIsHovered] = useState(false);
 
     /**
      * Sync local state when task data changes and no mutation is pending
@@ -82,6 +86,18 @@ export function TaskItem({ taskId }: TaskItemProps) {
         }
     };
 
+    /**
+     * Handle deleting the task
+     */
+    const handleDeleteTask = () => {
+        deleteTaskMutation.mutate(taskId, {
+            onSuccess: () => {
+                // Notify parent to remove from action
+                onTaskDeleted?.(taskId);
+            },
+        });
+    };
+
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
         return (
@@ -98,7 +114,11 @@ export function TaskItem({ taskId }: TaskItemProps) {
 
     // Success state - render task with inline editing
     return (
-        <div className="border-t border-gray-200 py-2 pl-8 pr-4">
+        <div
+            className="relative border-t border-gray-200 py-2 pl-8 pr-12"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
             {isEditing ? (
                 <input
                     type="text"
@@ -122,6 +142,18 @@ export function TaskItem({ taskId }: TaskItemProps) {
                     {pendingValue ||
                         (updateTaskMutation.isPending ? localValue : task.name)}
                 </p>
+            )}
+
+            {/* Delete Button - Visible on Hover, Hidden in Edit Mode */}
+            {isHovered && !isEditing && (
+                <button
+                    onClick={handleDeleteTask}
+                    disabled={deleteTaskMutation.isPending}
+                    className="absolute right-2 top-2 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                    title="Delete task"
+                >
+                    <X className="h-3 w-3" />
+                </button>
             )}
         </div>
     );

@@ -40,6 +40,36 @@ export function OgsmBoard({ ogsm, onObjectiveChange }: OgsmBoardProps) {
         });
     };
 
+    /**
+     * Handle goal deletion - remove goal ID from OGSM
+     */
+    const handleGoalDeleted = (goalId: string) => {
+        const updatedGoalIds = ogsm.goalIds.filter(
+            (id: string) => id !== goalId
+        );
+        updateOgsmMutation.mutate({
+            id: ogsm.id,
+            input: {
+                goalIds: updatedGoalIds,
+            },
+        });
+    };
+
+    /**
+     * Handle strategy deletion - remove strategy ID from OGSM
+     */
+    const handleStrategyDeleted = (strategyId: string) => {
+        const updatedStrategyIds = ogsm.strategyIds.filter(
+            (id: string) => id !== strategyId
+        );
+        updateOgsmMutation.mutate({
+            id: ogsm.id,
+            input: {
+                strategyIds: updatedStrategyIds,
+            },
+        });
+    };
+
     return (
         <main className="flex flex-1 flex-col overflow-hidden bg-muted/20 p-8">
             <div className="flex min-h-0 flex-1 flex-col gap-6">
@@ -56,6 +86,7 @@ export function OgsmBoard({ ogsm, onObjectiveChange }: OgsmBoardProps) {
                         <GoalsSection
                             goalIds={ogsm.goalIds}
                             onGoalCreated={handleGoalCreated}
+                            onGoalDeleted={handleGoalDeleted}
                         />
                     </div>
 
@@ -64,6 +95,7 @@ export function OgsmBoard({ ogsm, onObjectiveChange }: OgsmBoardProps) {
                         <StrategySection
                             strategyIds={ogsm.strategyIds}
                             onStrategyCreated={handleStrategyCreated}
+                            onStrategyDeleted={handleStrategyDeleted}
                         />
                     </div>
                 </div>

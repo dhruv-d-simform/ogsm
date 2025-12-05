@@ -1,23 +1,27 @@
 import { useState, useEffect } from 'react';
-import { useKPI, useUpdateKPI } from '@/hooks/useKpi';
+import { useKPI, useUpdateKPI, useDeleteKPI } from '@/hooks/useKpi';
 import { Skeleton } from '@/components/ui/skeleton';
+import { X } from 'lucide-react';
 
 interface KPIItemProps {
     kpiId: string;
+    onKpiDeleted?: (kpiId: string) => void;
 }
 
 /**
  * KPIItem Component
  * Fetches and displays a single KPI by its ID
- * Supports inline editing
+ * Supports inline editing and deletion
  */
-export function KPIItem({ kpiId }: KPIItemProps) {
+export function KPIItem({ kpiId, onKpiDeleted }: KPIItemProps) {
     const { data: kpi, isLoading, isError, isFetching } = useKPI(kpiId);
     const updateKpiMutation = useUpdateKPI();
+    const deleteKpiMutation = useDeleteKPI();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
+    const [isHovered, setIsHovered] = useState(false);
 
     /**
      * Sync local state when kpi data changes and no mutation is pending
@@ -82,6 +86,18 @@ export function KPIItem({ kpiId }: KPIItemProps) {
         }
     };
 
+    /**
+     * Handle deleting the KPI
+     */
+    const handleDeleteKpi = () => {
+        deleteKpiMutation.mutate(kpiId, {
+            onSuccess: () => {
+                // Notify parent to remove from goal/strategy
+                onKpiDeleted?.(kpiId);
+            },
+        });
+    };
+
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
         return (
@@ -98,7 +114,11 @@ export function KPIItem({ kpiId }: KPIItemProps) {
 
     // Success state - render KPI with inline editing
     return (
-        <div className="border-t border-gray-200 py-2 pl-6 pr-3">
+        <div
+            className="relative border-t border-gray-200 py-2 pl-6 pr-10"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
             {isEditing ? (
                 <input
                     type="text"
@@ -122,6 +142,18 @@ export function KPIItem({ kpiId }: KPIItemProps) {
                     {pendingValue ||
                         (updateKpiMutation.isPending ? localValue : kpi.name)}
                 </p>
+            )}
+
+            {/* Delete Button - Visible on Hover, Hidden in Edit Mode */}
+            {isHovered && !isEditing && (
+                <button
+                    onClick={handleDeleteKpi}
+                    disabled={deleteKpiMutation.isPending}
+                    className="absolute right-2 top-2 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                    title="Delete KPI"
+                >
+                    <X className="h-3 w-3" />
+                </button>
             )}
         </div>
     );

@@ -1,21 +1,30 @@
 import { useState, useEffect } from 'react';
-import { useStrategy, useUpdateStrategy } from '@/hooks/useStrategy';
+import {
+    useStrategy,
+    useUpdateStrategy,
+    useDeleteStrategy,
+} from '@/hooks/useStrategy';
 import { useCreateKPI } from '@/hooks/useKpi';
 import { useCreateAction } from '@/hooks/useAction';
 import { DashboardKpiItem } from '@/components/DashboardKpiItem';
 import { ActionItem } from '@/components/ActionItem';
 import { Skeleton } from '@/components/ui/skeleton';
+import { X } from 'lucide-react';
 
 interface StrategyItemProps {
     strategyId: string;
+    onStrategyDeleted?: (strategyId: string) => void;
 }
 
 /**
  * StrategyItem Component
  * Fetches and displays a single strategy with its dashboard KPIs and actions
- * Supports inline editing
+ * Supports inline editing and deletion
  */
-export function StrategyItem({ strategyId }: StrategyItemProps) {
+export function StrategyItem({
+    strategyId,
+    onStrategyDeleted,
+}: StrategyItemProps) {
     const {
         data: strategy,
         isLoading,
@@ -25,10 +34,12 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
     const updateStrategyMutation = useUpdateStrategy();
     const createKpiMutation = useCreateKPI();
     const createActionMutation = useCreateAction();
+    const deleteStrategyMutation = useDeleteStrategy();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
+    const [isHovered, setIsHovered] = useState(false);
     const [isKpiHovered, setIsKpiHovered] = useState(false);
     const [newKpiName, setNewKpiName] = useState('');
     const [isActionHovered, setIsActionHovered] = useState(false);
@@ -180,6 +191,46 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
         }
     };
 
+    /**
+     * Handle deleting the strategy
+     */
+    const handleDeleteStrategy = () => {
+        deleteStrategyMutation.mutate(strategyId, {
+            onSuccess: () => {
+                // Notify parent to remove from OGSM
+                onStrategyDeleted?.(strategyId);
+            },
+        });
+    };
+
+    /**
+     * Handle Dashboard KPI deletion - remove from strategy's dashboardKpiIds
+     */
+    const handleKpiDeleted = (kpiId: string) => {
+        if (!strategy) return;
+        const updatedKpiIds = strategy.dashboardKpiIds.filter(
+            (id: string) => id !== kpiId
+        );
+        updateStrategyMutation.mutate({
+            id: strategyId,
+            input: { dashboardKpiIds: updatedKpiIds },
+        });
+    };
+
+    /**
+     * Handle Action deletion - remove from strategy's actionIds
+     */
+    const handleActionDeleted = (actionId: string) => {
+        if (!strategy) return;
+        const updatedActionIds = strategy.actionIds.filter(
+            (id: string) => id !== actionId
+        );
+        updateStrategyMutation.mutate({
+            id: strategyId,
+            input: { actionIds: updatedActionIds },
+        });
+    };
+
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
         return (
@@ -227,10 +278,14 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
 
     // Success state - render strategy with dashboard KPIs and actions
     return (
-        <div className="shadow-sm">
+        <div
+            className="relative shadow-sm"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
             <div className="flex">
                 {/* Strategy Name Column - 25% - Inline Editable */}
-                <div className="w-[25%] border-r border-gray-200 p-4">
+                <div className="relative w-[25%] border-r border-gray-200 p-4 pr-10">
                     {isEditing ? (
                         <input
                             type="text"
@@ -257,6 +312,18 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
                                     : strategy.name)}
                         </p>
                     )}
+
+                    {/* Delete Button - Visible on Hover, Hidden in Edit Mode */}
+                    {isHovered && !isEditing && (
+                        <button
+                            onClick={handleDeleteStrategy}
+                            disabled={deleteStrategyMutation.isPending}
+                            className="absolute right-2 top-4 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                            title="Delete strategy"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    )}
                 </div>
 
                 {/* Dashboard KPIs Column - 25% */}
@@ -272,6 +339,7 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
                                     key={kpiId}
                                     kpiId={kpiId}
                                     showBorder={index > 0}
+                                    onKpiDeleted={handleKpiDeleted}
                                 />
                             ))}
 
@@ -332,7 +400,10 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
                                             : ''
                                     }
                                 >
-                                    <ActionItem actionId={actionId} />
+                                    <ActionItem
+                                        actionId={actionId}
+                                        onActionDeleted={handleActionDeleted}
+                                    />
                                 </div>
                             ))}
 

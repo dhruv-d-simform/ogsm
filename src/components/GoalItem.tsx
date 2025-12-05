@@ -1,26 +1,30 @@
 import { useState, useEffect } from 'react';
-import { useGoal, useUpdateGoal } from '@/hooks/useGoal';
+import { useGoal, useUpdateGoal, useDeleteGoal } from '@/hooks/useGoal';
 import { useCreateKPI } from '@/hooks/useKpi';
 import { KPIItem } from '@/components/KPIItem';
 import { Skeleton } from '@/components/ui/skeleton';
+import { X } from 'lucide-react';
 
 interface GoalItemProps {
     goalId: string;
+    onGoalDeleted?: (goalId: string) => void;
 }
 
 /**
  * GoalItem Component
  * Fetches and displays a single goal with its associated KPIs
- * Supports inline editing
+ * Supports inline editing and deletion
  */
-export function GoalItem({ goalId }: GoalItemProps) {
+export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     const { data: goal, isLoading, isError, isFetching } = useGoal(goalId);
     const updateGoalMutation = useUpdateGoal();
     const createKpiMutation = useCreateKPI();
+    const deleteGoalMutation = useDeleteGoal();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
+    const [isHovered, setIsHovered] = useState(false);
     const [isKpiHovered, setIsKpiHovered] = useState(false);
     const [newKpiName, setNewKpiName] = useState('');
 
@@ -127,6 +131,30 @@ export function GoalItem({ goalId }: GoalItemProps) {
         }
     };
 
+    /**
+     * Handle deleting the goal
+     */
+    const handleDeleteGoal = () => {
+        deleteGoalMutation.mutate(goalId, {
+            onSuccess: () => {
+                // Notify parent to remove from OGSM
+                onGoalDeleted?.(goalId);
+            },
+        });
+    };
+
+    /**
+     * Handle KPI deletion - remove from goal's kpiIds
+     */
+    const handleKpiDeleted = (kpiId: string) => {
+        if (!goal) return;
+        const updatedKpiIds = goal.kpiIds.filter((id) => id !== kpiId);
+        updateGoalMutation.mutate({
+            id: goalId,
+            input: { kpiIds: updatedKpiIds },
+        });
+    };
+
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
         return (
@@ -157,12 +185,18 @@ export function GoalItem({ goalId }: GoalItemProps) {
     // Success state - render goal with KPIs
     return (
         <div
-            className="border-b border-gray-200 last:border-b-0"
-            onMouseEnter={() => setIsKpiHovered(true)}
-            onMouseLeave={() => setIsKpiHovered(false)}
+            className="relative border-b border-gray-200 last:border-b-0"
+            onMouseEnter={() => {
+                setIsKpiHovered(true);
+                setIsHovered(true);
+            }}
+            onMouseLeave={() => {
+                setIsKpiHovered(false);
+                setIsHovered(false);
+            }}
         >
             {/* Goal Name - Inline Editable */}
-            <div className="p-3">
+            <div className="p-3 pr-10">
                 {isEditing ? (
                     <input
                         type="text"
@@ -191,11 +225,27 @@ export function GoalItem({ goalId }: GoalItemProps) {
                 )}
             </div>
 
+            {/* Delete Button - Visible on Hover, Hidden in Edit Mode */}
+            {isHovered && !isEditing && (
+                <button
+                    onClick={handleDeleteGoal}
+                    disabled={deleteGoalMutation.isPending}
+                    className="absolute right-2 top-3 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                    title="Delete goal"
+                >
+                    <X className="h-4 w-4" />
+                </button>
+            )}
+
             {/* KPIs List */}
             {goal.kpiIds.length > 0 && (
                 <div className="bg-gray-50">
                     {goal.kpiIds.map((kpiId) => (
-                        <KPIItem key={kpiId} kpiId={kpiId} />
+                        <KPIItem
+                            key={kpiId}
+                            kpiId={kpiId}
+                            onKpiDeleted={handleKpiDeleted}
+                        />
                     ))}
 
                     {/* Add New KPI Input - Visible on Hover */}

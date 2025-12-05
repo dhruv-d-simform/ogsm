@@ -6,13 +6,18 @@ import { useCreateGoal } from '@/hooks/useGoal';
 interface GoalsSectionProps {
     goalIds: string[];
     onGoalCreated?: (goalId: string) => void;
+    onGoalDeleted?: (goalId: string) => void;
 }
 
 /**
  * Goals Section Component
  * Displays the goals list on the left side of the board
  */
-export function GoalsSection({ goalIds, onGoalCreated }: GoalsSectionProps) {
+export function GoalsSection({
+    goalIds,
+    onGoalCreated,
+    onGoalDeleted,
+}: GoalsSectionProps) {
     const [isHovered, setIsHovered] = useState(false);
     const [newGoalName, setNewGoalName] = useState('');
     const createGoalMutation = useCreateGoal();
@@ -69,7 +74,11 @@ export function GoalsSection({ goalIds, onGoalCreated }: GoalsSectionProps) {
                     <div>
                         {goalIds.length > 0 ? (
                             goalIds.map((goalId) => (
-                                <GoalItem key={goalId} goalId={goalId} />
+                                <GoalItem
+                                    key={goalId}
+                                    goalId={goalId}
+                                    onGoalDeleted={onGoalDeleted}
+                                />
                             ))
                         ) : (
                             <div className="p-4 text-center text-sm text-gray-500">

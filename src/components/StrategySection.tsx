@@ -6,15 +6,17 @@ import { useCreateStrategy } from '@/hooks/useStrategy';
 interface StrategySectionProps {
     strategyIds: string[];
     onStrategyCreated?: (strategyId: string) => void;
+    onStrategyDeleted?: (strategyId: string) => void;
 }
 
 /**
  * Strategy Section Component
- * Displays the strategies on the right side of the board
+ * Displays the strategies in a grid on the right side of the board
  */
 export function StrategySection({
     strategyIds,
     onStrategyCreated,
+    onStrategyDeleted,
 }: StrategySectionProps) {
     const [isHovered, setIsHovered] = useState(false);
     const [newStrategyName, setNewStrategyName] = useState('');
@@ -93,6 +95,7 @@ export function StrategySection({
                                 <StrategyItem
                                     key={strategyId}
                                     strategyId={strategyId}
+                                    onStrategyDeleted={onStrategyDeleted}
                                 />
                             ))
                         ) : (

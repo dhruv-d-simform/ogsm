@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react';
-import { useAction, useUpdateAction } from '@/hooks/useAction';
+import { useAction, useUpdateAction, useDeleteAction } from '@/hooks/useAction';
 import { useCreateTask } from '@/hooks/useTask';
 import { TaskItem } from '@/components/TaskItem';
 import { Skeleton } from '@/components/ui/skeleton';
+import { X } from 'lucide-react';
 
 interface ActionItemProps {
     actionId: string;
+    onActionDeleted?: (actionId: string) => void;
 }
 
 /**
  * ActionItem Component
  * Fetches and displays a single action with its tasks
- * Supports inline editing
+ * Supports inline editing and deletion
  */
-export function ActionItem({ actionId }: ActionItemProps) {
+export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
     const {
         data: action,
         isLoading,
@@ -22,10 +24,12 @@ export function ActionItem({ actionId }: ActionItemProps) {
     } = useAction(actionId);
     const updateActionMutation = useUpdateAction();
     const createTaskMutation = useCreateTask();
+    const deleteActionMutation = useDeleteAction();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
+    const [isHovered, setIsHovered] = useState(false);
     const [isTaskHovered, setIsTaskHovered] = useState(false);
     const [newTaskName, setNewTaskName] = useState('');
 
@@ -132,6 +136,32 @@ export function ActionItem({ actionId }: ActionItemProps) {
         }
     };
 
+    /**
+     * Handle deleting the action
+     */
+    const handleDeleteAction = () => {
+        deleteActionMutation.mutate(actionId, {
+            onSuccess: () => {
+                // Notify parent to remove from strategy
+                onActionDeleted?.(actionId);
+            },
+        });
+    };
+
+    /**
+     * Handle Task deletion - remove from action's taskIds
+     */
+    const handleTaskDeleted = (taskId: string) => {
+        if (!action) return;
+        const updatedTaskIds = action.taskIds.filter(
+            (id: string) => id !== taskId
+        );
+        updateActionMutation.mutate({
+            id: actionId,
+            input: { taskIds: updatedTaskIds },
+        });
+    };
+
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
         return (
@@ -165,11 +195,17 @@ export function ActionItem({ actionId }: ActionItemProps) {
     // Success state - render action with tasks
     return (
         <div
-            onMouseEnter={() => setIsTaskHovered(true)}
-            onMouseLeave={() => setIsTaskHovered(false)}
+            onMouseEnter={() => {
+                setIsTaskHovered(true);
+                setIsHovered(true);
+            }}
+            onMouseLeave={() => {
+                setIsTaskHovered(false);
+                setIsHovered(false);
+            }}
         >
             {/* Action Name - Inline Editable */}
-            <div className="p-4">
+            <div className="relative p-4 pr-10">
                 {isEditing ? (
                     <input
                         type="text"
@@ -196,13 +232,29 @@ export function ActionItem({ actionId }: ActionItemProps) {
                                 : action.name)}
                     </p>
                 )}
+
+                {/* Delete Button - Visible on Hover, Hidden in Edit Mode */}
+                {isHovered && !isEditing && (
+                    <button
+                        onClick={handleDeleteAction}
+                        disabled={deleteActionMutation.isPending}
+                        className="absolute right-2 top-4 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                        title="Delete action"
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
+                )}
             </div>
 
             {/* Tasks */}
             {action.taskIds.length > 0 && (
                 <div className="bg-gray-50">
                     {action.taskIds.map((taskId) => (
-                        <TaskItem key={taskId} taskId={taskId} />
+                        <TaskItem
+                            key={taskId}
+                            taskId={taskId}
+                            onTaskDeleted={handleTaskDeleted}
+                        />
                     ))}
 
                     {/* Add New Task Input - Visible on Hover */}

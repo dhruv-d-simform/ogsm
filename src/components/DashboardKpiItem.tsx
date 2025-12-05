@@ -1,27 +1,32 @@
 import { useState, useEffect } from 'react';
-import { useKPI, useUpdateKPI } from '@/hooks/useKpi';
+import { useKPI, useUpdateKPI, useDeleteKPI } from '@/hooks/useKpi';
 import { Skeleton } from '@/components/ui/skeleton';
+import { X } from 'lucide-react';
 
 interface DashboardKpiItemProps {
     kpiId: string;
     showBorder?: boolean;
+    onKpiDeleted?: (kpiId: string) => void;
 }
 
 /**
  * DashboardKpiItem Component
  * Fetches and displays a single KPI in the Dashboard column
- * Supports inline editing
+ * Supports inline editing and deletion
  */
 export function DashboardKpiItem({
     kpiId,
     showBorder = false,
+    onKpiDeleted,
 }: DashboardKpiItemProps) {
     const { data: kpi, isLoading, isError, isFetching } = useKPI(kpiId);
     const updateKpiMutation = useUpdateKPI();
+    const deleteKpiMutation = useDeleteKPI();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
+    const [isHovered, setIsHovered] = useState(false);
 
     /**
      * Sync local state when kpi data changes and no mutation is pending
@@ -86,6 +91,18 @@ export function DashboardKpiItem({
         }
     };
 
+    /**
+     * Handle deleting the KPI
+     */
+    const handleDeleteKpi = () => {
+        deleteKpiMutation.mutate(kpiId, {
+            onSuccess: () => {
+                // Notify parent to remove from strategy
+                onKpiDeleted?.(kpiId);
+            },
+        });
+    };
+
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
         return (
@@ -104,7 +121,11 @@ export function DashboardKpiItem({
 
     // Success state - render KPI with inline editing
     return (
-        <div className={`p-4 ${showBorder ? 'border-t border-gray-200' : ''}`}>
+        <div
+            className={`relative p-4 pr-10 ${showBorder ? 'border-t border-gray-200' : ''}`}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
             {isEditing ? (
                 <input
                     type="text"
@@ -128,6 +149,18 @@ export function DashboardKpiItem({
                     {pendingValue ||
                         (updateKpiMutation.isPending ? localValue : kpi.name)}
                 </p>
+            )}
+
+            {/* Delete Button - Visible on Hover, Hidden in Edit Mode */}
+            {isHovered && !isEditing && (
+                <button
+                    onClick={handleDeleteKpi}
+                    disabled={deleteKpiMutation.isPending}
+                    className="absolute right-2 top-4 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                    title="Delete KPI"
+                >
+                    <X className="h-3 w-3" />
+                </button>
             )}
         </div>
     );
