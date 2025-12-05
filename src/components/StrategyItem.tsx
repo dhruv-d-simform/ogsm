@@ -31,8 +31,14 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
 
     /**
      * Handle click to enter edit mode
+     * Initialize local value with current strategy name when entering edit mode
+     * Prevent editing if mutation is in progress
      */
     const handleClick = () => {
+        if (updateStrategyMutation.isPending) return;
+        if (strategy) {
+            setLocalValue(strategy.name);
+        }
         setIsEditing(true);
     };
 
@@ -138,10 +144,16 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
                     ) : (
                         <p
                             onClick={handleClick}
-                            className="cursor-pointer text-sm font-medium hover:opacity-70"
+                            className={`cursor-pointer text-sm font-medium hover:opacity-70 ${
+                                updateStrategyMutation.isPending
+                                    ? 'opacity-50'
+                                    : ''
+                            }`}
                             title="Click to edit"
                         >
-                            {strategy.name}
+                            {updateStrategyMutation.isPending
+                                ? localValue
+                                : strategy.name}
                         </p>
                     )}
                 </div>

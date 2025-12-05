@@ -30,8 +30,14 @@ export function GoalItem({ goalId }: GoalItemProps) {
 
     /**
      * Handle click to enter edit mode
+     * Initialize local value with current goal name when entering edit mode
+     * Prevent editing if mutation is in progress
      */
     const handleClick = () => {
+        if (updateGoalMutation.isPending) return;
+        if (goal) {
+            setLocalValue(goal.name);
+        }
         setIsEditing(true);
     };
 
@@ -118,10 +124,12 @@ export function GoalItem({ goalId }: GoalItemProps) {
                 ) : (
                     <p
                         onClick={handleClick}
-                        className="cursor-pointer text-sm font-medium hover:opacity-70"
+                        className={`cursor-pointer text-sm font-medium hover:opacity-70 ${
+                            updateGoalMutation.isPending ? 'opacity-50' : ''
+                        }`}
                         title="Click to edit"
                     >
-                        {goal.name}
+                        {updateGoalMutation.isPending ? localValue : goal.name}
                     </p>
                 )}
             </div>

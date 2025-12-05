@@ -33,8 +33,14 @@ export function DashboardKpiItem({
 
     /**
      * Handle click to enter edit mode
+     * Initialize local value with current KPI name when entering edit mode
+     * Prevent editing if mutation is in progress
      */
     const handleClick = () => {
+        if (updateKpiMutation.isPending) return;
+        if (kpi) {
+            setLocalValue(kpi.name);
+        }
         setIsEditing(true);
     };
 
@@ -108,10 +114,12 @@ export function DashboardKpiItem({
             ) : (
                 <p
                     onClick={handleClick}
-                    className="cursor-pointer text-sm hover:opacity-70"
+                    className={`cursor-pointer text-sm hover:opacity-70 ${
+                        updateKpiMutation.isPending ? 'opacity-50' : ''
+                    }`}
                     title="Click to edit"
                 >
-                    {kpi.name}
+                    {updateKpiMutation.isPending ? localValue : kpi.name}
                 </p>
             )}
         </div>

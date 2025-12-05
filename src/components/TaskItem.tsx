@@ -29,8 +29,14 @@ export function TaskItem({ taskId }: TaskItemProps) {
 
     /**
      * Handle click to enter edit mode
+     * Initialize local value with current task name when entering edit mode
+     * Prevent editing if mutation is in progress
      */
     const handleClick = () => {
+        if (updateTaskMutation.isPending) return;
+        if (task) {
+            setLocalValue(task.name);
+        }
         setIsEditing(true);
     };
 
@@ -102,10 +108,12 @@ export function TaskItem({ taskId }: TaskItemProps) {
             ) : (
                 <p
                     onClick={handleClick}
-                    className="cursor-pointer text-sm text-gray-600 hover:opacity-70"
+                    className={`cursor-pointer text-sm text-gray-600 hover:opacity-70 ${
+                        updateTaskMutation.isPending ? 'opacity-50' : ''
+                    }`}
                     title="Click to edit"
                 >
-                    {task.name}
+                    {updateTaskMutation.isPending ? localValue : task.name}
                 </p>
             )}
         </div>

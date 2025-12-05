@@ -30,8 +30,14 @@ export function ActionItem({ actionId }: ActionItemProps) {
 
     /**
      * Handle click to enter edit mode
+     * Initialize local value with current action name when entering edit mode
+     * Prevent editing if mutation is in progress
      */
     const handleClick = () => {
+        if (updateActionMutation.isPending) return;
+        if (action) {
+            setLocalValue(action.name);
+        }
         setIsEditing(true);
     };
 
@@ -121,10 +127,14 @@ export function ActionItem({ actionId }: ActionItemProps) {
                 ) : (
                     <p
                         onClick={handleClick}
-                        className="cursor-pointer text-sm font-medium hover:opacity-70"
+                        className={`cursor-pointer text-sm font-medium hover:opacity-70 ${
+                            updateActionMutation.isPending ? 'opacity-50' : ''
+                        }`}
                         title="Click to edit"
                     >
-                        {action.name}
+                        {updateActionMutation.isPending
+                            ? localValue
+                            : action.name}
                     </p>
                 )}
             </div>
