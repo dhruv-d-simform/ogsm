@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useParams, useNavigate } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -15,17 +15,22 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Search, Plus, Trash2, Loader2 } from 'lucide-react';
-import { useOGSMs } from '@/hooks/useOgsm';
+import { useOGSMs, useDeleteOGSM } from '@/hooks/useOgsm';
+import { CreateOgsmDialog } from '@/components/CreateOgsmDialog';
 
 /**
  * Sidebar component with search, OGSM list, and create button
  */
 export function Sidebar() {
     const [searchQuery, setSearchQuery] = useState('');
+    const [hoveredOgsmId, setHoveredOgsmId] = useState<string | null>(null);
+    const [ogsmToDelete, setOgsmToDelete] = useState<string | null>(null);
     const { id: selectedOgsmId } = useParams();
+    const navigate = useNavigate();
 
     // Fetch OGSM data using TanStack Query
     const { data: ogsms = [], isLoading, isError, error } = useOGSMs();
+    const deleteOgsmMutation = useDeleteOGSM();
 
     /**
      * Handle clearing all data and resetting to mock data
@@ -36,6 +41,31 @@ export function Sidebar() {
 
         // Redirect to home and force full page reload
         window.location.href = '/';
+    };
+
+    /**
+     * Handle deleting a single OGSM
+     */
+    const handleDeleteOgsm = () => {
+        if (!ogsmToDelete) return;
+
+        const isCurrentlySelected = selectedOgsmId === ogsmToDelete;
+
+        deleteOgsmMutation.mutate(ogsmToDelete, {
+            onSuccess: () => {
+                // Close the confirmation dialog
+                setOgsmToDelete(null);
+
+                // If we deleted the currently selected OGSM, navigate to home
+                if (isCurrentlySelected) {
+                    navigate('/');
+                }
+            },
+            onError: (error) => {
+                console.error('Failed to delete OGSM:', error);
+                // Keep dialog open on error so user can retry
+            },
+        });
     };
 
     // Filter OGSM list based on search query
@@ -140,29 +170,56 @@ export function Sidebar() {
                     ) : (
                         filteredOgsmList.map((ogsm) => {
                             const isSelected = selectedOgsmId === ogsm.id;
+                            const isHovered = hoveredOgsmId === ogsm.id;
+
                             return (
-                                <Link
+                                <div
                                     key={ogsm.id}
-                                    to={`/ogsm/${ogsm.id}`}
-                                    className={`block rounded-lg px-4 py-3 transition-colors ${
-                                        isSelected
-                                            ? 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100'
-                                            : 'text-foreground hover:bg-accent hover:text-accent-foreground'
-                                    }`}
+                                    className="relative"
+                                    onMouseEnter={() =>
+                                        setHoveredOgsmId(ogsm.id)
+                                    }
+                                    onMouseLeave={() => setHoveredOgsmId(null)}
                                 >
-                                    <div className="font-medium">
-                                        {ogsm.name}
-                                    </div>
-                                    <div
-                                        className={`mt-1 line-clamp-2 text-sm ${
+                                    <Link
+                                        to={`/ogsm/${ogsm.id}`}
+                                        className={`block rounded-lg px-4 py-3 pr-10 transition-colors ${
                                             isSelected
-                                                ? 'text-blue-700 dark:text-blue-200'
-                                                : 'text-muted-foreground'
+                                                ? 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100'
+                                                : 'text-foreground hover:bg-accent hover:text-accent-foreground'
                                         }`}
                                     >
-                                        {ogsm.objective}
-                                    </div>
-                                </Link>
+                                        <div className="font-medium">
+                                            {ogsm.name}
+                                        </div>
+                                        <div
+                                            className={`mt-1 line-clamp-2 text-sm ${
+                                                isSelected
+                                                    ? 'text-blue-700 dark:text-blue-200'
+                                                    : 'text-muted-foreground'
+                                            }`}
+                                        >
+                                            {ogsm.objective}
+                                        </div>
+                                    </Link>
+
+                                    {/* Delete Button - Visible on Hover */}
+                                    {isHovered && (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:text-destructive"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setOgsmToDelete(ogsm.id);
+                                            }}
+                                            title="Delete OGSM"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                                </div>
                             );
                         })
                     )}
@@ -171,11 +228,53 @@ export function Sidebar() {
 
             {/* Fixed Bottom - Create Button */}
             <div className="shrink-0 border-t border-border p-4">
-                <Button className="w-full" size="lg">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create New OGSM
-                </Button>
+                <CreateOgsmDialog>
+                    <Button className="w-full" size="lg">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create New OGSM
+                    </Button>
+                </CreateOgsmDialog>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog
+                open={ogsmToDelete !== null}
+                onOpenChange={(open) => {
+                    if (!open) setOgsmToDelete(null);
+                }}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete OGSM?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete this OGSM? This
+                            action cannot be undone. All associated goals,
+                            strategies, and measures will be permanently
+                            removed.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel
+                            disabled={deleteOgsmMutation.isPending}
+                        >
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleDeleteOgsm();
+                            }}
+                            disabled={deleteOgsmMutation.isPending}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {deleteOgsmMutation.isPending && (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )}
+                            Delete OGSM
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </aside>
     );
 }
