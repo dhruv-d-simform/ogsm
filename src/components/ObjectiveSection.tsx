@@ -86,7 +86,7 @@ export function ObjectiveSection({
                         className={`flex-1 truncate text-lg ${
                             isReadOnly ? '' : 'cursor-pointer hover:opacity-80'
                         }`}
-                        title={isReadOnly ? '' : 'Click to edit'}
+                        title={isReadOnly ? localValue : 'Click to edit'}
                     >
                         {localValue}
                     </p>

@@ -140,12 +140,14 @@ export function TaskItem({ taskId, onTaskDeleted }: TaskItemProps) {
             ) : (
                 <p
                     onClick={handleClick}
-                    className={`cursor-pointer text-sm text-gray-600 hover:opacity-70 ${
+                    className={`${
+                        isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
+                    } text-sm text-gray-600 ${
                         updateTaskMutation.isPending || pendingValue
                             ? 'opacity-50'
                             : ''
                     }`}
-                    title="Click to edit"
+                    title={isReadOnly ? '' : 'Click to edit'}
                 >
                     {pendingValue ||
                         (updateTaskMutation.isPending ? localValue : task.name)}

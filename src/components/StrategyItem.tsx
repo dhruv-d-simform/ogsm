@@ -306,12 +306,16 @@ export function StrategyItem({
                     ) : (
                         <p
                             onClick={handleClick}
-                            className={`cursor-pointer text-sm font-medium hover:opacity-70 ${
+                            className={`${
+                                isReadOnly
+                                    ? ''
+                                    : 'cursor-pointer hover:opacity-70'
+                            } text-sm font-medium ${
                                 updateStrategyMutation.isPending || pendingValue
                                     ? 'opacity-50'
                                     : ''
                             }`}
-                            title="Click to edit"
+                            title={isReadOnly ? '' : 'Click to edit'}
                         >
                             {pendingValue ||
                                 (updateStrategyMutation.isPending

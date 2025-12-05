@@ -147,12 +147,14 @@ export function DashboardKpiItem({
             ) : (
                 <p
                     onClick={handleClick}
-                    className={`cursor-pointer text-sm hover:opacity-70 ${
+                    className={`${
+                        isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
+                    } text-sm ${
                         updateKpiMutation.isPending || pendingValue
                             ? 'opacity-50'
                             : ''
                     }`}
-                    title="Click to edit"
+                    title={isReadOnly ? '' : 'Click to edit'}
                 >
                     {pendingValue ||
                         (updateKpiMutation.isPending ? localValue : kpi.name)}
