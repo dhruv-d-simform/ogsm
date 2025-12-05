@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Search, Plus, Trash2, Loader2 } from 'lucide-react';
 import { useOGSMs } from '@/hooks/useOgsm';
+import { CreateOgsmDialog } from '@/components/CreateOgsmDialog';
 
 /**
  * Sidebar component with search, OGSM list, and create button
@@ -171,10 +172,12 @@ export function Sidebar() {
 
             {/* Fixed Bottom - Create Button */}
             <div className="shrink-0 border-t border-border p-4">
-                <Button className="w-full" size="lg">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create New OGSM
-                </Button>
+                <CreateOgsmDialog>
+                    <Button className="w-full" size="lg">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create New OGSM
+                    </Button>
+                </CreateOgsmDialog>
             </div>
         </aside>
     );
