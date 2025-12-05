@@ -164,7 +164,10 @@ export function ActionItem({ actionId }: ActionItemProps) {
 
     // Success state - render action with tasks
     return (
-        <div>
+        <div
+            onMouseEnter={() => setIsTaskHovered(true)}
+            onMouseLeave={() => setIsTaskHovered(false)}
+        >
             {/* Action Name - Inline Editable */}
             <div className="p-4">
                 {isEditing ? (
@@ -197,11 +200,7 @@ export function ActionItem({ actionId }: ActionItemProps) {
 
             {/* Tasks */}
             {action.taskIds.length > 0 && (
-                <div
-                    className="bg-gray-50"
-                    onMouseEnter={() => setIsTaskHovered(true)}
-                    onMouseLeave={() => setIsTaskHovered(false)}
-                >
+                <div className="bg-gray-50">
                     {action.taskIds.map((taskId) => (
                         <TaskItem key={taskId} taskId={taskId} />
                     ))}
@@ -225,26 +224,20 @@ export function ActionItem({ actionId }: ActionItemProps) {
             )}
 
             {/* Show Task section even when empty, on hover */}
-            {action.taskIds.length === 0 && (
-                <div
-                    className="bg-gray-50"
-                    onMouseEnter={() => setIsTaskHovered(true)}
-                    onMouseLeave={() => setIsTaskHovered(false)}
-                >
-                    {isTaskHovered && (
-                        <div className="py-2 pl-8 pr-4">
-                            <input
-                                type="text"
-                                value={newTaskName}
-                                onChange={(e) => setNewTaskName(e.target.value)}
-                                onKeyDown={handleTaskKeyDown}
-                                onBlur={handleCreateTask}
-                                placeholder="Add a new Task"
-                                disabled={createTaskMutation.isPending}
-                                className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
-                            />
-                        </div>
-                    )}
+            {action.taskIds.length === 0 && isTaskHovered && (
+                <div className="bg-gray-50">
+                    <div className="py-2 pl-8 pr-4">
+                        <input
+                            type="text"
+                            value={newTaskName}
+                            onChange={(e) => setNewTaskName(e.target.value)}
+                            onKeyDown={handleTaskKeyDown}
+                            onBlur={handleCreateTask}
+                            placeholder="Add a new Task"
+                            disabled={createTaskMutation.isPending}
+                            className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                        />
+                    </div>
                 </div>
             )}
         </div>

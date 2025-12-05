@@ -156,7 +156,11 @@ export function GoalItem({ goalId }: GoalItemProps) {
 
     // Success state - render goal with KPIs
     return (
-        <div className="border-b border-gray-200 last:border-b-0">
+        <div
+            className="border-b border-gray-200 last:border-b-0"
+            onMouseEnter={() => setIsKpiHovered(true)}
+            onMouseLeave={() => setIsKpiHovered(false)}
+        >
             {/* Goal Name - Inline Editable */}
             <div className="p-3">
                 {isEditing ? (
@@ -189,11 +193,7 @@ export function GoalItem({ goalId }: GoalItemProps) {
 
             {/* KPIs List */}
             {goal.kpiIds.length > 0 && (
-                <div
-                    className="bg-gray-50"
-                    onMouseEnter={() => setIsKpiHovered(true)}
-                    onMouseLeave={() => setIsKpiHovered(false)}
-                >
+                <div className="bg-gray-50">
                     {goal.kpiIds.map((kpiId) => (
                         <KPIItem key={kpiId} kpiId={kpiId} />
                     ))}
@@ -217,26 +217,20 @@ export function GoalItem({ goalId }: GoalItemProps) {
             )}
 
             {/* Show KPI section even when empty, on hover */}
-            {goal.kpiIds.length === 0 && (
-                <div
-                    className="bg-gray-50"
-                    onMouseEnter={() => setIsKpiHovered(true)}
-                    onMouseLeave={() => setIsKpiHovered(false)}
-                >
-                    {isKpiHovered && (
-                        <div className="py-2 pl-6 pr-3">
-                            <input
-                                type="text"
-                                value={newKpiName}
-                                onChange={(e) => setNewKpiName(e.target.value)}
-                                onKeyDown={handleKpiKeyDown}
-                                onBlur={handleCreateKpi}
-                                placeholder="Add a new KPI"
-                                disabled={createKpiMutation.isPending}
-                                className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
-                            />
-                        </div>
-                    )}
+            {goal.kpiIds.length === 0 && isKpiHovered && (
+                <div className="bg-gray-50">
+                    <div className="py-2 pl-6 pr-3">
+                        <input
+                            type="text"
+                            value={newKpiName}
+                            onChange={(e) => setNewKpiName(e.target.value)}
+                            onKeyDown={handleKpiKeyDown}
+                            onBlur={handleCreateKpi}
+                            placeholder="Add a new KPI"
+                            disabled={createKpiMutation.isPending}
+                            className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                        />
+                    </div>
                 </div>
             )}
         </div>
