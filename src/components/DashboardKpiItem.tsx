@@ -1,4 +1,5 @@
-import { useKPI } from '@/hooks/useKpi';
+import { useState, useEffect } from 'react';
+import { useKPI, useUpdateKPI } from '@/hooks/useKpi';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface DashboardKpiItemProps {
@@ -9,12 +10,71 @@ interface DashboardKpiItemProps {
 /**
  * DashboardKpiItem Component
  * Fetches and displays a single KPI in the Dashboard column
+ * Supports inline editing
  */
 export function DashboardKpiItem({
     kpiId,
     showBorder = false,
 }: DashboardKpiItemProps) {
     const { data: kpi, isLoading, isError } = useKPI(kpiId);
+    const updateKpiMutation = useUpdateKPI();
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [localValue, setLocalValue] = useState('');
+
+    /**
+     * Sync local state when kpi data changes
+     */
+    useEffect(() => {
+        if (kpi) {
+            setLocalValue(kpi.name);
+        }
+    }, [kpi]);
+
+    /**
+     * Handle click to enter edit mode
+     */
+    const handleClick = () => {
+        setIsEditing(true);
+    };
+
+    /**
+     * Handle blur to save and exit edit mode
+     */
+    const handleBlur = () => {
+        const trimmedValue = localValue.trim();
+        if (trimmedValue && trimmedValue !== kpi?.name) {
+            // Optimistic update
+            updateKpiMutation.mutate({
+                id: kpiId,
+                input: { name: trimmedValue },
+            });
+        } else if (kpi) {
+            setLocalValue(kpi.name);
+        }
+        setIsEditing(false);
+    };
+
+    /**
+     * Handle input change
+     */
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setLocalValue(e.target.value);
+    };
+
+    /**
+     * Handle key down (Enter to save, Escape to cancel)
+     */
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleBlur();
+        } else if (e.key === 'Escape') {
+            if (kpi) {
+                setLocalValue(kpi.name);
+            }
+            setIsEditing(false);
+        }
+    };
 
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
@@ -32,10 +92,28 @@ export function DashboardKpiItem({
         return null;
     }
 
-    // Success state - render KPI
+    // Success state - render KPI with inline editing
     return (
         <div className={`p-4 ${showBorder ? 'border-t border-gray-200' : ''}`}>
-            <p className="text-sm">{kpi.name}</p>
+            {isEditing ? (
+                <input
+                    type="text"
+                    value={localValue}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    onKeyDown={handleKeyDown}
+                    autoFocus
+                    className="w-full bg-transparent text-sm outline-none"
+                />
+            ) : (
+                <p
+                    onClick={handleClick}
+                    className="cursor-pointer text-sm hover:opacity-70"
+                    title="Click to edit"
+                >
+                    {kpi.name}
+                </p>
+            )}
         </div>
     );
 }

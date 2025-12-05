@@ -1,4 +1,5 @@
-import { useTask } from '@/hooks/useTask';
+import { useState, useEffect } from 'react';
+import { useTask, useUpdateTask } from '@/hooks/useTask';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface TaskItemProps {
@@ -8,9 +9,68 @@ interface TaskItemProps {
 /**
  * TaskItem Component
  * Fetches and displays a single task by its ID
+ * Supports inline editing
  */
 export function TaskItem({ taskId }: TaskItemProps) {
     const { data: task, isLoading, isError } = useTask(taskId);
+    const updateTaskMutation = useUpdateTask();
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [localValue, setLocalValue] = useState('');
+
+    /**
+     * Sync local state when task data changes
+     */
+    useEffect(() => {
+        if (task) {
+            setLocalValue(task.name);
+        }
+    }, [task]);
+
+    /**
+     * Handle click to enter edit mode
+     */
+    const handleClick = () => {
+        setIsEditing(true);
+    };
+
+    /**
+     * Handle blur to save and exit edit mode
+     */
+    const handleBlur = () => {
+        const trimmedValue = localValue.trim();
+        if (trimmedValue && trimmedValue !== task?.name) {
+            // Optimistic update
+            updateTaskMutation.mutate({
+                id: taskId,
+                input: { name: trimmedValue },
+            });
+        } else if (task) {
+            setLocalValue(task.name);
+        }
+        setIsEditing(false);
+    };
+
+    /**
+     * Handle input change
+     */
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setLocalValue(e.target.value);
+    };
+
+    /**
+     * Handle key down (Enter to save, Escape to cancel)
+     */
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleBlur();
+        } else if (e.key === 'Escape') {
+            if (task) {
+                setLocalValue(task.name);
+            }
+            setIsEditing(false);
+        }
+    };
 
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
@@ -26,10 +86,28 @@ export function TaskItem({ taskId }: TaskItemProps) {
         return null;
     }
 
-    // Success state - render task
+    // Success state - render task with inline editing
     return (
         <div className="border-t border-gray-200 py-2 pl-8 pr-4">
-            <p className="text-sm text-gray-600">{task.name}</p>
+            {isEditing ? (
+                <input
+                    type="text"
+                    value={localValue}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    onKeyDown={handleKeyDown}
+                    autoFocus
+                    className="w-full bg-transparent text-sm text-gray-600 outline-none"
+                />
+            ) : (
+                <p
+                    onClick={handleClick}
+                    className="cursor-pointer text-sm text-gray-600 hover:opacity-70"
+                    title="Click to edit"
+                >
+                    {task.name}
+                </p>
+            )}
         </div>
     );
 }

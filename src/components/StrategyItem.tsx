@@ -1,4 +1,5 @@
-import { useStrategy } from '@/hooks/useStrategy';
+import { useState, useEffect } from 'react';
+import { useStrategy, useUpdateStrategy } from '@/hooks/useStrategy';
 import { DashboardKpiItem } from '@/components/DashboardKpiItem';
 import { ActionItem } from '@/components/ActionItem';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,9 +11,68 @@ interface StrategyItemProps {
 /**
  * StrategyItem Component
  * Fetches and displays a single strategy with its dashboard KPIs and actions
+ * Supports inline editing
  */
 export function StrategyItem({ strategyId }: StrategyItemProps) {
     const { data: strategy, isLoading, isError } = useStrategy(strategyId);
+    const updateStrategyMutation = useUpdateStrategy();
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [localValue, setLocalValue] = useState('');
+
+    /**
+     * Sync local state when strategy data changes
+     */
+    useEffect(() => {
+        if (strategy) {
+            setLocalValue(strategy.name);
+        }
+    }, [strategy]);
+
+    /**
+     * Handle click to enter edit mode
+     */
+    const handleClick = () => {
+        setIsEditing(true);
+    };
+
+    /**
+     * Handle blur to save and exit edit mode
+     */
+    const handleBlur = () => {
+        const trimmedValue = localValue.trim();
+        if (trimmedValue && trimmedValue !== strategy?.name) {
+            // Optimistic update
+            updateStrategyMutation.mutate({
+                id: strategyId,
+                input: { name: trimmedValue },
+            });
+        } else if (strategy) {
+            setLocalValue(strategy.name);
+        }
+        setIsEditing(false);
+    };
+
+    /**
+     * Handle input change
+     */
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setLocalValue(e.target.value);
+    };
+
+    /**
+     * Handle key down (Enter to save, Escape to cancel)
+     */
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleBlur();
+        } else if (e.key === 'Escape') {
+            if (strategy) {
+                setLocalValue(strategy.name);
+            }
+            setIsEditing(false);
+        }
+    };
 
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
@@ -63,9 +123,27 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
     return (
         <div className="shadow-sm">
             <div className="flex">
-                {/* Strategy Name Column - 25% */}
+                {/* Strategy Name Column - 25% - Inline Editable */}
                 <div className="w-[25%] border-r border-gray-200 p-4">
-                    <p className="text-sm font-medium">{strategy.name}</p>
+                    {isEditing ? (
+                        <input
+                            type="text"
+                            value={localValue}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            onKeyDown={handleKeyDown}
+                            autoFocus
+                            className="w-full bg-transparent text-sm font-medium outline-none"
+                        />
+                    ) : (
+                        <p
+                            onClick={handleClick}
+                            className="cursor-pointer text-sm font-medium hover:opacity-70"
+                            title="Click to edit"
+                        >
+                            {strategy.name}
+                        </p>
+                    )}
                 </div>
 
                 {/* Dashboard KPIs Column - 25% */}
