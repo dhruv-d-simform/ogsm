@@ -12,28 +12,30 @@ interface TaskItemProps {
  * Supports inline editing
  */
 export function TaskItem({ taskId }: TaskItemProps) {
-    const { data: task, isLoading, isError } = useTask(taskId);
+    const { data: task, isLoading, isError, isFetching } = useTask(taskId);
     const updateTaskMutation = useUpdateTask();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
+    const [pendingValue, setPendingValue] = useState<string | null>(null);
 
     /**
-     * Sync local state when task data changes
+     * Sync local state when task data changes and no mutation is pending
      */
     useEffect(() => {
-        if (task) {
+        if (task && !isFetching && !updateTaskMutation.isPending) {
             setLocalValue(task.name);
+            setPendingValue(null);
         }
-    }, [task]);
+    }, [task, isFetching, updateTaskMutation.isPending]);
 
     /**
      * Handle click to enter edit mode
      * Initialize local value with current task name when entering edit mode
-     * Prevent editing if mutation is in progress
+     * Prevent editing if mutation is in progress or data is being refetched
      */
     const handleClick = () => {
-        if (updateTaskMutation.isPending) return;
+        if (updateTaskMutation.isPending || isFetching || pendingValue) return;
         if (task) {
             setLocalValue(task.name);
         }
@@ -46,6 +48,8 @@ export function TaskItem({ taskId }: TaskItemProps) {
     const handleBlur = () => {
         const trimmedValue = localValue.trim();
         if (trimmedValue && trimmedValue !== task?.name) {
+            // Store the new value to show during refetch
+            setPendingValue(trimmedValue);
             // Optimistic update
             updateTaskMutation.mutate({
                 id: taskId,
@@ -109,11 +113,14 @@ export function TaskItem({ taskId }: TaskItemProps) {
                 <p
                     onClick={handleClick}
                     className={`cursor-pointer text-sm text-gray-600 hover:opacity-70 ${
-                        updateTaskMutation.isPending ? 'opacity-50' : ''
+                        updateTaskMutation.isPending || pendingValue
+                            ? 'opacity-50'
+                            : ''
                     }`}
                     title="Click to edit"
                 >
-                    {updateTaskMutation.isPending ? localValue : task.name}
+                    {pendingValue ||
+                        (updateTaskMutation.isPending ? localValue : task.name)}
                 </p>
             )}
         </div>

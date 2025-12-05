@@ -13,28 +13,36 @@ interface ActionItemProps {
  * Supports inline editing
  */
 export function ActionItem({ actionId }: ActionItemProps) {
-    const { data: action, isLoading, isError } = useAction(actionId);
+    const {
+        data: action,
+        isLoading,
+        isError,
+        isFetching,
+    } = useAction(actionId);
     const updateActionMutation = useUpdateAction();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
+    const [pendingValue, setPendingValue] = useState<string | null>(null);
 
     /**
-     * Sync local state when action data changes
+     * Sync local state when action data changes and no mutation is pending
      */
     useEffect(() => {
-        if (action) {
+        if (action && !isFetching && !updateActionMutation.isPending) {
             setLocalValue(action.name);
+            setPendingValue(null);
         }
-    }, [action]);
+    }, [action, isFetching, updateActionMutation.isPending]);
 
     /**
      * Handle click to enter edit mode
      * Initialize local value with current action name when entering edit mode
-     * Prevent editing if mutation is in progress
+     * Prevent editing if mutation is in progress or data is being refetched
      */
     const handleClick = () => {
-        if (updateActionMutation.isPending) return;
+        if (updateActionMutation.isPending || isFetching || pendingValue)
+            return;
         if (action) {
             setLocalValue(action.name);
         }
@@ -47,6 +55,8 @@ export function ActionItem({ actionId }: ActionItemProps) {
     const handleBlur = () => {
         const trimmedValue = localValue.trim();
         if (trimmedValue && trimmedValue !== action?.name) {
+            // Store the new value to show during refetch
+            setPendingValue(trimmedValue);
             // Optimistic update
             updateActionMutation.mutate({
                 id: actionId,
@@ -128,13 +138,16 @@ export function ActionItem({ actionId }: ActionItemProps) {
                     <p
                         onClick={handleClick}
                         className={`cursor-pointer text-sm font-medium hover:opacity-70 ${
-                            updateActionMutation.isPending ? 'opacity-50' : ''
+                            updateActionMutation.isPending || pendingValue
+                                ? 'opacity-50'
+                                : ''
                         }`}
                         title="Click to edit"
                     >
-                        {updateActionMutation.isPending
-                            ? localValue
-                            : action.name}
+                        {pendingValue ||
+                            (updateActionMutation.isPending
+                                ? localValue
+                                : action.name)}
                     </p>
                 )}
             </div>

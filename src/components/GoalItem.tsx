@@ -13,28 +13,30 @@ interface GoalItemProps {
  * Supports inline editing
  */
 export function GoalItem({ goalId }: GoalItemProps) {
-    const { data: goal, isLoading, isError } = useGoal(goalId);
+    const { data: goal, isLoading, isError, isFetching } = useGoal(goalId);
     const updateGoalMutation = useUpdateGoal();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
+    const [pendingValue, setPendingValue] = useState<string | null>(null);
 
     /**
-     * Sync local state when goal data changes
+     * Sync local state when goal data changes and no mutation is pending
      */
     useEffect(() => {
-        if (goal) {
+        if (goal && !isFetching && !updateGoalMutation.isPending) {
             setLocalValue(goal.name);
+            setPendingValue(null);
         }
-    }, [goal]);
+    }, [goal, isFetching, updateGoalMutation.isPending]);
 
     /**
      * Handle click to enter edit mode
      * Initialize local value with current goal name when entering edit mode
-     * Prevent editing if mutation is in progress
+     * Prevent editing if mutation is in progress or data is being refetched
      */
     const handleClick = () => {
-        if (updateGoalMutation.isPending) return;
+        if (updateGoalMutation.isPending || isFetching || pendingValue) return;
         if (goal) {
             setLocalValue(goal.name);
         }
@@ -47,6 +49,8 @@ export function GoalItem({ goalId }: GoalItemProps) {
     const handleBlur = () => {
         const trimmedValue = localValue.trim();
         if (trimmedValue && trimmedValue !== goal?.name) {
+            // Store the new value to show during refetch
+            setPendingValue(trimmedValue);
             // Optimistic update
             updateGoalMutation.mutate({
                 id: goalId,
@@ -125,11 +129,16 @@ export function GoalItem({ goalId }: GoalItemProps) {
                     <p
                         onClick={handleClick}
                         className={`cursor-pointer text-sm font-medium hover:opacity-70 ${
-                            updateGoalMutation.isPending ? 'opacity-50' : ''
+                            updateGoalMutation.isPending || pendingValue
+                                ? 'opacity-50'
+                                : ''
                         }`}
                         title="Click to edit"
                     >
-                        {updateGoalMutation.isPending ? localValue : goal.name}
+                        {pendingValue ||
+                            (updateGoalMutation.isPending
+                                ? localValue
+                                : goal.name)}
                     </p>
                 )}
             </div>

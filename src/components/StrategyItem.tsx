@@ -14,28 +14,36 @@ interface StrategyItemProps {
  * Supports inline editing
  */
 export function StrategyItem({ strategyId }: StrategyItemProps) {
-    const { data: strategy, isLoading, isError } = useStrategy(strategyId);
+    const {
+        data: strategy,
+        isLoading,
+        isError,
+        isFetching,
+    } = useStrategy(strategyId);
     const updateStrategyMutation = useUpdateStrategy();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
+    const [pendingValue, setPendingValue] = useState<string | null>(null);
 
     /**
-     * Sync local state when strategy data changes
+     * Sync local state when strategy data changes and no mutation is pending
      */
     useEffect(() => {
-        if (strategy) {
+        if (strategy && !isFetching && !updateStrategyMutation.isPending) {
             setLocalValue(strategy.name);
+            setPendingValue(null);
         }
-    }, [strategy]);
+    }, [strategy, isFetching, updateStrategyMutation.isPending]);
 
     /**
      * Handle click to enter edit mode
      * Initialize local value with current strategy name when entering edit mode
-     * Prevent editing if mutation is in progress
+     * Prevent editing if mutation is in progress or data is being refetched
      */
     const handleClick = () => {
-        if (updateStrategyMutation.isPending) return;
+        if (updateStrategyMutation.isPending || isFetching || pendingValue)
+            return;
         if (strategy) {
             setLocalValue(strategy.name);
         }
@@ -48,6 +56,8 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
     const handleBlur = () => {
         const trimmedValue = localValue.trim();
         if (trimmedValue && trimmedValue !== strategy?.name) {
+            // Store the new value to show during refetch
+            setPendingValue(trimmedValue);
             // Optimistic update
             updateStrategyMutation.mutate({
                 id: strategyId,
@@ -145,15 +155,16 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
                         <p
                             onClick={handleClick}
                             className={`cursor-pointer text-sm font-medium hover:opacity-70 ${
-                                updateStrategyMutation.isPending
+                                updateStrategyMutation.isPending || pendingValue
                                     ? 'opacity-50'
                                     : ''
                             }`}
                             title="Click to edit"
                         >
-                            {updateStrategyMutation.isPending
-                                ? localValue
-                                : strategy.name}
+                            {pendingValue ||
+                                (updateStrategyMutation.isPending
+                                    ? localValue
+                                    : strategy.name)}
                         </p>
                     )}
                 </div>

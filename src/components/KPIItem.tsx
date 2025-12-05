@@ -12,28 +12,30 @@ interface KPIItemProps {
  * Supports inline editing
  */
 export function KPIItem({ kpiId }: KPIItemProps) {
-    const { data: kpi, isLoading, isError } = useKPI(kpiId);
+    const { data: kpi, isLoading, isError, isFetching } = useKPI(kpiId);
     const updateKpiMutation = useUpdateKPI();
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
+    const [pendingValue, setPendingValue] = useState<string | null>(null);
 
     /**
-     * Sync local state when kpi data changes
+     * Sync local state when kpi data changes and no mutation is pending
      */
     useEffect(() => {
-        if (kpi) {
+        if (kpi && !isFetching && !updateKpiMutation.isPending) {
             setLocalValue(kpi.name);
+            setPendingValue(null);
         }
-    }, [kpi]);
+    }, [kpi, isFetching, updateKpiMutation.isPending]);
 
     /**
      * Handle click to enter edit mode
      * Initialize local value with current KPI name when entering edit mode
-     * Prevent editing if mutation is in progress
+     * Prevent editing if mutation is in progress or data is being refetched
      */
     const handleClick = () => {
-        if (updateKpiMutation.isPending) return;
+        if (updateKpiMutation.isPending || isFetching || pendingValue) return;
         if (kpi) {
             setLocalValue(kpi.name);
         }
@@ -46,6 +48,8 @@ export function KPIItem({ kpiId }: KPIItemProps) {
     const handleBlur = () => {
         const trimmedValue = localValue.trim();
         if (trimmedValue && trimmedValue !== kpi?.name) {
+            // Store the new value to show during refetch
+            setPendingValue(trimmedValue);
             // Optimistic update
             updateKpiMutation.mutate({
                 id: kpiId,
@@ -109,11 +113,14 @@ export function KPIItem({ kpiId }: KPIItemProps) {
                 <p
                     onClick={handleClick}
                     className={`cursor-pointer text-sm text-gray-600 hover:opacity-70 ${
-                        updateKpiMutation.isPending ? 'opacity-50' : ''
+                        updateKpiMutation.isPending || pendingValue
+                            ? 'opacity-50'
+                            : ''
                     }`}
                     title="Click to edit"
                 >
-                    {updateKpiMutation.isPending ? localValue : kpi.name}
+                    {pendingValue ||
+                        (updateKpiMutation.isPending ? localValue : kpi.name)}
                 </p>
             )}
         </div>
