@@ -1,15 +1,46 @@
-import type { Goal, KPI } from '@/types';
+import { useGoal } from '@/hooks/useGoal';
+import { KPIItem } from '@/components/KPIItem';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface GoalItemProps {
-    goal: Goal;
-    kpis: KPI[];
+    goalId: string;
 }
 
 /**
  * GoalItem Component
- * Displays a single goal with its associated KPIs
+ * Fetches and displays a single goal with its associated KPIs
  */
-export function GoalItem({ goal, kpis }: GoalItemProps) {
+export function GoalItem({ goalId }: GoalItemProps) {
+    const { data: goal, isLoading, isError } = useGoal(goalId);
+
+    // Loading state - skeleton UI to prevent layout shift
+    if (isLoading) {
+        return (
+            <div className="border-b border-gray-200 last:border-b-0">
+                <div className="p-3">
+                    <Skeleton className="h-5 w-full" />
+                </div>
+                <div className="bg-gray-50">
+                    <div className="border-t border-gray-200 py-2 pl-6 pr-3">
+                        <Skeleton className="h-5 w-3/4" />
+                    </div>
+                    <div className="border-t border-gray-200 py-2 pl-6 pr-3">
+                        <Skeleton className="h-5 w-3/4" />
+                    </div>
+                    <div className="border-t border-gray-200 py-2 pl-6 pr-3">
+                        <Skeleton className="h-5 w-3/4" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Error or not found - don't render anything
+    if (isError || !goal) {
+        return null;
+    }
+
+    // Success state - render goal with KPIs
     return (
         <div className="border-b border-gray-200 last:border-b-0">
             {/* Goal Name */}
@@ -18,15 +49,10 @@ export function GoalItem({ goal, kpis }: GoalItemProps) {
             </div>
 
             {/* KPIs List */}
-            {kpis.length > 0 && (
+            {goal.kpiIds.length > 0 && (
                 <div className="bg-gray-50">
-                    {kpis.map((kpi) => (
-                        <div
-                            key={kpi.id}
-                            className="border-t border-gray-200 py-2 pl-6 pr-3"
-                        >
-                            <p className="text-sm text-gray-600">{kpi.name}</p>
-                        </div>
+                    {goal.kpiIds.map((kpiId) => (
+                        <KPIItem key={kpiId} kpiId={kpiId} />
                     ))}
                 </div>
             )}

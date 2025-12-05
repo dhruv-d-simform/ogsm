@@ -26,7 +26,7 @@ export function OgsmBoard({ ogsm, onObjectiveChange }: OgsmBoardProps) {
                 <div className="flex min-h-0 flex-1 gap-6">
                     {/* Goals Section - 20% width */}
                     <div className="w-[20%]">
-                        <GoalsSection />
+                        <GoalsSection goalIds={ogsm.goalIds} />
                     </div>
 
                     {/* Strategy Section - 80% width */}
