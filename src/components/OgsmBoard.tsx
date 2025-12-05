@@ -31,7 +31,7 @@ export function OgsmBoard({ ogsm, onObjectiveChange }: OgsmBoardProps) {
 
                     {/* Strategy Section - 80% width */}
                     <div className="w-[80%]">
-                        <StrategySection />
+                        <StrategySection strategyIds={ogsm.strategyIds} />
                     </div>
                 </div>
             </div>
