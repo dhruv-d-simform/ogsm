@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
+import { SectionHeader } from '@/components/SectionHeader';
 
 interface ObjectiveSectionProps {
     objective: string;
@@ -69,7 +70,11 @@ export function ObjectiveSection({
     return (
         <div className="rounded-lg bg-blue-900 p-6 text-white">
             <div className="flex items-center gap-3">
-                <span className="text-lg font-semibold">Objective</span>
+                <SectionHeader
+                    initial="O"
+                    label="Objective"
+                    description="The overarching goal or aspiration that defines what you want to achieve. It should be clear, inspiring, and provide direction for all other elements of your OGSM plan."
+                />
                 {isEditing ? (
                     <input
                         type="text"

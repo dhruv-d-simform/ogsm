@@ -3,6 +3,7 @@ import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { GoalItem } from '@/components/GoalItem';
 import { useCreateGoal } from '@/hooks/useGoal';
+import { SectionHeader } from '@/components/SectionHeader';
 
 interface GoalsSectionProps {
     goalIds: string[];
@@ -66,7 +67,11 @@ export function GoalsSection({
         >
             {/* Header */}
             <div className="rounded-t-lg bg-blue-900 p-4 text-white">
-                <h2 className="text-lg font-semibold">Goals</h2>
+                <SectionHeader
+                    initial="G"
+                    label="Goals"
+                    description="Specific, measurable targets that support your objective. Goals should be quantifiable and time-bound, providing clear milestones to track progress toward your objective."
+                />
             </div>
 
             {/* Content Area - Scrollable List */}
