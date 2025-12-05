@@ -210,7 +210,6 @@ export function GoalItem({ goalId }: GoalItemProps) {
                                 placeholder="Add a new KPI"
                                 disabled={createKpiMutation.isPending}
                                 className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
-                                autoFocus
                             />
                         </div>
                     )}
@@ -235,7 +234,6 @@ export function GoalItem({ goalId }: GoalItemProps) {
                                 placeholder="Add a new KPI"
                                 disabled={createKpiMutation.isPending}
                                 className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
-                                autoFocus
                             />
                         </div>
                     )}

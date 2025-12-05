@@ -289,7 +289,6 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
                                         placeholder="Add a new KPI"
                                         disabled={createKpiMutation.isPending}
                                         className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
-                                        autoFocus
                                     />
                                 </div>
                             )}
@@ -308,7 +307,6 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
                                     placeholder="Add a new KPI"
                                     disabled={createKpiMutation.isPending}
                                     className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
-                                    autoFocus
                                 />
                             ) : (
                                 <p className="text-sm text-gray-400">No KPIs</p>
@@ -354,7 +352,6 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
                                             createActionMutation.isPending
                                         }
                                         className="w-full bg-transparent text-sm font-medium text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-900"
-                                        autoFocus
                                     />
                                 </div>
                             )}
@@ -373,7 +370,6 @@ export function StrategyItem({ strategyId }: StrategyItemProps) {
                                     placeholder="Add a new Action"
                                     disabled={createActionMutation.isPending}
                                     className="w-full bg-transparent text-sm font-medium text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-900"
-                                    autoFocus
                                 />
                             ) : (
                                 <p className="text-sm text-gray-400">

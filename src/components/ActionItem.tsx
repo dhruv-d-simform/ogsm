@@ -218,7 +218,6 @@ export function ActionItem({ actionId }: ActionItemProps) {
                                 placeholder="Add a new Task"
                                 disabled={createTaskMutation.isPending}
                                 className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
-                                autoFocus
                             />
                         </div>
                     )}
@@ -243,7 +242,6 @@ export function ActionItem({ actionId }: ActionItemProps) {
                                 placeholder="Add a new Task"
                                 disabled={createTaskMutation.isPending}
                                 className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
-                                autoFocus
                             />
                         </div>
                     )}

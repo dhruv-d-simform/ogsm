@@ -91,7 +91,6 @@ export function GoalsSection({ goalIds, onGoalCreated }: GoalsSectionProps) {
                                     placeholder="Add a new Goal"
                                     disabled={createGoalMutation.isPending}
                                     className="w-full bg-transparent text-sm font-medium text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-900"
-                                    autoFocus
                                 />
                             </div>
                         )}

@@ -122,7 +122,6 @@ export function StrategySection({
                                                 createStrategyMutation.isPending
                                             }
                                             className="w-full bg-transparent text-sm font-medium text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-900"
-                                            autoFocus
                                         />
                                     </div>
 
