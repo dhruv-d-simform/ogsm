@@ -19,7 +19,10 @@ export function Layout() {
             <Sidebar />
 
             {/* Main Content Area */}
-            <main id="main-content" className="flex-1 overflow-auto bg-background">
+            <main
+                id="main-content"
+                className="flex-1 overflow-auto bg-background"
+            >
                 <Outlet />
             </main>
         </div>
