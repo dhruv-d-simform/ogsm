@@ -258,8 +258,8 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                         />
                     ))}
 
-                    {/* Add New KPI Input - Visible on Hover, Hidden in Read-Only */}
-                    {isKpiHovered && !isReadOnly && (
+                    {/* Add New KPI Input - Visible on Hover or when input has text, Hidden in Read-Only */}
+                    {(isKpiHovered || newKpiName) && !isReadOnly && (
                         <div className="border-t border-border py-2 pl-6 pr-3">
                             <input
                                 type="text"
@@ -276,23 +276,25 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                 </div>
             )}
 
-            {/* Show KPI section even when empty, on hover, but not in Read-Only */}
-            {goal.kpiIds.length === 0 && isKpiHovered && !isReadOnly && (
-                <div className="bg-muted/50">
-                    <div className="py-2 pl-6 pr-3">
-                        <input
-                            type="text"
-                            value={newKpiName}
-                            onChange={(e) => setNewKpiName(e.target.value)}
-                            onKeyDown={handleKpiKeyDown}
-                            onBlur={handleCreateKpi}
-                            placeholder="Add a new KPI"
-                            disabled={createKpiMutation.isPending}
-                            className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
-                        />
+            {/* Show KPI section even when empty, on hover or when input has text, but not in Read-Only */}
+            {goal.kpiIds.length === 0 &&
+                (isKpiHovered || newKpiName) &&
+                !isReadOnly && (
+                    <div className="bg-muted/50">
+                        <div className="py-2 pl-6 pr-3">
+                            <input
+                                type="text"
+                                value={newKpiName}
+                                onChange={(e) => setNewKpiName(e.target.value)}
+                                onKeyDown={handleKpiKeyDown}
+                                onBlur={handleCreateKpi}
+                                placeholder="Add a new KPI"
+                                disabled={createKpiMutation.isPending}
+                                className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
+                            />
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
         </div>
     );
 }

@@ -88,14 +88,14 @@ export function GoalsSection({
                                   />
                               ))
                             : // Show empty state only in read-only mode or when input is not visible
-                              (isReadOnly || !isHovered) && (
+                              (isReadOnly || (!isHovered && !newGoalName)) && (
                                   <div className="p-4 text-center text-sm text-muted-foreground">
                                       No goals yet. Add your first goal!
                                   </div>
                               )}
 
-                        {/* Add New Goal Input - Visible on Hover, Hidden in Read-Only */}
-                        {isHovered && !isReadOnly && (
+                        {/* Add New Goal Input - Visible on Hover or when input has text, Hidden in Read-Only */}
+                        {(isHovered || newGoalName) && !isReadOnly && (
                             <div className="border-t border-border p-3">
                                 <input
                                     type="text"

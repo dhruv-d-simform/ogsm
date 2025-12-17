@@ -354,8 +354,8 @@ export function StrategyItem({
                                 />
                             ))}
 
-                            {/* Add New KPI Input - Visible on Hover, Hidden in Read-Only */}
-                            {isKpiHovered && !isReadOnly && (
+                            {/* Add New KPI Input - Visible on Hover or when input has text, Hidden in Read-Only */}
+                            {(isKpiHovered || newKpiName) && !isReadOnly && (
                                 <div className="border-t border-border p-4">
                                     <input
                                         type="text"
@@ -374,7 +374,7 @@ export function StrategyItem({
                         </div>
                     ) : (
                         <div className="p-4">
-                            {isKpiHovered && !isReadOnly ? (
+                            {(isKpiHovered || newKpiName) && !isReadOnly ? (
                                 <input
                                     type="text"
                                     value={newKpiName}
@@ -420,29 +420,31 @@ export function StrategyItem({
                                 </div>
                             ))}
 
-                            {/* Add New Action Input - Visible on Hover, Hidden in Read-Only */}
-                            {isActionHovered && !isReadOnly && (
-                                <div className="border-t border-border p-4">
-                                    <input
-                                        type="text"
-                                        value={newActionName}
-                                        onChange={(e) =>
-                                            setNewActionName(e.target.value)
-                                        }
-                                        onKeyDown={handleActionKeyDown}
-                                        onBlur={handleCreateAction}
-                                        placeholder="Add a new Action"
-                                        disabled={
-                                            createActionMutation.isPending
-                                        }
-                                        className="w-full bg-transparent text-sm font-medium text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
-                                    />
-                                </div>
-                            )}
+                            {/* Add New Action Input - Visible on Hover or when input has text, Hidden in Read-Only */}
+                            {(isActionHovered || newActionName) &&
+                                !isReadOnly && (
+                                    <div className="border-t border-border p-4">
+                                        <input
+                                            type="text"
+                                            value={newActionName}
+                                            onChange={(e) =>
+                                                setNewActionName(e.target.value)
+                                            }
+                                            onKeyDown={handleActionKeyDown}
+                                            onBlur={handleCreateAction}
+                                            placeholder="Add a new Action"
+                                            disabled={
+                                                createActionMutation.isPending
+                                            }
+                                            className="w-full bg-transparent text-sm font-medium text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
+                                        />
+                                    </div>
+                                )}
                         </div>
                     ) : (
                         <div className="p-4">
-                            {isActionHovered && !isReadOnly ? (
+                            {(isActionHovered || newActionName) &&
+                            !isReadOnly ? (
                                 <input
                                     type="text"
                                     value={newActionName}
