@@ -115,7 +115,7 @@ export function DashboardKpiItem({
     if (isLoading) {
         return (
             <div
-                className={`p-4 ${showBorder ? 'border-t border-gray-200' : ''}`}
+                className={`p-4 ${showBorder ? 'border-t border-border' : ''}`}
             >
                 <Skeleton className="h-5 w-3/4" />
             </div>
@@ -130,7 +130,7 @@ export function DashboardKpiItem({
     // Success state - render KPI with inline editing
     return (
         <div
-            className={`relative p-4 pr-10 ${showBorder ? 'border-t border-gray-200' : ''}`}
+            className={`relative p-4 pr-10 ${showBorder ? 'border-t border-border' : ''}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -166,7 +166,7 @@ export function DashboardKpiItem({
                 <button
                     onClick={handleDeleteKpi}
                     disabled={deleteKpiMutation.isPending}
-                    className="absolute right-2 top-4 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                    className="absolute right-2 top-4 text-muted-foreground hover:text-destructive disabled:opacity-50"
                     title="Delete KPI"
                 >
                     <X className="h-3 w-3" />

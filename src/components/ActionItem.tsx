@@ -179,14 +179,14 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                 </div>
 
                 {/* Tasks Skeleton */}
-                <div className="bg-gray-50">
-                    <div className="border-t border-gray-200 py-2 pl-8 pr-4">
+                <div className="bg-muted/50">
+                    <div className="border-t border-border py-2 pl-8 pr-4">
                         <Skeleton className="h-5 w-3/4" />
                     </div>
-                    <div className="border-t border-gray-200 py-2 pl-8 pr-4">
+                    <div className="border-t border-border py-2 pl-8 pr-4">
                         <Skeleton className="h-5 w-3/4" />
                     </div>
-                    <div className="border-t border-gray-200 py-2 pl-8 pr-4">
+                    <div className="border-t border-border py-2 pl-8 pr-4">
                         <Skeleton className="h-5 w-3/4" />
                     </div>
                 </div>
@@ -247,7 +247,7 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                     <button
                         onClick={handleDeleteAction}
                         disabled={deleteActionMutation.isPending}
-                        className="absolute right-2 top-4 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                        className="absolute right-2 top-4 text-muted-foreground hover:text-destructive disabled:opacity-50"
                         title="Delete action"
                     >
                         <X className="h-4 w-4" />
@@ -257,7 +257,7 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
 
             {/* Tasks */}
             {action.taskIds.length > 0 && (
-                <div className="bg-gray-50">
+                <div className="bg-muted/50">
                     {action.taskIds.map((taskId) => (
                         <TaskItem
                             key={taskId}
@@ -268,7 +268,7 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
 
                     {/* Add New Task Input - Visible on Hover, Hidden in Read-Only */}
                     {isTaskHovered && !isReadOnly && (
-                        <div className="border-t border-gray-200 py-2 pl-8 pr-4">
+                        <div className="border-t border-border py-2 pl-8 pr-4">
                             <input
                                 type="text"
                                 value={newTaskName}
@@ -277,7 +277,7 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                                 onBlur={handleCreateTask}
                                 placeholder="Add a new Task"
                                 disabled={createTaskMutation.isPending}
-                                className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                                className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
                             />
                         </div>
                     )}
@@ -286,7 +286,7 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
 
             {/* Show Task section even when empty, on hover, Hidden in Read-Only */}
             {action.taskIds.length === 0 && isTaskHovered && !isReadOnly && (
-                <div className="bg-gray-50">
+                <div className="bg-muted/50">
                     <div className="py-2 pl-8 pr-4">
                         <input
                             type="text"
@@ -296,7 +296,7 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                             onBlur={handleCreateTask}
                             placeholder="Add a new Task"
                             disabled={createTaskMutation.isPending}
-                            className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                            className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
                         />
                     </div>
                 </div>

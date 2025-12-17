@@ -68,7 +68,7 @@ export function ObjectiveSection({
     };
 
     return (
-        <div className="rounded-lg bg-blue-900 p-6 text-white">
+        <div className="rounded-lg bg-primary p-6 text-primary-foreground">
             <div className="flex items-center gap-3">
                 <SectionHeader
                     initial="O"

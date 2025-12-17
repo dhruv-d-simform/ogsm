@@ -62,13 +62,13 @@ export function StrategySection({
 
     return (
         <div
-            className="flex h-full flex-col rounded-lg border border-gray-300"
+            className="flex h-full flex-col rounded-lg border border-border"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
             {/* Main Header - Strategy and Measures */}
-            <div className="flex rounded-t-lg bg-blue-900 text-white">
-                <div className="w-[25%] border-r border-white p-4">
+            <div className="flex rounded-t-lg bg-primary text-primary-foreground">
+                <div className="w-[25%] border-r border-primary-foreground/20 p-4">
                     <SectionHeader
                         initial="S"
                         label="Strategy"
@@ -85,15 +85,19 @@ export function StrategySection({
             </div>
 
             {/* Sub-header - Strategies, Dashboard, Actions */}
-            <div className="flex border-b border-gray-300 bg-white text-sm">
-                <div className="w-[25%] border-r border-gray-300 p-3">
-                    <span className="font-medium text-black">Strategies</span>
+            <div className="flex border-b border-border bg-card text-sm">
+                <div className="w-[25%] border-r border-border p-3">
+                    <span className="font-medium text-foreground">
+                        Strategies
+                    </span>
                 </div>
-                <div className="w-[25%] border-r border-gray-300 p-3">
-                    <span className="font-medium text-black">Dashboard</span>
+                <div className="w-[25%] border-r border-border p-3">
+                    <span className="font-medium text-foreground">
+                        Dashboard
+                    </span>
                 </div>
                 <div className="w-[50%] p-3">
-                    <span className="font-medium text-black">Actions</span>
+                    <span className="font-medium text-foreground">Actions</span>
                 </div>
             </div>
 
@@ -111,7 +115,7 @@ export function StrategySection({
                               ))
                             : // Show empty state only in read-only mode or when input is not visible
                               (isReadOnly || !isHovered) && (
-                                  <div className="p-8 text-center text-sm text-gray-500">
+                                  <div className="p-8 text-center text-sm text-muted-foreground">
                                       No strategies yet. Add your first
                                       strategy!
                                   </div>
@@ -122,7 +126,7 @@ export function StrategySection({
                             <div className="shadow-sm">
                                 <div className="flex">
                                     {/* Strategy Name Input - 25% */}
-                                    <div className="w-[25%] border-r border-gray-200 p-4">
+                                    <div className="w-[25%] border-r border-border p-4">
                                         <input
                                             type="text"
                                             value={newStrategyName}
@@ -137,12 +141,12 @@ export function StrategySection({
                                             disabled={
                                                 createStrategyMutation.isPending
                                             }
-                                            className="w-full bg-transparent text-sm font-medium text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-900"
+                                            className="w-full bg-transparent text-sm font-medium text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
                                         />
                                     </div>
 
                                     {/* Placeholder columns */}
-                                    <div className="w-[25%] border-r border-gray-200 p-4" />
+                                    <div className="w-[25%] border-r border-border p-4" />
                                     <div className="w-[50%] p-4" />
                                 </div>
                             </div>

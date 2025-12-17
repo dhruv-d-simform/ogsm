@@ -86,7 +86,7 @@ export function Sidebar() {
             <div className="shrink-0 border-b border-border px-6 py-4">
                 <div className="flex items-center justify-between">
                     <Link to="/">
-                        <h1 className="cursor-pointer text-2xl font-bold text-foreground hover:text-blue-600 transition-colors">
+                        <h1 className="cursor-pointer text-2xl font-bold text-foreground hover:text-primary transition-colors">
                             OGSM
                         </h1>
                     </Link>

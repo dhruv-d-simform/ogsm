@@ -244,12 +244,12 @@ export function StrategyItem({
             <div className="shadow-sm">
                 <div className="flex">
                     {/* Strategy Name Column - 25% */}
-                    <div className="w-[25%] border-r border-gray-200 p-4">
+                    <div className="w-[25%] border-r border-border p-4">
                         <Skeleton className="h-5 w-full" />
                     </div>
 
                     {/* Dashboard KPIs Column - 25% */}
-                    <div className="w-[25%] border-r border-gray-200">
+                    <div className="w-[25%] border-r border-border">
                         <div className="p-4">
                             <Skeleton className="h-5 w-3/4" />
                         </div>
@@ -263,11 +263,11 @@ export function StrategyItem({
                                 <Skeleton className="h-5 w-full" />
                             </div>
                             {/* Tasks Skeleton */}
-                            <div className="bg-gray-50">
-                                <div className="border-t border-gray-200 py-2 pl-8 pr-4">
+                            <div className="bg-muted/50">
+                                <div className="border-t border-border py-2 pl-8 pr-4">
                                     <Skeleton className="h-5 w-3/4" />
                                 </div>
-                                <div className="border-t border-gray-200 py-2 pl-8 pr-4">
+                                <div className="border-t border-border py-2 pl-8 pr-4">
                                     <Skeleton className="h-5 w-3/4" />
                                 </div>
                             </div>
@@ -292,7 +292,7 @@ export function StrategyItem({
         >
             <div className="flex">
                 {/* Strategy Name Column - 25% - Inline Editable */}
-                <div className="relative w-[25%] border-r border-gray-200 p-4 pr-10">
+                <div className="relative w-[25%] border-r border-border p-4 pr-10">
                     {isEditing ? (
                         <input
                             type="text"
@@ -329,7 +329,7 @@ export function StrategyItem({
                         <button
                             onClick={handleDeleteStrategy}
                             disabled={deleteStrategyMutation.isPending}
-                            className="absolute right-2 top-4 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                            className="absolute right-2 top-4 text-muted-foreground hover:text-destructive disabled:opacity-50"
                             title="Delete strategy"
                         >
                             <X className="h-4 w-4" />
@@ -339,7 +339,7 @@ export function StrategyItem({
 
                 {/* Dashboard KPIs Column - 25% */}
                 <div
-                    className="w-[25%] border-r border-gray-200"
+                    className="w-[25%] border-r border-border"
                     onMouseEnter={() => setIsKpiHovered(true)}
                     onMouseLeave={() => setIsKpiHovered(false)}
                 >
@@ -356,7 +356,7 @@ export function StrategyItem({
 
                             {/* Add New KPI Input - Visible on Hover, Hidden in Read-Only */}
                             {isKpiHovered && !isReadOnly && (
-                                <div className="border-t border-gray-200 p-4">
+                                <div className="border-t border-border p-4">
                                     <input
                                         type="text"
                                         value={newKpiName}
@@ -367,7 +367,7 @@ export function StrategyItem({
                                         onBlur={handleCreateKpi}
                                         placeholder="Add a new KPI"
                                         disabled={createKpiMutation.isPending}
-                                        className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                                        className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
                                     />
                                 </div>
                             )}
@@ -385,10 +385,12 @@ export function StrategyItem({
                                     onBlur={handleCreateKpi}
                                     placeholder="Add a new KPI"
                                     disabled={createKpiMutation.isPending}
-                                    className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                                    className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
                                 />
                             ) : (
-                                <p className="text-sm text-gray-400">No KPIs</p>
+                                <p className="text-sm text-muted-foreground">
+                                    No KPIs
+                                </p>
                             )}
                         </div>
                     )}
@@ -407,7 +409,7 @@ export function StrategyItem({
                                     key={actionId}
                                     className={
                                         index > 0
-                                            ? 'border-t border-gray-200'
+                                            ? 'border-t border-border'
                                             : ''
                                     }
                                 >
@@ -420,7 +422,7 @@ export function StrategyItem({
 
                             {/* Add New Action Input - Visible on Hover, Hidden in Read-Only */}
                             {isActionHovered && !isReadOnly && (
-                                <div className="border-t border-gray-200 p-4">
+                                <div className="border-t border-border p-4">
                                     <input
                                         type="text"
                                         value={newActionName}
@@ -433,7 +435,7 @@ export function StrategyItem({
                                         disabled={
                                             createActionMutation.isPending
                                         }
-                                        className="w-full bg-transparent text-sm font-medium text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-900"
+                                        className="w-full bg-transparent text-sm font-medium text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
                                     />
                                 </div>
                             )}
@@ -451,10 +453,10 @@ export function StrategyItem({
                                     onBlur={handleCreateAction}
                                     placeholder="Add a new Action"
                                     disabled={createActionMutation.isPending}
-                                    className="w-full bg-transparent text-sm font-medium text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-900"
+                                    className="w-full bg-transparent text-sm font-medium text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
                                 />
                             ) : (
-                                <p className="text-sm text-gray-400">
+                                <p className="text-sm text-muted-foreground">
                                     No Actions
                                 </p>
                             )}
