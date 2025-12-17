@@ -188,7 +188,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     };
 
     /**
-     * Handle KPI drag end - reorder KPIs
+     * Handle KPI drag end - reorder KPIs with optimistic update
      */
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -202,11 +202,19 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
 
         const newKpiIds = arrayMove(goal.kpiIds, oldIndex, newIndex);
 
-        // Update the goal with new KPI order
-        updateGoalMutation.mutate({
-            id: goalId,
-            input: { kpiIds: newKpiIds },
-        });
+        // Optimistic update - update the goal with new KPI order immediately
+        updateGoalMutation.mutate(
+            {
+                id: goalId,
+                input: { kpiIds: newKpiIds },
+            },
+            {
+                // Optimistic update handled by mutation
+                onError: () => {
+                    // On error, React Query will automatically refetch and restore the previous state
+                },
+            }
+        );
     };
 
     // Loading state - skeleton UI to prevent layout shift

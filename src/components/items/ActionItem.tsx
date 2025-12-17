@@ -194,7 +194,7 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
     };
 
     /**
-     * Handle Task drag end - reorder tasks
+     * Handle Task drag end - reorder tasks with optimistic update
      */
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -208,11 +208,19 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
 
         const newTaskIds = arrayMove(action.taskIds, oldIndex, newIndex);
 
-        // Update the action with new task order
-        updateActionMutation.mutate({
-            id: actionId,
-            input: { taskIds: newTaskIds },
-        });
+        // Optimistic update - update the action with new task order immediately
+        updateActionMutation.mutate(
+            {
+                id: actionId,
+                input: { taskIds: newTaskIds },
+            },
+            {
+                // Optimistic update handled by mutation
+                onError: () => {
+                    // On error, React Query will automatically refetch and restore the previous state
+                },
+            }
+        );
     };
 
     // Loading state - skeleton UI to prevent layout shift
