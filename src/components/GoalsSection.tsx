@@ -61,12 +61,12 @@ export function GoalsSection({
 
     return (
         <div
-            className="flex h-full flex-col rounded-lg border border-gray-300"
+            className="flex h-full flex-col rounded-lg border border-border"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
             {/* Header */}
-            <div className="rounded-t-lg bg-blue-900 p-4 text-white">
+            <div className="rounded-t-lg bg-primary p-4 text-primary-foreground">
                 <SectionHeader
                     initial="G"
                     label="Goals"
@@ -89,14 +89,14 @@ export function GoalsSection({
                               ))
                             : // Show empty state only in read-only mode or when input is not visible
                               (isReadOnly || !isHovered) && (
-                                  <div className="p-4 text-center text-sm text-gray-500">
+                                  <div className="p-4 text-center text-sm text-muted-foreground">
                                       No goals yet. Add your first goal!
                                   </div>
                               )}
 
                         {/* Add New Goal Input - Visible on Hover, Hidden in Read-Only */}
                         {isHovered && !isReadOnly && (
-                            <div className="border-t border-gray-200 p-3">
+                            <div className="border-t border-border p-3">
                                 <input
                                     type="text"
                                     value={newGoalName}
@@ -107,7 +107,7 @@ export function GoalsSection({
                                     onBlur={handleCreateGoal}
                                     placeholder="Add a new Goal"
                                     disabled={createGoalMutation.isPending}
-                                    className="w-full bg-transparent text-sm font-medium text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-900"
+                                    className="w-full bg-transparent text-sm font-medium text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
                                 />
                             </div>
                         )}

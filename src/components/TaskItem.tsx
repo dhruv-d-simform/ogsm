@@ -109,7 +109,7 @@ export function TaskItem({ taskId, onTaskDeleted }: TaskItemProps) {
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
         return (
-            <div className="border-t border-gray-200 py-2 pl-8 pr-4">
+            <div className="border-t border-border py-2 pl-8 pr-4">
                 <Skeleton className="h-5 w-3/4" />
             </div>
         );
@@ -123,7 +123,7 @@ export function TaskItem({ taskId, onTaskDeleted }: TaskItemProps) {
     // Success state - render task with inline editing
     return (
         <div
-            className="relative border-t border-gray-200 py-2 pl-8 pr-12"
+            className="relative border-t border-border py-2 pl-8 pr-12"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -135,14 +135,14 @@ export function TaskItem({ taskId, onTaskDeleted }: TaskItemProps) {
                     onBlur={handleBlur}
                     onKeyDown={handleKeyDown}
                     autoFocus
-                    className="w-full bg-transparent text-sm text-gray-600 outline-none"
+                    className="w-full bg-transparent text-sm text-muted-foreground outline-none"
                 />
             ) : (
                 <p
                     onClick={handleClick}
                     className={`${
                         isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
-                    } text-sm text-gray-600 ${
+                    } text-sm text-muted-foreground ${
                         updateTaskMutation.isPending || pendingValue
                             ? 'opacity-50'
                             : ''
@@ -159,7 +159,7 @@ export function TaskItem({ taskId, onTaskDeleted }: TaskItemProps) {
                 <button
                     onClick={handleDeleteTask}
                     disabled={deleteTaskMutation.isPending}
-                    className="absolute right-2 top-2 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                    className="absolute right-2 top-2 text-muted-foreground hover:text-destructive disabled:opacity-50"
                     title="Delete task"
                 >
                     <X className="h-3 w-3" />

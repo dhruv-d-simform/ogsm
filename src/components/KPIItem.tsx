@@ -109,7 +109,7 @@ export function KPIItem({ kpiId, onKpiDeleted }: KPIItemProps) {
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
         return (
-            <div className="border-t border-gray-200 py-2 pl-6 pr-3">
+            <div className="border-t border-border py-2 pl-6 pr-3">
                 <Skeleton className="h-5 w-3/4" />
             </div>
         );
@@ -123,7 +123,7 @@ export function KPIItem({ kpiId, onKpiDeleted }: KPIItemProps) {
     // Success state - render KPI with inline editing
     return (
         <div
-            className="relative border-t border-gray-200 py-2 pl-6 pr-10"
+            className="relative border-t border-border py-2 pl-6 pr-10"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -135,14 +135,14 @@ export function KPIItem({ kpiId, onKpiDeleted }: KPIItemProps) {
                     onBlur={handleBlur}
                     onKeyDown={handleKeyDown}
                     autoFocus
-                    className="w-full bg-transparent text-sm text-gray-600 outline-none"
+                    className="w-full bg-transparent text-sm text-muted-foreground outline-none"
                 />
             ) : (
                 <p
                     onClick={handleClick}
                     className={`${
                         isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
-                    } text-sm text-gray-600 ${
+                    } text-sm text-muted-foreground ${
                         updateKpiMutation.isPending || pendingValue
                             ? 'opacity-50'
                             : ''
@@ -159,7 +159,7 @@ export function KPIItem({ kpiId, onKpiDeleted }: KPIItemProps) {
                 <button
                     onClick={handleDeleteKpi}
                     disabled={deleteKpiMutation.isPending}
-                    className="absolute right-2 top-2 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                    className="absolute right-2 top-2 text-muted-foreground hover:text-destructive disabled:opacity-50"
                     title="Delete KPI"
                 >
                     <X className="h-3 w-3" />

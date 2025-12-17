@@ -166,18 +166,18 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
         return (
-            <div className="border-b border-gray-200 last:border-b-0">
+            <div className="border-b border-border last:border-b-0">
                 <div className="p-3">
                     <Skeleton className="h-5 w-full" />
                 </div>
-                <div className="bg-gray-50">
-                    <div className="border-t border-gray-200 py-2 pl-6 pr-3">
+                <div className="bg-muted/50">
+                    <div className="border-t border-border py-2 pl-6 pr-3">
                         <Skeleton className="h-5 w-3/4" />
                     </div>
-                    <div className="border-t border-gray-200 py-2 pl-6 pr-3">
+                    <div className="border-t border-border py-2 pl-6 pr-3">
                         <Skeleton className="h-5 w-3/4" />
                     </div>
-                    <div className="border-t border-gray-200 py-2 pl-6 pr-3">
+                    <div className="border-t border-border py-2 pl-6 pr-3">
                         <Skeleton className="h-5 w-3/4" />
                     </div>
                 </div>
@@ -193,7 +193,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     // Success state - render goal with KPIs
     return (
         <div
-            className="relative border-b border-gray-200 last:border-b-0"
+            className="relative border-b border-border last:border-b-0"
             onMouseEnter={() => {
                 setIsKpiHovered(true);
                 setIsHovered(true);
@@ -240,7 +240,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                 <button
                     onClick={handleDeleteGoal}
                     disabled={deleteGoalMutation.isPending}
-                    className="absolute right-2 top-3 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                    className="absolute right-2 top-3 text-muted-foreground hover:text-destructive disabled:opacity-50"
                     title="Delete goal"
                 >
                     <X className="h-4 w-4" />
@@ -249,7 +249,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
 
             {/* KPIs List */}
             {goal.kpiIds.length > 0 && (
-                <div className="bg-gray-50">
+                <div className="bg-muted/50">
                     {goal.kpiIds.map((kpiId) => (
                         <KPIItem
                             key={kpiId}
@@ -260,7 +260,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
 
                     {/* Add New KPI Input - Visible on Hover, Hidden in Read-Only */}
                     {isKpiHovered && !isReadOnly && (
-                        <div className="border-t border-gray-200 py-2 pl-6 pr-3">
+                        <div className="border-t border-border py-2 pl-6 pr-3">
                             <input
                                 type="text"
                                 value={newKpiName}
@@ -269,7 +269,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                                 onBlur={handleCreateKpi}
                                 placeholder="Add a new KPI"
                                 disabled={createKpiMutation.isPending}
-                                className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                                className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
                             />
                         </div>
                     )}
@@ -278,7 +278,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
 
             {/* Show KPI section even when empty, on hover, but not in Read-Only */}
             {goal.kpiIds.length === 0 && isKpiHovered && !isReadOnly && (
-                <div className="bg-gray-50">
+                <div className="bg-muted/50">
                     <div className="py-2 pl-6 pr-3">
                         <input
                             type="text"
@@ -288,7 +288,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                             onBlur={handleCreateKpi}
                             placeholder="Add a new KPI"
                             disabled={createKpiMutation.isPending}
-                            className="w-full bg-transparent text-sm text-gray-400 outline-none placeholder:text-gray-400 focus:text-gray-600"
+                            className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
                         />
                     </div>
                 </div>

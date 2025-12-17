@@ -33,7 +33,7 @@ export function SectionHeader({
             <HoverCard>
                 <HoverCardTrigger asChild>
                     <button
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white text-blue-900 transition-all hover:scale-110 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-900"
+                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-background text-primary transition-all hover:scale-110 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-primary"
                         aria-label={`Information about ${label}`}
                     >
                         <span className="text-base font-bold">{initial}</span>
@@ -46,8 +46,12 @@ export function SectionHeader({
                     sideOffset={8}
                 >
                     <div className="space-y-2">
-                        <h4 className="font-semibold text-blue-900">{label}</h4>
-                        <p className="text-sm text-gray-600">{description}</p>
+                        <h4 className="font-semibold text-foreground">
+                            {label}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                            {description}
+                        </p>
                     </div>
                 </HoverCardContent>
             </HoverCard>
