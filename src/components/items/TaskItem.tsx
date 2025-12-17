@@ -160,7 +160,7 @@ export function TaskItem({ taskId, onTaskDeleted }: TaskItemProps) {
                     onClick={handleDeleteTask}
                     disabled={deleteTaskMutation.isPending}
                     className="absolute right-2 top-2 text-muted-foreground hover:text-destructive disabled:opacity-50"
-                    aria-label="Delete task"
+                    aria-label={`Delete task: ${task.name}`}
                 >
                     <X className="h-3 w-3" aria-hidden="true" />
                 </button>
