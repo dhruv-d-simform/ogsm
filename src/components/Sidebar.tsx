@@ -189,7 +189,7 @@ export function Sidebar() {
                                         to={`/ogsm/${ogsm.id}`}
                                         className={`block rounded-lg px-4 py-3 pr-10 transition-colors ${
                                             isSelected
-                                                ? 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100'
+                                                ? 'bg-primary/10 text-primary border border-primary/20'
                                                 : 'text-foreground hover:bg-accent hover:text-accent-foreground'
                                         }`}
                                     >
@@ -199,7 +199,7 @@ export function Sidebar() {
                                         <div
                                             className={`mt-1 line-clamp-2 text-sm ${
                                                 isSelected
-                                                    ? 'text-blue-700 dark:text-blue-200'
+                                                    ? 'text-primary/80'
                                                     : 'text-muted-foreground'
                                             }`}
                                         >
