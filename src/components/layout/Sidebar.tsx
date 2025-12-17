@@ -147,9 +147,15 @@ export function Sidebar() {
 
             {/* Scrollable OGSM List */}
             <ScrollArea className="flex-1 overflow-hidden">
-                <nav aria-label="OGSM plans navigation" className="space-y-1 p-2">
+                <nav
+                    aria-label="OGSM plans navigation"
+                    className="space-y-1 p-2"
+                >
                     {isLoading ? (
-                        <div className="flex flex-col items-center justify-center px-4 py-12 text-center" role="status" aria-live="polite">
+                        <div
+                            className="flex flex-col items-center justify-center px-4 py-12 text-center"
+                            role="status"
+                        >
                             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                             <p className="mt-3 text-sm text-muted-foreground">
                                 Loading OGSM plans...

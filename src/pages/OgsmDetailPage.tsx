@@ -59,7 +59,11 @@ export function OgsmDetailPage() {
     // Loading state
     if (isLoading) {
         return (
-            <div className="flex h-full flex-col items-center justify-center bg-muted/20" role="status" aria-live="polite" aria-busy="true">
+            <div
+                className="flex h-full flex-col items-center justify-center bg-muted/20"
+                role="status"
+                aria-busy="true"
+            >
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 <p className="mt-4 text-lg text-muted-foreground">
                     Loading OGSM...
@@ -75,9 +79,15 @@ export function OgsmDetailPage() {
         error.message.includes('not found')
     ) {
         return (
-            <div className="flex h-full flex-col items-center justify-center bg-muted/20 px-8" role="alert" aria-live="assertive">
+            <div
+                className="flex h-full flex-col items-center justify-center bg-muted/20 px-8"
+                role="alert"
+            >
                 <div className="flex max-w-md flex-col items-center text-center">
-                    <FileQuestion className="h-20 w-20 text-muted-foreground" aria-hidden="true" />
+                    <FileQuestion
+                        className="h-20 w-20 text-muted-foreground"
+                        aria-hidden="true"
+                    />
                     <h2 className="mt-6 text-2xl font-bold text-foreground">
                         OGSM Not Found
                     </h2>
@@ -99,9 +109,15 @@ export function OgsmDetailPage() {
     // Generic error state
     if (isError) {
         return (
-            <div className="flex h-full flex-col items-center justify-center bg-muted/20 px-8" role="alert" aria-live="assertive">
+            <div
+                className="flex h-full flex-col items-center justify-center bg-muted/20 px-8"
+                role="alert"
+            >
                 <div className="flex max-w-md flex-col items-center text-center">
-                    <AlertCircle className="h-20 w-20 text-destructive" aria-hidden="true" />
+                    <AlertCircle
+                        className="h-20 w-20 text-destructive"
+                        aria-hidden="true"
+                    />
                     <h2 className="mt-6 text-2xl font-bold text-foreground">
                         Error Loading OGSM
                     </h2>
