@@ -241,7 +241,7 @@ export function StrategyItem({
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
         return (
-            <div className="shadow-sm">
+            <div className="shadow-sm dark:shadow-[0_1px_3px_0_rgba(255,255,255,0.1)]">
                 <div className="flex">
                     {/* Strategy Name Column - 25% */}
                     <div className="w-[25%] border-r border-border p-4">
@@ -286,7 +286,7 @@ export function StrategyItem({
     // Success state - render strategy with dashboard KPIs and actions
     return (
         <div
-            className="relative shadow-sm"
+            className="relative shadow-sm dark:shadow-[0_1px_3px_0_rgba(255,255,255,0.1)]"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
