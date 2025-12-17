@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Search, Plus, Trash2, Loader2 } from 'lucide-react';
 import { useOGSMs, useDeleteOGSM } from '@/hooks/useOgsm';
-import { CreateOgsmDialog } from '@/components/CreateOgsmDialog';
+import { CreateOgsmDialog } from '@/components/ogsm/CreateOgsmDialog';
 
 /**
  * Sidebar component with search, OGSM list, and create button

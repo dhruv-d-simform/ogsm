@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router';
-import { Sidebar } from '@/components/Sidebar';
+import { Sidebar } from '@/components/layout/Sidebar';
 
 /**
  * Main application layout with sidebar and content area

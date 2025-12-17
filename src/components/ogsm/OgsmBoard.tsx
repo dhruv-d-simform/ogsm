@@ -1,7 +1,7 @@
 import type { OGSM } from '@/types';
-import { ObjectiveSection } from '@/components/ObjectiveSection';
-import { GoalsSection } from '@/components/GoalsSection';
-import { StrategySection } from '@/components/StrategySection';
+import { ObjectiveSection } from '@/components/sections/ObjectiveSection';
+import { GoalsSection } from '@/components/sections/GoalsSection';
+import { StrategySection } from '@/components/sections/StrategySection';
 import { useUpdateOGSM } from '@/hooks/useOgsm';
 
 interface OgsmBoardProps {

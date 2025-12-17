@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { useAction, useUpdateAction, useDeleteAction } from '@/hooks/useAction';
 import { useCreateTask } from '@/hooks/useTask';
-import { TaskItem } from '@/components/TaskItem';
+import { TaskItem } from '@/components/items/TaskItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { X } from 'lucide-react';
 

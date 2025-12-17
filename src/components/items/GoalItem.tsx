@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGoal, useUpdateGoal, useDeleteGoal } from '@/hooks/useGoal';
 import { useCreateKPI } from '@/hooks/useKpi';
-import { KPIItem } from '@/components/KPIItem';
+import { KPIItem } from '@/components/items/KPIItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { X } from 'lucide-react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';

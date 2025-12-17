@@ -7,8 +7,8 @@ import {
 } from '@/hooks/useStrategy';
 import { useCreateKPI } from '@/hooks/useKpi';
 import { useCreateAction } from '@/hooks/useAction';
-import { DashboardKpiItem } from '@/components/DashboardKpiItem';
-import { ActionItem } from '@/components/ActionItem';
+import { DashboardKpiItem } from '@/components/items/DashboardKpiItem';
+import { ActionItem } from '@/components/items/ActionItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { X } from 'lucide-react';
 

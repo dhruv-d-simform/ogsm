@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
-import { SectionHeader } from '@/components/SectionHeader';
+import { SectionHeader } from '@/components/sections/SectionHeader';
 
 interface ObjectiveSectionProps {
     objective: string;
