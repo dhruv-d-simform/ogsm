@@ -123,9 +123,17 @@ export function CreateOgsmDialog({ children }: CreateOgsmDialogProps) {
                                 placeholder="e.g., Q1 2025 Company Strategy"
                                 {...register('name')}
                                 disabled={createOgsmMutation.isPending}
+                                aria-invalid={errors.name ? 'true' : 'false'}
+                                aria-describedby={
+                                    errors.name ? 'name-error' : undefined
+                                }
                             />
                             {errors.name && (
-                                <p className="text-sm text-destructive">
+                                <p
+                                    id="name-error"
+                                    className="text-sm text-destructive"
+                                    role="alert"
+                                >
                                     {errors.name.message}
                                 </p>
                             )}
@@ -142,9 +150,21 @@ export function CreateOgsmDialog({ children }: CreateOgsmDialogProps) {
                                 placeholder="e.g., Increase market share by 25% while maintaining profitability"
                                 {...register('objective')}
                                 disabled={createOgsmMutation.isPending}
+                                aria-invalid={
+                                    errors.objective ? 'true' : 'false'
+                                }
+                                aria-describedby={
+                                    errors.objective
+                                        ? 'objective-error'
+                                        : undefined
+                                }
                             />
                             {errors.objective && (
-                                <p className="text-sm text-destructive">
+                                <p
+                                    id="objective-error"
+                                    className="text-sm text-destructive"
+                                    role="alert"
+                                >
                                     {errors.objective.message}
                                 </p>
                             )}

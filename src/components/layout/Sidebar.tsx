@@ -86,9 +86,9 @@ export function Sidebar() {
             <div className="shrink-0 border-b border-border px-6 py-4">
                 <div className="flex items-center justify-between">
                     <Link to="/">
-                        <h1 className="cursor-pointer text-2xl font-bold text-foreground hover:text-primary transition-colors">
+                        <div className="cursor-pointer text-2xl font-bold text-foreground hover:text-primary transition-colors">
                             OGSM
-                        </h1>
+                        </div>
                     </Link>
 
                     <AlertDialog>
@@ -97,7 +97,7 @@ export function Sidebar() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                title="Clear all data"
+                                aria-label="Clear all data and reset to mock data"
                             >
                                 <Trash2 className="h-4 w-4" />
                             </Button>
@@ -140,15 +140,22 @@ export function Sidebar() {
                             setSearchQuery(e.target.value)
                         }
                         className="pl-9"
+                        aria-label="Search OGSM plans"
                     />
                 </div>
             </div>
 
             {/* Scrollable OGSM List */}
             <ScrollArea className="flex-1 overflow-hidden">
-                <div className="space-y-1 p-2">
+                <nav
+                    aria-label="OGSM plans navigation"
+                    className="space-y-1 p-2"
+                >
                     {isLoading ? (
-                        <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+                        <div
+                            className="flex flex-col items-center justify-center px-4 py-12 text-center"
+                            role="status"
+                        >
                             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                             <p className="mt-3 text-sm text-muted-foreground">
                                 Loading OGSM plans...
@@ -218,7 +225,7 @@ export function Sidebar() {
                                                 e.stopPropagation();
                                                 setOgsmToDelete(ogsm.id);
                                             }}
-                                            title="Delete OGSM"
+                                            aria-label={`Delete ${ogsm.name}`}
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
@@ -227,7 +234,7 @@ export function Sidebar() {
                             );
                         })
                     )}
-                </div>
+                </nav>
             </ScrollArea>
 
             {/* Fixed Bottom - Create Button */}

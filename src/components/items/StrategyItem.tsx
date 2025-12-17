@@ -330,9 +330,9 @@ export function StrategyItem({
                             onClick={handleDeleteStrategy}
                             disabled={deleteStrategyMutation.isPending}
                             className="absolute right-2 top-4 text-muted-foreground hover:text-destructive disabled:opacity-50"
-                            title="Delete strategy"
+                            aria-label={`Delete strategy: ${strategy.name}`}
                         >
-                            <X className="h-4 w-4" />
+                            <X className="h-4 w-4" aria-hidden="true" />
                         </button>
                     )}
                 </div>

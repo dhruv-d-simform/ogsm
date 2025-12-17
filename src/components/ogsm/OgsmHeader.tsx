@@ -110,7 +110,7 @@ export function OgsmHeader({ name, onNameChange }: OgsmHeaderProps) {
                         variant="ghost"
                         size="icon"
                         onClick={toggleTheme}
-                        title={
+                        aria-label={
                             theme === 'light'
                                 ? 'Switch to dark mode'
                                 : 'Switch to light mode'
@@ -135,6 +135,7 @@ export function OgsmHeader({ name, onNameChange }: OgsmHeaderProps) {
                             id="read-only-mode"
                             checked={isReadOnly}
                             onCheckedChange={setIsReadOnly}
+                            aria-label="Toggle read-only mode"
                         />
                     </div>
                 </div>
