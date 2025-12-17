@@ -144,7 +144,7 @@ export function KPIItem({ kpiId, onKpiDeleted }: KPIItemProps) {
         <div
             ref={setNodeRef}
             style={style}
-            className="relative border-t border-border py-2 pl-6 pr-10"
+            className="relative border-t border-border py-2 pl-8 pr-10"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -153,10 +153,10 @@ export function KPIItem({ kpiId, onKpiDeleted }: KPIItemProps) {
                 <button
                     {...attributes}
                     {...listeners}
-                    className="absolute left-2 top-2 cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
                     aria-label={`Drag to reorder KPI: ${kpi.name}`}
                 >
-                    <GripVertical className="h-3 w-3" aria-hidden="true" />
+                    <GripVertical className="h-4 w-4" aria-hidden="true" />
                 </button>
             )}
 
