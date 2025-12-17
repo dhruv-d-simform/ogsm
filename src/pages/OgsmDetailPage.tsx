@@ -1,8 +1,8 @@
 import { useParams } from 'react-router';
 import { useEffect } from 'react';
 import { Loader2, AlertCircle, FileQuestion } from 'lucide-react';
-import { OgsmHeader } from '@/components/OgsmHeader';
-import { OgsmBoard } from '@/components/OgsmBoard';
+import { OgsmHeader } from '@/components/ogsm/OgsmHeader';
+import { OgsmBoard } from '@/components/ogsm/OgsmBoard';
 import { useOGSM, useUpdateOGSM } from '@/hooks/useOgsm';
 import { Button } from '@/components/ui/button';
 import { ReadOnlyProvider } from '@/contexts/ReadOnlyContext';

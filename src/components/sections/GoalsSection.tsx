@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { GoalItem } from '@/components/GoalItem';
+import { GoalItem } from '@/components/items/GoalItem';
 import { useCreateGoal } from '@/hooks/useGoal';
-import { SectionHeader } from '@/components/SectionHeader';
+import { SectionHeader } from '@/components/sections/SectionHeader';
 
 interface GoalsSectionProps {
     goalIds: string[];

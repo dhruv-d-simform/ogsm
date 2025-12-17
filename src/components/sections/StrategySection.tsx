@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { StrategyItem } from '@/components/StrategyItem';
+import { StrategyItem } from '@/components/items/StrategyItem';
 import { useCreateStrategy } from '@/hooks/useStrategy';
-import { SectionHeader } from '@/components/SectionHeader';
+import { SectionHeader } from '@/components/sections/SectionHeader';
 
 interface StrategySectionProps {
     strategyIds: string[];
