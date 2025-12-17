@@ -266,8 +266,8 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                         />
                     ))}
 
-                    {/* Add New Task Input - Visible on Hover, Hidden in Read-Only */}
-                    {isTaskHovered && !isReadOnly && (
+                    {/* Add New Task Input - Visible on Hover or when input has text, Hidden in Read-Only */}
+                    {(isTaskHovered || newTaskName) && !isReadOnly && (
                         <div className="border-t border-border py-2 pl-8 pr-4">
                             <input
                                 type="text"
@@ -284,23 +284,25 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                 </div>
             )}
 
-            {/* Show Task section even when empty, on hover, Hidden in Read-Only */}
-            {action.taskIds.length === 0 && isTaskHovered && !isReadOnly && (
-                <div className="bg-muted/50">
-                    <div className="py-2 pl-8 pr-4">
-                        <input
-                            type="text"
-                            value={newTaskName}
-                            onChange={(e) => setNewTaskName(e.target.value)}
-                            onKeyDown={handleTaskKeyDown}
-                            onBlur={handleCreateTask}
-                            placeholder="Add a new Task"
-                            disabled={createTaskMutation.isPending}
-                            className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
-                        />
+            {/* Show Task section even when empty, on hover or when input has text, Hidden in Read-Only */}
+            {action.taskIds.length === 0 &&
+                (isTaskHovered || newTaskName) &&
+                !isReadOnly && (
+                    <div className="bg-muted/50">
+                        <div className="py-2 pl-8 pr-4">
+                            <input
+                                type="text"
+                                value={newTaskName}
+                                onChange={(e) => setNewTaskName(e.target.value)}
+                                onKeyDown={handleTaskKeyDown}
+                                onBlur={handleCreateTask}
+                                placeholder="Add a new Task"
+                                disabled={createTaskMutation.isPending}
+                                className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
+                            />
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
         </div>
     );
 }

@@ -114,15 +114,16 @@ export function StrategySection({
                                   />
                               ))
                             : // Show empty state only in read-only mode or when input is not visible
-                              (isReadOnly || !isHovered) && (
+                              (isReadOnly ||
+                                  (!isHovered && !newStrategyName)) && (
                                   <div className="p-8 text-center text-sm text-muted-foreground">
                                       No strategies yet. Add your first
                                       strategy!
                                   </div>
                               )}
 
-                        {/* Add New Strategy Input - Visible on Hover, Hidden in Read-Only */}
-                        {isHovered && !isReadOnly && (
+                        {/* Add New Strategy Input - Visible on Hover or when input has text, Hidden in Read-Only */}
+                        {(isHovered || newStrategyName) && !isReadOnly && (
                             <div className="shadow-sm">
                                 <div className="flex">
                                     {/* Strategy Name Input - 25% */}
