@@ -166,10 +166,10 @@ export function DashboardKpiItem({
                 <button
                     onClick={handleDeleteKpi}
                     disabled={deleteKpiMutation.isPending}
-                    className="absolute right-2 top-4 text-muted-foreground hover:text-destructive disabled:opacity-50"
-                    title="Delete KPI"
+                    className="absolute right-2 top-2 text-muted-foreground hover:text-destructive disabled:opacity-50"
+                    aria-label="Delete dashboard KPI"
                 >
-                    <X className="h-3 w-3" />
+                    <X className="h-3 w-3" aria-hidden="true" />
                 </button>
             )}
         </div>

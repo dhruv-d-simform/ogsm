@@ -240,10 +240,10 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                 <button
                     onClick={handleDeleteGoal}
                     disabled={deleteGoalMutation.isPending}
-                    className="absolute right-2 top-3 text-muted-foreground hover:text-destructive disabled:opacity-50"
-                    title="Delete goal"
+                    className="absolute right-2 top-2 text-muted-foreground hover:text-destructive disabled:opacity-50"
+                    aria-label={`Delete goal: ${goal.name}`}
                 >
-                    <X className="h-4 w-4" />
+                    <X className="h-3 w-3" aria-hidden="true" />
                 </button>
             )}
 
