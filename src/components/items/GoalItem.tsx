@@ -200,6 +200,10 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
         const oldIndex = goal.kpiIds.indexOf(active.id as string);
         const newIndex = goal.kpiIds.indexOf(over.id as string);
 
+        if (oldIndex === -1 || newIndex === -1) {
+            return;
+        }
+
         const newKpiIds = arrayMove(goal.kpiIds, oldIndex, newIndex);
 
         // Optimistic update - update the goal with new KPI order immediately

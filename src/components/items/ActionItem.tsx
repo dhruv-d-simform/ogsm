@@ -206,6 +206,10 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
         const oldIndex = action.taskIds.indexOf(active.id as string);
         const newIndex = action.taskIds.indexOf(over.id as string);
 
+        if (oldIndex === -1 || newIndex === -1) {
+            return;
+        }
+
         const newTaskIds = arrayMove(action.taskIds, oldIndex, newIndex);
 
         // Optimistic update - update the action with new task order immediately
