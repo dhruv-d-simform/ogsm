@@ -17,10 +17,14 @@ const THEME_STORAGE_KEY = 'ogsm-theme';
  */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [theme, setTheme] = useState<Theme>(() => {
-        // Check localStorage for saved theme preference
-        const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-        if (savedTheme === 'light' || savedTheme === 'dark') {
-            return savedTheme;
+        try {
+            // Check localStorage for saved theme preference
+            const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+            if (savedTheme === 'light' || savedTheme === 'dark') {
+                return savedTheme;
+            }
+        } catch (error) {
+            console.warn('Failed to read theme from localStorage:', error);
         }
         // Check system preference
         if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -40,7 +44,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             root.classList.remove('dark');
         }
         // Save to localStorage
-        localStorage.setItem(THEME_STORAGE_KEY, theme);
+        try {
+            localStorage.setItem(THEME_STORAGE_KEY, theme);
+        } catch (error) {
+            console.warn('Failed to save theme to localStorage:', error);
+        }
     }, [theme]);
 
     /**
