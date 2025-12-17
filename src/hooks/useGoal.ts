@@ -3,9 +3,10 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { CreateGoalInput, UpdateGoalInput } from '@/types';
+import type { CreateGoalInput, UpdateGoalInput, Goal } from '@/types';
 import * as goalApi from '@/api/goals';
 import { goalKeys } from '@/lib/queryKeys';
+import { createOptimisticUpdateOptions } from '@/utils/optimisticUpdate';
 
 /**
  * Hook to fetch all goals
@@ -63,13 +64,11 @@ export const useUpdateGoal = () => {
     return useMutation({
         mutationFn: ({ id, input }: { id: string; input: UpdateGoalInput }) =>
             goalApi.updateGoal(id, input),
-        onSuccess: (_data, variables) => {
-            // Invalidate and refetch both list and detail
-            queryClient.invalidateQueries({ queryKey: goalKeys.lists() });
-            queryClient.invalidateQueries({
-                queryKey: goalKeys.detail(variables.id),
-            });
-        },
+        ...createOptimisticUpdateOptions<Goal, UpdateGoalInput>({
+            queryClient,
+            getDetailKey: goalKeys.detail,
+            getListKey: goalKeys.lists,
+        }),
     });
 };
 

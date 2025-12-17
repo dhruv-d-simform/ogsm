@@ -3,9 +3,10 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { CreateActionInput, UpdateActionInput } from '@/types';
+import type { CreateActionInput, UpdateActionInput, Action } from '@/types';
 import * as actionApi from '@/api/actions';
 import { actionKeys } from '@/lib/queryKeys';
+import { createOptimisticUpdateOptions } from '@/utils/optimisticUpdate';
 
 /**
  * Hook to fetch all actions
@@ -63,13 +64,11 @@ export const useUpdateAction = () => {
     return useMutation({
         mutationFn: ({ id, input }: { id: string; input: UpdateActionInput }) =>
             actionApi.updateAction(id, input),
-        onSuccess: (_data, variables) => {
-            // Invalidate and refetch both list and detail
-            queryClient.invalidateQueries({ queryKey: actionKeys.lists() });
-            queryClient.invalidateQueries({
-                queryKey: actionKeys.detail(variables.id),
-            });
-        },
+        ...createOptimisticUpdateOptions<Action, UpdateActionInput>({
+            queryClient,
+            getDetailKey: actionKeys.detail,
+            getListKey: actionKeys.lists,
+        }),
     });
 };
 

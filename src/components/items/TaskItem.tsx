@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { useTask, useUpdateTask, useDeleteTask } from '@/hooks/useTask';
 import { Skeleton } from '@/components/ui/skeleton';
-import { X } from 'lucide-react';
+import { X, GripVertical } from 'lucide-react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface TaskItemProps {
     taskId: string;
@@ -13,12 +15,29 @@ interface TaskItemProps {
  * TaskItem Component
  * Fetches and displays a single task by its ID
  * Supports inline editing and deletion
+ * Supports drag-and-drop reordering
  */
 export function TaskItem({ taskId, onTaskDeleted }: TaskItemProps) {
     const { data: task, isLoading, isError, isFetching } = useTask(taskId);
     const updateTaskMutation = useUpdateTask();
     const deleteTaskMutation = useDeleteTask();
     const { isReadOnly } = useReadOnly();
+
+    // Sortable hook for drag-and-drop
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: taskId, disabled: isReadOnly });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
@@ -123,10 +142,24 @@ export function TaskItem({ taskId, onTaskDeleted }: TaskItemProps) {
     // Success state - render task with inline editing
     return (
         <div
-            className="relative border-t border-border py-2 pl-8 pr-12"
+            ref={setNodeRef}
+            style={style}
+            className="relative border-t border-border py-2 pl-10 pr-12"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
+            {/* Drag Handler - Visible on Hover, Hidden in Read-Only */}
+            {isHovered && !isReadOnly && !isEditing && (
+                <button
+                    {...attributes}
+                    {...listeners}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+                    aria-label={`Drag to reorder task: ${task.name}`}
+                >
+                    <GripVertical className="h-4 w-4" aria-hidden="true" />
+                </button>
+            )}
+
             {isEditing ? (
                 <input
                     type="text"
