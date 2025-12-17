@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useKPI, useUpdateKPI, useDeleteKPI } from '@/hooks/useKpi';
 import { Skeleton } from '@/components/ui/skeleton';
-import { X } from 'lucide-react';
+import { X, GripVertical } from 'lucide-react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface KPIItemProps {
     kpiId: string;
@@ -13,12 +15,29 @@ interface KPIItemProps {
  * KPIItem Component
  * Fetches and displays a single KPI by its ID
  * Supports inline editing and deletion
+ * Supports drag-and-drop reordering
  */
 export function KPIItem({ kpiId, onKpiDeleted }: KPIItemProps) {
     const { data: kpi, isLoading, isError, isFetching } = useKPI(kpiId);
     const updateKpiMutation = useUpdateKPI();
     const deleteKpiMutation = useDeleteKPI();
     const { isReadOnly } = useReadOnly();
+
+    // Sortable hook for drag-and-drop
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: kpiId, disabled: isReadOnly });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
@@ -123,10 +142,24 @@ export function KPIItem({ kpiId, onKpiDeleted }: KPIItemProps) {
     // Success state - render KPI with inline editing
     return (
         <div
+            ref={setNodeRef}
+            style={style}
             className="relative border-t border-border py-2 pl-6 pr-10"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
+            {/* Drag Handler - Visible on Hover, Hidden in Read-Only */}
+            {isHovered && !isReadOnly && !isEditing && (
+                <button
+                    {...attributes}
+                    {...listeners}
+                    className="absolute left-2 top-2 cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+                    aria-label={`Drag to reorder KPI: ${kpi.name}`}
+                >
+                    <GripVertical className="h-3 w-3" aria-hidden="true" />
+                </button>
+            )}
+
             {isEditing ? (
                 <input
                     type="text"

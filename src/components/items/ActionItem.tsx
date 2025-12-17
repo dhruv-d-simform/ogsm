@@ -5,6 +5,21 @@ import { useCreateTask } from '@/hooks/useTask';
 import { TaskItem } from '@/components/items/TaskItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { X } from 'lucide-react';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 
 interface ActionItemProps {
     actionId: string;
@@ -15,6 +30,7 @@ interface ActionItemProps {
  * ActionItem Component
  * Fetches and displays a single action with its tasks
  * Supports inline editing and deletion
+ * Supports drag-and-drop reordering of tasks
  */
 export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
     const { isReadOnly } = useReadOnly();
@@ -34,6 +50,14 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
     const [isHovered, setIsHovered] = useState(false);
     const [isTaskHovered, setIsTaskHovered] = useState(false);
     const [newTaskName, setNewTaskName] = useState('');
+
+    // Sensors for drag and drop
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     /**
      * Sync local state when action data changes and no mutation is pending
@@ -169,6 +193,28 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
         });
     };
 
+    /**
+     * Handle Task drag end - reorder tasks
+     */
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (!over || active.id === over.id || !action) {
+            return;
+        }
+
+        const oldIndex = action.taskIds.indexOf(active.id as string);
+        const newIndex = action.taskIds.indexOf(over.id as string);
+
+        const newTaskIds = arrayMove(action.taskIds, oldIndex, newIndex);
+
+        // Update the action with new task order
+        updateActionMutation.mutate({
+            id: actionId,
+            input: { taskIds: newTaskIds },
+        });
+    };
+
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
         return (
@@ -258,13 +304,24 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
             {/* Tasks */}
             {action.taskIds.length > 0 && (
                 <div className="bg-muted/50">
-                    {action.taskIds.map((taskId) => (
-                        <TaskItem
-                            key={taskId}
-                            taskId={taskId}
-                            onTaskDeleted={handleTaskDeleted}
-                        />
-                    ))}
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <SortableContext
+                            items={action.taskIds}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {action.taskIds.map((taskId) => (
+                                <TaskItem
+                                    key={taskId}
+                                    taskId={taskId}
+                                    onTaskDeleted={handleTaskDeleted}
+                                />
+                            ))}
+                        </SortableContext>
+                    </DndContext>
 
                     {/* Add New Task Input - Visible on Hover or when input has text, Hidden in Read-Only */}
                     {(isTaskHovered || newTaskName) && !isReadOnly && (

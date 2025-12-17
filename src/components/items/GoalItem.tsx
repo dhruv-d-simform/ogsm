@@ -5,6 +5,21 @@ import { KPIItem } from '@/components/items/KPIItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { X } from 'lucide-react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 
 interface GoalItemProps {
     goalId: string;
@@ -15,6 +30,7 @@ interface GoalItemProps {
  * GoalItem Component
  * Fetches and displays a single goal with its associated KPIs
  * Supports inline editing and deletion
+ * Supports drag-and-drop reordering of KPIs
  */
 export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     const { data: goal, isLoading, isError, isFetching } = useGoal(goalId);
@@ -29,6 +45,14 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     const [isHovered, setIsHovered] = useState(false);
     const [isKpiHovered, setIsKpiHovered] = useState(false);
     const [newKpiName, setNewKpiName] = useState('');
+
+    // Sensors for drag and drop
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     /**
      * Sync local state when goal data changes and no mutation is pending
@@ -163,6 +187,28 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
         });
     };
 
+    /**
+     * Handle KPI drag end - reorder KPIs
+     */
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (!over || active.id === over.id || !goal) {
+            return;
+        }
+
+        const oldIndex = goal.kpiIds.indexOf(active.id as string);
+        const newIndex = goal.kpiIds.indexOf(over.id as string);
+
+        const newKpiIds = arrayMove(goal.kpiIds, oldIndex, newIndex);
+
+        // Update the goal with new KPI order
+        updateGoalMutation.mutate({
+            id: goalId,
+            input: { kpiIds: newKpiIds },
+        });
+    };
+
     // Loading state - skeleton UI to prevent layout shift
     if (isLoading) {
         return (
@@ -250,13 +296,24 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
             {/* KPIs List */}
             {goal.kpiIds.length > 0 && (
                 <div className="bg-muted/50">
-                    {goal.kpiIds.map((kpiId) => (
-                        <KPIItem
-                            key={kpiId}
-                            kpiId={kpiId}
-                            onKpiDeleted={handleKpiDeleted}
-                        />
-                    ))}
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <SortableContext
+                            items={goal.kpiIds}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {goal.kpiIds.map((kpiId) => (
+                                <KPIItem
+                                    key={kpiId}
+                                    kpiId={kpiId}
+                                    onKpiDeleted={handleKpiDeleted}
+                                />
+                            ))}
+                        </SortableContext>
+                    </DndContext>
 
                     {/* Add New KPI Input - Visible on Hover or when input has text, Hidden in Read-Only */}
                     {(isKpiHovered || newKpiName) && !isReadOnly && (
