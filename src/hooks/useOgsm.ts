@@ -36,9 +36,9 @@ export const useCreateOGSM = () => {
 
     return useMutation({
         mutationFn: (input: CreateOGSMInput) => ogsmApi.createOGSM(input),
-        onSuccess: () => {
-            // Invalidate and refetch OGSM list
-            queryClient.invalidateQueries({ queryKey: ogsmKeys.lists() });
+        onSuccess: async () => {
+            // Invalidate and refetch OGSM list - await to ensure refetch completes
+            await queryClient.invalidateQueries({ queryKey: ogsmKeys.lists() });
         },
     });
 };
