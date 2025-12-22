@@ -20,7 +20,7 @@ import { CreateOgsmDialog } from '@/components/ogsm/CreateOgsmDialog';
 import { useTheme } from '@/contexts/ThemeContext';
 
 /**
- * Sidebar component with search, OGSM list, and create button
+ * Sidebar component with theme toggle, clear data, search, OGSM list, and create button
  */
 export function Sidebar() {
     const [searchQuery, setSearchQuery] = useState('');
