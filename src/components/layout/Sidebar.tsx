@@ -30,7 +30,6 @@ export function Sidebar() {
     const navigate = useNavigate();
     const { theme, toggleTheme } = useTheme();
     const selectedItemRef = useRef<HTMLAnchorElement>(null);
-    const prevSelectedIdRef = useRef<string | undefined>(selectedOgsmId);
 
     // Fetch OGSM data using TanStack Query
     const { data: ogsms = [], isLoading, isError, error } = useOGSMs();
@@ -85,33 +84,29 @@ export function Sidebar() {
     }, [searchQuery, ogsms]);
 
     /**
-     * Auto-scroll to selected OGSM when selection changes or on mount
-     * Uses a small delay to prevent scrolling during active search typing
+     * Auto-scroll to selected OGSM when it's available in the DOM
+     * Only depends on selectedOgsmId and initial loading state
+     * This ensures scroll works:
+     * - On page load (after data is fetched)
+     * - When navigating between OGSMs
+     * - When creating a new OGSM and navigating to it
      */
     useEffect(() => {
-        if (!selectedItemRef.current || !selectedOgsmId) return;
+        // Don't scroll while initial data is loading
+        if (isLoading) return;
 
-        const hasSelectionChanged =
-            prevSelectedIdRef.current !== selectedOgsmId;
+        // Don't scroll if no OGSM is selected
+        if (!selectedOgsmId) return;
 
-        // Scroll immediately if selection changed, or after a delay if list filtered
-        const scrollTimeout = setTimeout(
-            () => {
-                if (selectedItemRef.current) {
-                    selectedItemRef.current.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'nearest',
-                    });
-                }
-            },
-            hasSelectionChanged ? 0 : 300
-        );
+        // Don't scroll if the ref is not attached yet
+        if (!selectedItemRef.current) return;
 
-        // Update the previous selection reference
-        prevSelectedIdRef.current = selectedOgsmId;
-
-        return () => clearTimeout(scrollTimeout);
-    }, [selectedOgsmId, filteredOgsmList]);
+        // Scroll to the selected item
+        selectedItemRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+        });
+    }, [selectedOgsmId, isLoading]);
 
     return (
         <aside className="flex h-screen w-80 flex-col border-r border-border bg-card">
