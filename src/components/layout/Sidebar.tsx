@@ -220,10 +220,10 @@ export function Sidebar() {
                                 >
                                     <Link
                                         to={`/ogsm/${ogsm.id}`}
-                                        className={`block rounded-lg px-4 py-3 pr-10 transition-colors ${
+                                        className={`block rounded-lg border px-4 py-3 pr-10 transition-colors ${
                                             isSelected
-                                                ? 'bg-primary/10 text-primary border border-primary/20'
-                                                : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                                                ? 'border-primary/20 bg-primary/10 text-primary'
+                                                : 'border-transparent text-foreground hover:bg-accent hover:text-accent-foreground'
                                         }`}
                                     >
                                         <div className="font-medium">
