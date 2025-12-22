@@ -1,11 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Moon, Sun } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
-import { useTheme } from '@/contexts/ThemeContext';
 
 interface OgsmHeaderProps {
     name: string;
@@ -22,7 +19,6 @@ export function OgsmHeader({ name, onNameChange }: OgsmHeaderProps) {
     const [nameValue, setNameValue] = useState(name);
     const inputRef = useRef<HTMLInputElement>(null);
     const { isReadOnly, setIsReadOnly } = useReadOnly();
-    const { theme, toggleTheme } = useTheme();
 
     /**
      * Sync local state when prop changes
@@ -105,24 +101,6 @@ export function OgsmHeader({ name, onNameChange }: OgsmHeaderProps) {
 
                 {/* Controls */}
                 <div className="flex items-center gap-4">
-                    {/* Theme Toggle */}
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={toggleTheme}
-                        aria-label={
-                            theme === 'light'
-                                ? 'Switch to dark mode'
-                                : 'Switch to light mode'
-                        }
-                    >
-                        {theme === 'light' ? (
-                            <Moon className="h-5 w-5" />
-                        ) : (
-                            <Sun className="h-5 w-5" />
-                        )}
-                    </Button>
-
                     {/* Read-Only Mode Toggle */}
                     <div className="flex items-center gap-3">
                         <Label
