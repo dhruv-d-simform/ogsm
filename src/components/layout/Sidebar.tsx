@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Link, useParams, useNavigate } from 'react-router';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { Link, NavLink, useParams, useNavigate } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -29,6 +29,7 @@ export function Sidebar() {
     const { id: selectedOgsmId } = useParams();
     const navigate = useNavigate();
     const { theme, toggleTheme } = useTheme();
+    const selectedItemRef = useRef<HTMLAnchorElement>(null);
 
     // Fetch OGSM data using TanStack Query
     const { data: ogsms = [], isLoading, isError, error } = useOGSMs();
@@ -81,6 +82,31 @@ export function Sidebar() {
                 ogsm.objective.toLowerCase().includes(query)
         );
     }, [searchQuery, ogsms]);
+
+    /**
+     * Auto-scroll to selected OGSM when it's available in the DOM
+     * Only depends on selectedOgsmId and initial loading state
+     * This ensures scroll works:
+     * - On page load (after data is fetched)
+     * - When navigating between OGSMs
+     * - When creating a new OGSM and navigating to it
+     */
+    useEffect(() => {
+        // Don't scroll while initial data is loading
+        if (isLoading) return;
+
+        // Don't scroll if no OGSM is selected
+        if (!selectedOgsmId) return;
+
+        // Don't scroll if the ref is not attached yet
+        if (!selectedItemRef.current) return;
+
+        // Scroll to the selected item
+        selectedItemRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+        });
+    }, [selectedOgsmId, isLoading]);
 
     return (
         <aside className="flex h-screen w-80 flex-col border-r border-border bg-card">
@@ -218,27 +244,38 @@ export function Sidebar() {
                                     }
                                     onMouseLeave={() => setHoveredOgsmId(null)}
                                 >
-                                    <Link
-                                        to={`/ogsm/${ogsm.id}`}
-                                        className={`block rounded-lg px-4 py-3 pr-10 transition-colors ${
+                                    <NavLink
+                                        ref={
                                             isSelected
-                                                ? 'bg-primary/10 text-primary border border-primary/20'
-                                                : 'text-foreground hover:bg-accent hover:text-accent-foreground'
-                                        }`}
+                                                ? selectedItemRef
+                                                : undefined
+                                        }
+                                        to={`/ogsm/${ogsm.id}`}
+                                        className={({ isActive }) =>
+                                            `block rounded-lg border px-4 py-3 pr-10 transition-colors ${
+                                                isActive
+                                                    ? 'border-primary/20 bg-primary/10 text-primary'
+                                                    : 'border-transparent text-foreground hover:bg-accent hover:text-accent-foreground'
+                                            }`
+                                        }
                                     >
-                                        <div className="font-medium">
-                                            {ogsm.name}
-                                        </div>
-                                        <div
-                                            className={`mt-1 line-clamp-2 text-sm ${
-                                                isSelected
-                                                    ? 'text-primary/80'
-                                                    : 'text-muted-foreground'
-                                            }`}
-                                        >
-                                            {ogsm.objective}
-                                        </div>
-                                    </Link>
+                                        {({ isActive }) => (
+                                            <>
+                                                <div className="font-medium">
+                                                    {ogsm.name}
+                                                </div>
+                                                <div
+                                                    className={`mt-1 line-clamp-2 text-sm ${
+                                                        isActive
+                                                            ? 'text-primary/80'
+                                                            : 'text-muted-foreground'
+                                                    }`}
+                                                >
+                                                    {ogsm.objective}
+                                                </div>
+                                            </>
+                                        )}
+                                    </NavLink>
 
                                     {/* Delete Button - Visible on Hover */}
                                     {isHovered && (
