@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,7 @@ export function Sidebar() {
     const { id: selectedOgsmId } = useParams();
     const navigate = useNavigate();
     const { theme, toggleTheme } = useTheme();
+    const selectedItemRef = useRef<HTMLAnchorElement>(null);
 
     // Fetch OGSM data using TanStack Query
     const { data: ogsms = [], isLoading, isError, error } = useOGSMs();
@@ -81,6 +82,18 @@ export function Sidebar() {
                 ogsm.objective.toLowerCase().includes(query)
         );
     }, [searchQuery, ogsms]);
+
+    /**
+     * Auto-scroll to selected OGSM on mount or when selection changes
+     */
+    useEffect(() => {
+        if (selectedItemRef.current && selectedOgsmId) {
+            selectedItemRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+            });
+        }
+    }, [selectedOgsmId, filteredOgsmList]);
 
     return (
         <aside className="flex h-screen w-80 flex-col border-r border-border bg-card">
@@ -219,6 +232,11 @@ export function Sidebar() {
                                     onMouseLeave={() => setHoveredOgsmId(null)}
                                 >
                                     <Link
+                                        ref={
+                                            isSelected
+                                                ? selectedItemRef
+                                                : undefined
+                                        }
                                         to={`/ogsm/${ogsm.id}`}
                                         className={`block rounded-lg border px-4 py-3 pr-10 transition-colors ${
                                             isSelected
