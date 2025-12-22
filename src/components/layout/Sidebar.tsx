@@ -30,6 +30,7 @@ export function Sidebar() {
     const navigate = useNavigate();
     const { theme, toggleTheme } = useTheme();
     const selectedItemRef = useRef<HTMLAnchorElement>(null);
+    const prevSelectedIdRef = useRef<string | undefined>(selectedOgsmId);
 
     // Fetch OGSM data using TanStack Query
     const { data: ogsms = [], isLoading, isError, error } = useOGSMs();
@@ -84,15 +85,32 @@ export function Sidebar() {
     }, [searchQuery, ogsms]);
 
     /**
-     * Auto-scroll to selected OGSM on mount or when selection changes
+     * Auto-scroll to selected OGSM when selection changes or on mount
+     * Uses a small delay to prevent scrolling during active search typing
      */
     useEffect(() => {
-        if (selectedItemRef.current && selectedOgsmId) {
-            selectedItemRef.current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest',
-            });
-        }
+        if (!selectedItemRef.current || !selectedOgsmId) return;
+
+        const hasSelectionChanged =
+            prevSelectedIdRef.current !== selectedOgsmId;
+
+        // Scroll immediately if selection changed, or after a delay if list filtered
+        const scrollTimeout = setTimeout(
+            () => {
+                if (selectedItemRef.current) {
+                    selectedItemRef.current.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                    });
+                }
+            },
+            hasSelectionChanged ? 0 : 300
+        );
+
+        // Update the previous selection reference
+        prevSelectedIdRef.current = selectedOgsmId;
+
+        return () => clearTimeout(scrollTimeout);
     }, [selectedOgsmId, filteredOgsmList]);
 
     return (
