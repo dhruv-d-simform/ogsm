@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router';
+import { Link, NavLink, useParams, useNavigate } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -249,32 +249,38 @@ export function Sidebar() {
                                     }
                                     onMouseLeave={() => setHoveredOgsmId(null)}
                                 >
-                                    <Link
+                                    <NavLink
                                         ref={
                                             isSelected
                                                 ? selectedItemRef
                                                 : undefined
                                         }
                                         to={`/ogsm/${ogsm.id}`}
-                                        className={`block rounded-lg border px-4 py-3 pr-10 transition-colors ${
-                                            isSelected
-                                                ? 'border-primary/20 bg-primary/10 text-primary'
-                                                : 'border-transparent text-foreground hover:bg-accent hover:text-accent-foreground'
-                                        }`}
+                                        className={({ isActive }) =>
+                                            `block rounded-lg border px-4 py-3 pr-10 transition-colors ${
+                                                isActive
+                                                    ? 'border-primary/20 bg-primary/10 text-primary'
+                                                    : 'border-transparent text-foreground hover:bg-accent hover:text-accent-foreground'
+                                            }`
+                                        }
                                     >
-                                        <div className="font-medium">
-                                            {ogsm.name}
-                                        </div>
-                                        <div
-                                            className={`mt-1 line-clamp-2 text-sm ${
-                                                isSelected
-                                                    ? 'text-primary/80'
-                                                    : 'text-muted-foreground'
-                                            }`}
-                                        >
-                                            {ogsm.objective}
-                                        </div>
-                                    </Link>
+                                        {({ isActive }) => (
+                                            <>
+                                                <div className="font-medium">
+                                                    {ogsm.name}
+                                                </div>
+                                                <div
+                                                    className={`mt-1 line-clamp-2 text-sm ${
+                                                        isActive
+                                                            ? 'text-primary/80'
+                                                            : 'text-muted-foreground'
+                                                    }`}
+                                                >
+                                                    {ogsm.objective}
+                                                </div>
+                                            </>
+                                        )}
+                                    </NavLink>
 
                                     {/* Delete Button - Visible on Hover */}
                                     {isHovered && (
