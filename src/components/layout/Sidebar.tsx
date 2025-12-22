@@ -14,12 +14,13 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Search, Plus, Trash2, Loader2 } from 'lucide-react';
+import { Search, Plus, Trash2, Loader2, Moon, Sun } from 'lucide-react';
 import { useOGSMs, useDeleteOGSM } from '@/hooks/useOgsm';
 import { CreateOgsmDialog } from '@/components/ogsm/CreateOgsmDialog';
+import { useTheme } from '@/contexts/ThemeContext';
 
 /**
- * Sidebar component with search, OGSM list, and create button
+ * Sidebar component with theme toggle, clear data, search, OGSM list, and create button
  */
 export function Sidebar() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -27,6 +28,7 @@ export function Sidebar() {
     const [ogsmToDelete, setOgsmToDelete] = useState<string | null>(null);
     const { id: selectedOgsmId } = useParams();
     const navigate = useNavigate();
+    const { theme, toggleTheme } = useTheme();
 
     // Fetch OGSM data using TanStack Query
     const { data: ogsms = [], isLoading, isError, error } = useOGSMs();
@@ -91,40 +93,64 @@ export function Sidebar() {
                         </div>
                     </Link>
 
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                aria-label="Clear all data and reset to mock data"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                    Are you sure you want to delete all the
-                                    data?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    All of your current data will be deleted and
-                                    mock data of around 10–15 OGSMs will be
-                                    created.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                    onClick={handleClearData}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    <div className="flex items-center gap-2">
+                        {/* Theme Toggle */}
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={toggleTheme}
+                            className="h-8 w-8"
+                            aria-label={
+                                theme === 'light'
+                                    ? 'Switch to dark mode'
+                                    : 'Switch to light mode'
+                            }
+                        >
+                            {theme === 'light' ? (
+                                <Moon className="h-4 w-4" />
+                            ) : (
+                                <Sun className="h-4 w-4" />
+                            )}
+                        </Button>
+
+                        {/* Clear Data Button */}
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                    aria-label="Clear all data and reset to mock data"
                                 >
-                                    Delete All Data
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                        Are you sure you want to delete all the
+                                        data?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        All of your current data will be deleted
+                                        and mock data of around 10–15 OGSMs will
+                                        be created.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                        Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={handleClearData}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                        Delete All Data
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
                 </div>
             </div>
 
