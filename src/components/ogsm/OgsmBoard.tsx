@@ -1,3 +1,4 @@
+import { useRef, useState, useEffect } from 'react';
 import type { OGSM } from '@/types';
 import { ObjectiveSection } from '@/components/sections/ObjectiveSection';
 import { GoalsSection } from '@/components/sections/GoalsSection';
@@ -14,6 +15,42 @@ interface OgsmBoardProps {
  * Displays the OGSM objectives, goals, strategies, and measures
  */
 export function OgsmBoard({ ogsm, onObjectiveChange }: OgsmBoardProps) {
+    const boardRef = useRef<HTMLElement>(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    /**
+     * Handle fullscreen state changes
+     */
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => {
+            document.removeEventListener(
+                'fullscreenchange',
+                handleFullscreenChange
+            );
+        };
+    }, []);
+
+    /**
+     * Toggle fullscreen mode using the Fullscreen API
+     */
+    const handleToggleFullscreen = async () => {
+        if (!boardRef.current) return;
+
+        try {
+            if (!document.fullscreenElement) {
+                await boardRef.current.requestFullscreen();
+            } else {
+                await document.exitFullscreen();
+            }
+        } catch (error) {
+            console.error('Error toggling fullscreen:', error);
+        }
+    };
     const updateOgsmMutation = useUpdateOGSM();
 
     /**
@@ -71,12 +108,17 @@ export function OgsmBoard({ ogsm, onObjectiveChange }: OgsmBoardProps) {
     };
 
     return (
-        <main className="flex flex-1 flex-col overflow-hidden bg-muted/20 p-8">
+        <main
+            ref={boardRef}
+            className="flex flex-1 flex-col overflow-hidden bg-muted/20 p-8"
+        >
             <div className="flex min-h-0 flex-1 flex-col gap-6">
                 {/* Objective Section */}
                 <ObjectiveSection
                     objective={ogsm.objective}
                     onObjectiveChange={onObjectiveChange}
+                    isFullscreen={isFullscreen}
+                    onToggleFullscreen={handleToggleFullscreen}
                 />
 
                 {/* Goals and Strategy Sections - Side by Side */}

@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
+import { Maximize, Minimize } from 'lucide-react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { SectionHeader } from '@/components/sections/SectionHeader';
+import { Button } from '@/components/ui/button';
 
 interface ObjectiveSectionProps {
     objective: string;
     onObjectiveChange?: (newObjective: string) => void;
+    isFullscreen: boolean;
+    onToggleFullscreen: () => void;
 }
 
 /**
@@ -15,9 +19,12 @@ interface ObjectiveSectionProps {
 export function ObjectiveSection({
     objective,
     onObjectiveChange,
+    isFullscreen,
+    onToggleFullscreen,
 }: ObjectiveSectionProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState(objective);
+    const [isHovered, setIsHovered] = useState(false);
     const { isReadOnly } = useReadOnly();
 
     /**
@@ -68,7 +75,11 @@ export function ObjectiveSection({
     };
 
     return (
-        <div className="rounded-lg bg-primary p-6 text-primary-foreground">
+        <div
+            className="relative rounded-lg bg-primary p-6 text-primary-foreground"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
             <div className="flex items-center gap-3">
                 <SectionHeader
                     initial="O"
@@ -97,6 +108,27 @@ export function ObjectiveSection({
                     </p>
                 )}
             </div>
+
+            {/* Fullscreen Toggle Button - Visible on hover */}
+            {isHovered && (
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onToggleFullscreen}
+                    className="absolute right-4 top-4 transition-transform duration-200 hover:scale-110"
+                    title={
+                        isFullscreen
+                            ? 'Exit fullscreen mode'
+                            : 'Enter fullscreen mode'
+                    }
+                >
+                    {isFullscreen ? (
+                        <Minimize className="h-5 w-5" />
+                    ) : (
+                        <Maximize className="h-5 w-5" />
+                    )}
+                </Button>
+            )}
         </div>
     );
 }
