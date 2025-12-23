@@ -80,7 +80,11 @@ export function ObjectiveSection({
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <div className="flex items-center gap-3">
+            <div
+                className={`flex items-center gap-3 transition-[padding] duration-200 ${
+                    isHovered ? 'pr-12' : ''
+                }`}
+            >
                 <SectionHeader
                     initial="O"
                     label="Objective"
@@ -115,7 +119,7 @@ export function ObjectiveSection({
                     variant="ghost"
                     size="icon"
                     onClick={onToggleFullscreen}
-                    className="absolute right-4 top-4 transition-transform duration-200 hover:scale-110"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 transition-transform duration-200 hover:scale-110"
                     title={
                         isFullscreen
                             ? 'Exit fullscreen mode'
