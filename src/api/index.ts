@@ -20,5 +20,8 @@ export * from './actions';
 // Task APIs
 export * from './tasks';
 
+// PDF Export APIs
+export * from './pdf';
+
 // Helper APIs
 export * from './helpers';
