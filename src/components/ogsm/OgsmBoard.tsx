@@ -22,16 +22,18 @@ export function OgsmBoard({ ogsm, onObjectiveChange }: OgsmBoardProps) {
      * Handle fullscreen state changes
      */
     useEffect(() => {
+        const abortController = new AbortController();
+
         const handleFullscreenChange = () => {
             setIsFullscreen(!!document.fullscreenElement);
         };
 
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('fullscreenchange', handleFullscreenChange, {
+            signal: abortController.signal,
+        });
+
         return () => {
-            document.removeEventListener(
-                'fullscreenchange',
-                handleFullscreenChange
-            );
+            abortController.abort();
         };
     }, []);
 
