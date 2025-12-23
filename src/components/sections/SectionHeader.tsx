@@ -56,7 +56,7 @@ export function SectionHeader({
                     </button>
                 </HoverCardTrigger>
                 <HoverCardContent
-                    className={`${hoverCardWidth} max-h-96 overflow-y-auto shadow-lg`}
+                    className={`${hoverCardWidth} shadow-lg max-h-96 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full`}
                     side="bottom"
                     align="start"
                     sideOffset={8}
