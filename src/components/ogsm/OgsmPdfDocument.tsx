@@ -56,6 +56,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f9fafb',
         borderRadius: 4,
         border: '1 solid #e5e7eb',
+        breakInside: 'avoid',
     },
     cardTitle: {
         fontSize: 13,
@@ -172,9 +173,9 @@ export function OgsmPdfDocument({
      */
     const formatTaskStatus = (status: string): string => {
         const statusMap: Record<string, string> = {
-            pending: '⏳ Pending',
-            'in-progress': '🔄 In Progress',
-            completed: '✅ Completed',
+            pending: 'Pending',
+            'in-progress': 'In Progress',
+            completed: 'Completed',
         };
         return statusMap[status] || status;
     };

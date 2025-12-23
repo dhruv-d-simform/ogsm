@@ -5,6 +5,13 @@ import type { OGSM } from '@/types';
 import { tryCatch } from '@/utils/tryCatch';
 
 /**
+ * Sanitize filename by removing invalid filesystem characters
+ */
+const sanitizeFilename = (name: string): string => {
+    return name.replace(/[/\\?%*:|"<>]/g, '-').trim() || 'OGSM';
+};
+
+/**
  * Hook to export OGSM data as PDF
  * Fetches all related data in a single query and generates a downloadable PDF document
  */
@@ -37,6 +44,8 @@ export function usePdfExport(ogsm: OGSM | undefined) {
 
         if (error || !blob) {
             console.error('Failed to generate PDF:', error);
+            // TODO: Add user feedback (e.g., toast notification)
+            alert('Failed to generate PDF. Please try again.');
             return;
         }
 
@@ -44,7 +53,7 @@ export function usePdfExport(ogsm: OGSM | undefined) {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${ogsm?.name || 'OGSM'}.pdf`;
+        link.download = `${sanitizeFilename(ogsm?.name || 'OGSM')}.pdf`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
