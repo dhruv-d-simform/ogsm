@@ -314,6 +314,25 @@ export const createBookWritingData = (
         name: 'Book Writing Journey',
         objective:
             'Write, publish, and successfully launch my first book within 12 months, selling 1,000 copies and establishing myself as a published author while sharing my story with the world.',
+        description: `# Book Writing Journey - Complete Author's Roadmap
+
+This OGSM outlines the comprehensive plan for transforming from an aspiring writer to a published author. The journey encompasses the entire book creation lifecycle, from initial concept to successful launch and marketing.
+
+## Why This Matters
+
+Writing a book is a significant personal and professional milestone that requires dedication, structure, and strategic planning. This plan breaks down the overwhelming task of book creation into manageable phases, ensuring consistent progress toward publication.
+
+## Key Success Factors
+
+- **Daily Writing Habit**: Maintaining consistent output through disciplined 1,000-word daily targets
+- **Professional Quality**: Engaging beta readers and professional editors to ensure market-ready content
+- **Strategic Publishing**: Choosing between traditional and self-publishing based on goals and timeline
+- **Marketing Excellence**: Building audience engagement before, during, and after launch
+- **Sales Momentum**: Achieving the 1,000-copy milestone as proof of market validation
+
+## Timeline Overview
+
+The 12-month timeline is structured into distinct phases: planning and outlining (months 1-2), intensive writing (months 3-7), editing and refinement (months 8-10), and finally publishing and launch (months 11-12).`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,

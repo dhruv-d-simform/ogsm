@@ -323,6 +323,42 @@ export const createRestaurantOpeningData = (
         name: 'Small Restaurant Opening',
         objective:
             'Successfully open and launch our neighborhood restaurant within 45 days, serving 80 customers daily and reaching $100K in monthly revenue within 3 months by delivering exceptional food and service.',
+        description: `# Restaurant Launch & Stabilization Plan
+
+Open a neighborhood restaurant that becomes a beloved local destination through exceptional food quality, warm service, and strong community integration.
+
+## Restaurant Concept
+
+Small, focused menu emphasizing quality over variety. This approach allows:
+- Mastery of each dish through repetition
+- Efficient kitchen operations with less complexity
+- Consistent quality control
+- Lower food waste and inventory costs
+
+The neighborhood positioning means we're not competing on novelty or Instagram-worthiness—we're building a place where locals eat regularly because the food is reliably excellent and the atmosphere feels like home.
+
+## Financial Model
+
+Target: 80 customers × $42 average check × 30 days = ~$100K monthly revenue
+
+This requires building repeat customer base, not relying on one-time diners. Success comes from regulars who visit weekly, not tourists seeking trendy spots.
+
+## 45-Day Opening Timeline
+
+**Weeks 1-2**: Finalize location, permits, equipment installation
+**Weeks 3-4**: Staff hiring and intensive training
+**Weeks 5-6**: Soft opening with limited hours for operational refinement
+**Week 7**: Grand opening with full schedule
+
+The aggressive 45-day timeline requires parallel workstreams and decisive decision-making, but creates urgency that prevents endless perfectionism.
+
+## Critical Success Factors
+
+1. **Location**: High foot traffic area with parking and neighborhood walkability
+2. **Team Quality**: Hire for attitude, train for skills
+3. **Operational Excellence**: Systems and checklists for consistency
+4. **Word-of-Mouth**: Exceed expectations so customers become advocates
+5. **Cash Flow**: Manage daily operations to avoid running out of money in early months`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,

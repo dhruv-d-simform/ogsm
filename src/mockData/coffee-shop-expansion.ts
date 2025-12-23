@@ -365,6 +365,28 @@ export const createCoffeeShopExpansionData = (
         name: 'Coffee Shop Expansion Plan',
         objective:
             'Transform our single, beloved neighborhood coffee shop into a thriving 3-location business that becomes the go-to coffee destination in our city, known for exceptional quality, friendly service, and community connection.',
+        description: `# Coffee Shop Expansion Strategy
+
+This plan charts the course for transforming a successful single-location coffee shop into a multi-location brand while preserving the quality, culture, and community connection that made the original location beloved.
+
+## Vision & Market Opportunity
+
+The local coffee market shows strong demand for quality third-wave coffee experiences. By maintaining our standards while scaling strategically, we can capture market share in underserved neighborhoods while building brand recognition citywide.
+
+## Expansion Philosophy
+
+Our growth strategy prioritizes **sustainable expansion** over rapid scaling. Each new location will open only after the previous one achieves operational stability and profitability, ensuring we maintain quality standards and don't overextend resources.
+
+## Core Pillars
+
+1. **Quality Consistency**: Implement rigorous training and quality control systems to ensure every location delivers the same exceptional experience
+2. **Local Integration**: Each location will reflect its neighborhood's character while maintaining brand identity
+3. **Team Development**: Grow our team capacity through leadership development and career pathways
+4. **Financial Prudence**: Careful cash flow management and location-by-location profitability validation
+
+## Success Metrics
+
+Revenue targets are structured to ensure each location reaches $600K annual revenue, demonstrating market fit before further expansion. Customer satisfaction and retention metrics will be equally important as financial indicators.`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,

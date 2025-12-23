@@ -352,6 +352,17 @@ export const createYoutubeChannelGrowthData = (
         name: 'YouTube Channel Growth Plan',
         objective:
             'Build a successful YouTube channel with 10,000 subscribers and 100K monthly views within 12 months, creating valuable content that generates $2,000 in monthly income.',
+        description: `# YouTube Channel Growth & Monetization Strategy
+
+This plan outlines a strategic approach to building a sustainable YouTube channel that provides educational value while generating meaningful income. The strategy focuses on consistent content production, audience engagement, and multiple revenue streams including AdSense, sponsorships, and digital products.
+
+**Content Strategy:** The plan emphasizes producing 2-3 high-quality videos weekly on a focused niche topic, optimizing for both watch time and subscriber conversion. Initial content will establish authority and build trust, while later videos will introduce monetization elements naturally.
+
+**Growth Mechanics:** Utilizing YouTube SEO best practices, collaboration with complementary channels, and cross-promotion on social media platforms. The strategy includes testing different video formats (tutorials, case studies, vlogs) to identify what resonates most with the target audience.
+
+**Monetization Roadmap:** Reaching 1,000 subscribers and 4,000 watch hours to enable monetization is the first milestone. Beyond AdSense, the plan includes securing 2-3 sponsors, launching a digital product aligned with channel content, and building an email list for direct audience communication.
+
+**Success Factors:** Consistency in upload schedule, data-driven content optimization based on analytics, genuine audience engagement through comments and community posts, and maintaining authentic personality while delivering value. The 12-month timeline is aggressive but achievable with dedication and strategic execution.`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,

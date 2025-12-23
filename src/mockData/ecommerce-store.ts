@@ -314,6 +314,32 @@ export const createEcommerceStoreData = (
         name: 'E-commerce Store Launch',
         objective:
             'Launch a successful e-commerce store selling handmade products, reaching 5,000 monthly visitors and generating $10,000 in monthly sales within 6 months through beautiful products and exceptional customer experience.',
+        description: `# E-commerce Store Launch Plan
+
+Transform a handmade products hobby into a thriving online business by building a professional e-commerce presence that converts browsers into loyal customers.
+
+## Market Position
+
+The handmade market is growing rapidly, with consumers increasingly valuing authentic, artisan-crafted products over mass-produced alternatives. Our unique product line and storytelling approach will differentiate us in this competitive but opportunity-rich market.
+
+## Launch Strategy
+
+This 6-month plan focuses on three critical phases:
+
+1. **Foundation (Months 1-2)**: Build a conversion-optimized store with professional product photography and compelling copy
+2. **Traffic Acquisition (Months 3-4)**: Deploy multi-channel marketing to drive qualified visitors
+3. **Optimization & Scale (Months 5-6)**: Refine based on data, improve conversion rates, and scale what works
+
+## Revenue Model
+
+With an average order value target of $75 and a 2.5% conversion rate, reaching 5,000 monthly visitors will generate approximately $9,375 in monthly revenue, positioning us well to exceed our $10,000 goal as we optimize.
+
+## Competitive Advantages
+
+- **Authentic Storytelling**: Share the craft and passion behind each product
+- **Quality Commitment**: Premium materials and exceptional craftsmanship
+- **Customer Experience**: White-glove service from browsing to unboxing
+- **Community Building**: Create a loyal following through content and engagement`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,

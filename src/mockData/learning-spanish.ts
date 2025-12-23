@@ -314,6 +314,34 @@ export const createLearningSpanishData = (
         name: 'Learning Spanish Plan',
         objective:
             'Achieve conversational fluency in Spanish within 18 months, enabling me to have natural conversations, understand native content, and connect with Spanish-speaking communities.',
+        description: `# Spanish Language Learning Journey
+
+Master conversational Spanish through immersive, consistent practice and strategic learning methods that build practical communication skills rather than just textbook knowledge.
+
+## Learning Philosophy
+
+This plan rejects traditional classroom-only approaches in favor of **acquisition through use**. Real fluency comes from speaking, listening, making mistakes, and gradually building intuition—not from perfect grammar exercises.
+
+## Proficiency Milestones
+
+- **Months 1-6 (Foundation)**: Build core vocabulary (1000+ words), basic grammar, simple conversations
+- **Months 7-12 (Development)**: Expand to 2000+ words, improve pronunciation, handle everyday situations
+- **Months 13-18 (Fluency)**: Achieve natural conversation flow, understand native speakers, think in Spanish
+
+## Multi-Modal Approach
+
+Success requires engaging with Spanish through multiple channels:
+
+- **Structured Learning**: Daily app practice for vocabulary and grammar foundations
+- **Immersion**: Spanish music, podcasts, TV shows for ear training
+- **Conversation Practice**: Weekly language exchange to build speaking confidence
+- **Cultural Context**: Understanding idioms, customs, and regional variations
+
+## Measuring Progress
+
+Beyond vocabulary counts and Duolingo streaks, true progress is measured by confidence in real-world situations: ordering food, having casual conversations, understanding movies without subtitles.
+
+The goal isn't perfection—it's functional fluency where Spanish becomes a tool for connection and communication.`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,

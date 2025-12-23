@@ -314,6 +314,40 @@ export const createPodcastLaunchData = (
         name: 'Podcast Launch and Growth',
         objective:
             'Launch and grow a successful entrepreneurship podcast, publishing 52 episodes in the first year, reaching 25,000 downloads, and earning 100 five-star reviews by delivering valuable, inspiring content.',
+        description: `# Podcast Launch & Growth Strategy
+
+Build a successful entrepreneurship podcast from zero to established show with consistent audience and strong reputation through quality content and strategic growth tactics.
+
+## Why Podcasting?
+
+Podcasting offers unique advantages for building authority and community:
+- **Deep Connection**: Long-form content creates stronger relationships than social posts
+- **Accessibility**: Listeners consume while commuting, exercising, or doing chores
+- **Evergreen Content**: Episodes continue attracting listeners months or years after publication
+- **Network Building**: Guest interviews create relationships and cross-promotion opportunities
+
+## Content Strategy
+
+52 weekly episodes = consistent publishing schedule that builds audience habits while remaining sustainable for the long term. Mix of formats:
+
+- **Solo Episodes**: Share insights, frameworks, and lessons learned
+- **Guest Interviews**: Feature successful entrepreneurs telling their stories
+- **Q&A Episodes**: Answer listener questions and provide tactical advice
+- **Case Studies**: Deep dives into business successes and failures
+
+## Growth Mechanics
+
+Reaching 25,000 downloads requires multi-channel approach:
+
+1. **Quality First**: Exceptional content that listeners want to share
+2. **Guest Leverage**: Each guest shares with their audience
+3. **SEO Optimization**: Show notes and transcripts for discoverability  
+4. **Social Amplification**: Audiograms and quotes across platforms
+5. **Cross-Promotion**: Appear on other podcasts as guest
+
+## Community Building
+
+100 five-star reviews signifies engaged, enthusiastic audience. This doesn't happen accidentally—it requires consistently delivering value and explicitly asking satisfied listeners to leave reviews.`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,

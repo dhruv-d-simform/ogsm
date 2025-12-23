@@ -305,6 +305,31 @@ export const createHomeRenovationData = (
         name: 'Home Renovation Project',
         objective:
             'Successfully renovate our kitchen and bathroom within 90 days and $45,000 budget, creating beautiful, functional spaces that increase our home value and improve our daily living experience.',
+        description: `# Home Renovation Project Plan
+
+Execute a comprehensive dual-room renovation that transforms our most-used spaces while staying on schedule and budget through careful planning and project management.
+
+## Renovation Scope
+
+**Kitchen Renovation ($30,000)**: Complete transformation including new cabinets, countertops, appliances, flooring, and lighting. Focus on creating an efficient work triangle, maximizing storage, and upgrading to energy-efficient appliances.
+
+**Bathroom Renovation ($15,000)**: Full modernization with new fixtures, vanity, tile work, and improved ventilation. Emphasis on creating a spa-like retreat with better functionality.
+
+## Project Management Approach
+
+Success in home renovation requires treating it like a serious project with clear phases, milestones, and contingencies. The 90-day timeline includes buffer time for unexpected issues while maintaining momentum.
+
+### Critical Success Factors
+
+1. **Detailed Planning**: Finalize all design decisions before demolition begins
+2. **Quality Contractors**: Work with licensed, insured professionals with verified references
+3. **Budget Discipline**: 10% contingency fund for unexpected issues
+4. **Living Arrangements**: Plan for kitchen/bathroom downtime with minimal life disruption
+5. **Permit Compliance**: Ensure all work meets building codes and passes inspections
+
+## Value Creation
+
+Beyond aesthetic improvements, this renovation focuses on functional enhancements that will serve our family for years while adding significant equity to our home's market value.`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,

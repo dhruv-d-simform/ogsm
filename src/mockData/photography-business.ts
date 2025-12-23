@@ -314,6 +314,44 @@ export const createPhotographyBusinessData = (
         name: 'Wedding Photography Business',
         objective:
             'Build a thriving wedding photography business, booking 20 weddings per year at $3,500+ per wedding to earn $70,000 annually while being recognized for exceptional artistry and client experience.',
+        description: `# Wedding Photography Business Plan
+
+Transform photography passion into profitable business specializing in wedding photography, positioning in the premium market segment through exceptional artistry and service.
+
+## Market Positioning
+
+The $3,500 price point positions us in the professional mid-to-premium market—above amateur or part-time photographers but below luxury boutique studios. This sweet spot targets couples who value quality photography but have realistic budgets.
+
+## Business Model
+
+20 weddings per year = less than 2 per month average, creating manageable workload that:
+- Prevents burnout and maintains enthusiasm
+- Allows time for proper editing and client care
+- Permits weekday marketing and business development
+- Enables personal life balance (not working every weekend)
+
+## Competitive Differentiation
+
+Wedding photography is highly competitive. Our advantages:
+
+1. **Storytelling Approach**: Capture authentic moments and emotions, not just posed shots
+2. **Client Experience**: From booking to delivery, make couples feel valued and excited
+3. **Consistent Quality**: Deliver on style and quality promise every time
+4. **Professional Portfolio**: Invest in website, marketing materials, and sample albums
+
+## Growth Strategy
+
+**Year 1**: Book 20 weddings, establish reputation, build portfolio and testimonials
+**Year 2**: Raise prices to $4,000+, improve margins, reduce workload
+**Year 3**: Consider expanding to destination weddings or mentoring other photographers
+
+## Revenue Streams
+
+While weddings are primary revenue, complementary income:
+- Engagement sessions
+- Bridal portraits  
+- Print sales and albums
+- Second-shooter opportunities`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,

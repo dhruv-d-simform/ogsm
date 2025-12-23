@@ -361,6 +361,34 @@ export const createFreelanceDesignBusinessData = (
         name: 'Freelance Design Business',
         objective:
             'Build a thriving freelance design business within 12 months, earning $8,000 monthly by serving 8+ active clients with exceptional design work while establishing myself as a recognized expert.',
+        description: `# Freelance Design Business Growth Plan
+
+Transform freelance design work from side hustle to sustainable full-time business through strategic client acquisition, professional positioning, and systematic service delivery.
+
+## Business Foundation
+
+The target of $8,000 monthly revenue with 8+ clients creates an average client value of $1,000/month, positioning our services in the professional mid-market segment. This pricing strategy attracts serious businesses while remaining accessible to growing companies.
+
+## Market Positioning
+
+We're not competing on price—we're competing on value, reliability, and results. By positioning as a strategic design partner rather than a commodity service provider, we can command premium rates and work with better clients who respect expertise.
+
+## Growth Strategy
+
+**Phase 1 (Months 1-4)**: Build foundation with 3-4 anchor clients and develop repeatable processes
+**Phase 2 (Months 5-8)**: Scale to 6-7 clients while refining service offerings based on what works
+**Phase 3 (Months 9-12)**: Reach 8+ clients and optimize for profitability and sustainability
+
+## Competitive Advantages
+
+- **Quality Over Quantity**: Focus on deep client relationships, not one-off projects
+- **Strategic Thinking**: Provide business value, not just pretty designs
+- **Reliable Delivery**: Meet deadlines consistently, communicate proactively
+- **Continuous Learning**: Stay current with design trends and tools
+
+## Long-term Vision
+
+This 12-month plan establishes the foundation for a 6-figure design business with potential to scale through productized services, retainer relationships, or eventually hiring junior designers.`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,

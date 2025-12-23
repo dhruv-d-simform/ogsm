@@ -352,6 +352,39 @@ export const createOnlineCourseData = (
         name: 'Online Course Creation',
         objective:
             'Create and successfully launch a comprehensive web development course, enrolling 200 students and generating $40,000 in revenue within 6 months while helping students achieve real career outcomes.',
+        description: `# Online Course Creation & Launch
+
+Build and successfully market a high-quality web development course that delivers genuine value to students while establishing a sustainable education business.
+
+## Market Opportunity
+
+The online learning market for web development is substantial, but success requires differentiation. Our competitive advantage is practical, project-based learning that prepares students for real jobs—not just covering syntax.
+
+## Course Economics
+
+Target: 200 students × $200 per enrollment = $40,000 revenue
+
+This pricing positions the course as a premium offering (not a $29 impulse buy) while remaining accessible compared to bootcamps ($5,000-$15,000). The higher price signals quality and attracts more serious, committed students.
+
+## Content Strategy
+
+The course must deliver exceptional value to justify premium pricing and generate positive word-of-mouth:
+
+- **Project-Based Learning**: Students build 5 real portfolio projects
+- **Modern Stack**: Focus on in-demand technologies (React, Node.js, databases)
+- **Career Support**: Resume reviews, portfolio guidance, interview prep
+- **Community Access**: Private Discord for peer learning and support
+
+## Launch Playbook
+
+1. **Build in Public**: Share course creation journey to build audience
+2. **Beta Launch**: Offer to 50 students at discount for feedback and testimonials
+3. **Full Launch**: Leverage testimonials and refined content for public launch
+4. **Continuous Marketing**: Content marketing, social proof, and student success stories
+
+## Success Beyond Revenue
+
+While $40K is the financial target, true success means students getting jobs, building projects, and genuinely learning—creating advocates who refer others and validate the course's value.`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,
