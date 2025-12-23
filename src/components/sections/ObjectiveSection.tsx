@@ -24,7 +24,6 @@ export function ObjectiveSection({
 }: ObjectiveSectionProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState(objective);
-    const [isHovered, setIsHovered] = useState(false);
     const { isReadOnly } = useReadOnly();
 
     /**
@@ -75,16 +74,8 @@ export function ObjectiveSection({
     };
 
     return (
-        <div
-            className="group relative rounded-lg bg-primary p-6 text-primary-foreground"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            <div
-                className={`flex items-center gap-3 transition-[padding] duration-200 ${
-                    isHovered ? 'pr-12' : ''
-                } group-focus-within:pr-12`}
-            >
+        <div className="group relative rounded-lg bg-primary p-6 text-primary-foreground">
+            <div className="flex items-center gap-3 transition-[padding] duration-200 group-hover:pr-12 group-focus-within:pr-12">
                 <SectionHeader
                     initial="O"
                     label="Objective"
