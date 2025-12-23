@@ -127,6 +127,28 @@ const styles = StyleSheet.create({
         borderTop: '1 solid #e5e7eb',
         paddingTop: 10,
     },
+    dateText: {
+        fontSize: 10,
+        color: '#6b7280',
+    },
+    emptyStateText: {
+        fontSize: 11,
+        color: '#9ca3af',
+    },
+    subheading: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        color: '#6b7280',
+        marginBottom: 4,
+    },
+    actionDescription: {
+        fontSize: 9,
+        color: '#6b7280',
+        marginBottom: 3,
+    },
+    taskName: {
+        flex: 1,
+    },
 });
 
 /**
@@ -142,36 +164,42 @@ export function OgsmPdfDocument({
     allTasks,
 }: OgsmPdfDocumentProps) {
     /**
+     * Generic helper to filter items by IDs
+     */
+    const getItemsByIds = <T extends { id: string }>(
+        ids: string[],
+        allItems: T[]
+    ): T[] => {
+        return ids
+            .map((id) => allItems.find((item) => item.id === id))
+            .filter((item): item is T => item !== undefined);
+    };
+
+    /**
      * Get KPIs by IDs
      */
     const getKpisByIds = (kpiIds: string[]): KPI[] => {
-        return kpiIds
-            .map((id) => allKpis.find((kpi) => kpi.id === id))
-            .filter((kpi): kpi is KPI => kpi !== undefined);
+        return getItemsByIds(kpiIds, allKpis);
     };
 
     /**
      * Get Actions by IDs
      */
     const getActionsByIds = (actionIds: string[]): Action[] => {
-        return actionIds
-            .map((id) => allActions.find((action) => action.id === id))
-            .filter((action): action is Action => action !== undefined);
+        return getItemsByIds(actionIds, allActions);
     };
 
     /**
      * Get Tasks by IDs
      */
     const getTasksByIds = (taskIds: string[]): Task[] => {
-        return taskIds
-            .map((id) => allTasks.find((task) => task.id === id))
-            .filter((task): task is Task => task !== undefined);
+        return getItemsByIds(taskIds, allTasks);
     };
 
     /**
      * Format task status for display
      */
-    const formatTaskStatus = (status: string): string => {
+    const formatTaskStatus = (status: Task['status']): string => {
         const statusMap: Record<string, string> = {
             pending: 'Pending',
             'in-progress': 'In Progress',
@@ -186,7 +214,7 @@ export function OgsmPdfDocument({
                 {/* Header with OGSM Name */}
                 <View style={styles.header}>
                     <Text style={styles.title}>{ogsm.name}</Text>
-                    <Text style={{ fontSize: 10, color: '#6b7280' }}>
+                    <Text style={styles.dateText}>
                         Generated on{' '}
                         {new Date().toLocaleDateString('en-US', {
                             year: 'numeric',
@@ -210,7 +238,7 @@ export function OgsmPdfDocument({
                         Goals ({goals.length})
                     </Text>
                     {goals.length === 0 ? (
-                        <Text style={{ fontSize: 11, color: '#9ca3af' }}>
+                        <Text style={styles.emptyStateText}>
                             No goals defined
                         </Text>
                     ) : (
@@ -228,14 +256,7 @@ export function OgsmPdfDocument({
                                     )}
                                     {kpis.length > 0 && (
                                         <View style={styles.kpiContainer}>
-                                            <Text
-                                                style={{
-                                                    fontSize: 10,
-                                                    fontWeight: 'bold',
-                                                    color: '#6b7280',
-                                                    marginBottom: 4,
-                                                }}
-                                            >
+                                            <Text style={styles.subheading}>
                                                 Key Performance Indicators:
                                             </Text>
                                             {kpis.map((kpi) => (
@@ -273,7 +294,7 @@ export function OgsmPdfDocument({
                         Strategies ({strategies.length})
                     </Text>
                     {strategies.length === 0 ? (
-                        <Text style={{ fontSize: 11, color: '#9ca3af' }}>
+                        <Text style={styles.emptyStateText}>
                             No strategies defined
                         </Text>
                     ) : (
@@ -294,14 +315,7 @@ export function OgsmPdfDocument({
                                     )}
                                     {dashboardKpis.length > 0 && (
                                         <View style={styles.kpiContainer}>
-                                            <Text
-                                                style={{
-                                                    fontSize: 10,
-                                                    fontWeight: 'bold',
-                                                    color: '#6b7280',
-                                                    marginBottom: 4,
-                                                }}
-                                            >
+                                            <Text style={styles.subheading}>
                                                 Dashboard KPIs:
                                             </Text>
                                             {dashboardKpis.map((kpi) => (
@@ -329,14 +343,7 @@ export function OgsmPdfDocument({
                                     )}
                                     {actions.length > 0 && (
                                         <View style={styles.actionContainer}>
-                                            <Text
-                                                style={{
-                                                    fontSize: 10,
-                                                    fontWeight: 'bold',
-                                                    color: '#6b7280',
-                                                    marginBottom: 6,
-                                                }}
-                                            >
+                                            <Text style={styles.subheading}>
                                                 Actions:
                                             </Text>
                                             {actions.map((action) => {
@@ -359,11 +366,9 @@ export function OgsmPdfDocument({
                                                         </Text>
                                                         {action.description && (
                                                             <Text
-                                                                style={{
-                                                                    fontSize: 9,
-                                                                    color: '#6b7280',
-                                                                    marginBottom: 3,
-                                                                }}
+                                                                style={
+                                                                    styles.actionDescription
+                                                                }
                                                             >
                                                                 {
                                                                     action.description
@@ -396,9 +401,9 @@ export function OgsmPdfDocument({
                                                                                 )}
                                                                             </Text>
                                                                             <Text
-                                                                                style={{
-                                                                                    flex: 1,
-                                                                                }}
+                                                                                style={
+                                                                                    styles.taskName
+                                                                                }
                                                                             >
                                                                                 {
                                                                                     task.name
@@ -422,14 +427,7 @@ export function OgsmPdfDocument({
 
                 {/* Footer */}
                 <View style={styles.footer} fixed>
-                    <Text>
-                        {ogsm.name} - OGSM Plan - Page{' '}
-                        <Text
-                            render={({ pageNumber, totalPages }) =>
-                                `${pageNumber} / ${totalPages}`
-                            }
-                        />
-                    </Text>
+                    <Text>{ogsm.name}</Text>
                 </View>
             </Page>
         </Document>
