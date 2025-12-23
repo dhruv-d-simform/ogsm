@@ -4,6 +4,7 @@ import { ObjectiveSection } from '@/components/sections/ObjectiveSection';
 import { GoalsSection } from '@/components/sections/GoalsSection';
 import { StrategySection } from '@/components/sections/StrategySection';
 import { useUpdateOGSM } from '@/hooks/useOgsm';
+import { tryCatch } from '@/utils/tryCatch';
 
 interface OgsmBoardProps {
     ogsm: OGSM;
@@ -43,13 +44,13 @@ export function OgsmBoard({ ogsm, onObjectiveChange }: OgsmBoardProps) {
     const handleToggleFullscreen = async () => {
         if (!boardRef.current) return;
 
-        try {
-            if (!document.fullscreenElement) {
-                await boardRef.current.requestFullscreen();
-            } else {
-                await document.exitFullscreen();
-            }
-        } catch (error) {
+        const [, error] = await tryCatch(
+            document.fullscreenElement
+                ? document.exitFullscreen()
+                : boardRef.current.requestFullscreen()
+        );
+
+        if (error) {
             console.error('Error toggling fullscreen:', error);
         }
     };
