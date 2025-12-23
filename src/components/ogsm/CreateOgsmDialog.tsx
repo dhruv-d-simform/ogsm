@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import MDEditor from '@uiw/react-md-editor';
+import '@uiw/react-md-editor/markdown-editor.css';
 import {
     Dialog,
     DialogContent,
@@ -17,25 +19,46 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { useCreateOGSM } from '@/hooks/useOgsm';
+import { useTheme } from '@/contexts/ThemeContext';
 import type { CreateOGSMInput } from '@/types';
 
 /**
  * Zod schema for OGSM creation form
  */
-const createOgsmSchema = z.object({
-    name: z
-        .string()
-        .min(1, 'OGSM name is required')
-        .min(3, 'OGSM name must be at least 3 characters')
-        .max(100, 'OGSM name must be less than 100 characters'),
-    objective: z
-        .string()
-        .min(1, 'Objective is required')
-        .min(10, 'Objective must be at least 10 characters')
-        .max(500, 'Objective must be less than 500 characters'),
-});
+const createOgsmSchema = z
+    .object({
+        name: z
+            .string()
+            .min(1, 'OGSM name is required')
+            .min(3, 'OGSM name must be at least 3 characters')
+            .max(100, 'OGSM name must be less than 100 characters'),
+        objective: z
+            .string()
+            .min(1, 'Objective is required')
+            .min(10, 'Objective must be at least 10 characters')
+            .max(500, 'Objective must be less than 500 characters'),
+        description: z
+            .string()
+            .optional()
+            .transform((val) => (val ? val.trim() : undefined)),
+    })
+    .refine(
+        (data) => {
+            if (!data.description) return true;
+            return data.description.length > data.objective.length;
+        },
+        {
+            message:
+                'Description should provide more detail than the objective',
+            path: ['description'],
+        }
+    );
 
-type CreateOgsmFormData = z.infer<typeof createOgsmSchema>;
+type CreateOgsmFormData = {
+    name: string;
+    objective: string;
+    description?: string;
+};
 
 interface CreateOgsmDialogProps {
     children: React.ReactNode;
@@ -48,10 +71,12 @@ export function CreateOgsmDialog({ children }: CreateOgsmDialogProps) {
     const [open, setOpen] = useState(false);
     const navigate = useNavigate();
     const createOgsmMutation = useCreateOGSM();
+    const { theme } = useTheme();
 
     const {
         register,
         handleSubmit,
+        control,
         formState: { errors },
         reset,
     } = useForm<CreateOgsmFormData>({
@@ -59,6 +84,7 @@ export function CreateOgsmDialog({ children }: CreateOgsmDialogProps) {
         defaultValues: {
             name: '',
             objective: '',
+            description: '',
         },
     });
 
@@ -69,6 +95,7 @@ export function CreateOgsmDialog({ children }: CreateOgsmDialogProps) {
         const input: CreateOGSMInput = {
             name: data.name,
             objective: data.objective,
+            description: data.description,
             goalIds: [],
             strategyIds: [],
         };
@@ -168,6 +195,49 @@ export function CreateOgsmDialog({ children }: CreateOgsmDialogProps) {
                                     {errors.objective.message}
                                 </p>
                             )}
+                        </div>
+
+                        {/* Description Field (Markdown) */}
+                        <div className="space-y-2">
+                            <Label htmlFor="description">
+                                Description{' '}
+                                <span className="text-sm font-normal text-muted-foreground">
+                                    (Optional)
+                                </span>
+                            </Label>
+                            <Controller
+                                name="description"
+                                control={control}
+                                render={({ field }) => (
+                                    <div data-color-mode={theme}>
+                                        <MDEditor
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            preview="edit"
+                                            height={200}
+                                            textareaProps={{
+                                                placeholder:
+                                                    'Provide additional context, strategy, or background information in markdown format...',
+                                                disabled:
+                                                    createOgsmMutation.isPending,
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            />
+                            {errors.description && (
+                                <p
+                                    id="description-error"
+                                    className="text-sm text-destructive"
+                                    role="alert"
+                                >
+                                    {errors.description.message}
+                                </p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                                Supports markdown formatting. This description
+                                will appear in a hover card on the OGSM board.
+                            </p>
                         </div>
                     </div>
 

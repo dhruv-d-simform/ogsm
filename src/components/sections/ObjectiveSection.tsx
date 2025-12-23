@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 
 interface ObjectiveSectionProps {
     objective: string;
+    description?: string;
     onObjectiveChange?: (newObjective: string) => void;
     isFullscreen: boolean;
     onToggleFullscreen: () => void;
@@ -18,6 +19,7 @@ interface ObjectiveSectionProps {
  */
 export function ObjectiveSection({
     objective,
+    description,
     onObjectiveChange,
     isFullscreen,
     onToggleFullscreen,
@@ -80,6 +82,8 @@ export function ObjectiveSection({
                     initial="O"
                     label="Objective"
                     description="The overarching goal or aspiration that defines what you want to achieve. It should be clear, inspiring, and provide direction for all other elements of your OGSM plan."
+                    customDescription={description}
+                    hoverCardWidth="w-96"
                 />
                 {isEditing ? (
                     <input
