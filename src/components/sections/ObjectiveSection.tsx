@@ -110,6 +110,11 @@ export function ObjectiveSection({
                 size="icon"
                 onClick={onToggleFullscreen}
                 className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 transition-all duration-200 hover:scale-110 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100"
+                aria-label={
+                    isFullscreen
+                        ? 'Exit fullscreen mode'
+                        : 'Enter fullscreen mode'
+                }
                 title={
                     isFullscreen
                         ? 'Exit fullscreen mode'
