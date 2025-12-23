@@ -76,14 +76,14 @@ export function ObjectiveSection({
 
     return (
         <div
-            className="relative rounded-lg bg-primary p-6 text-primary-foreground"
+            className="group relative rounded-lg bg-primary p-6 text-primary-foreground"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
             <div
                 className={`flex items-center gap-3 transition-[padding] duration-200 ${
                     isHovered ? 'pr-12' : ''
-                }`}
+                } group-focus-within:pr-12`}
             >
                 <SectionHeader
                     initial="O"
@@ -113,26 +113,24 @@ export function ObjectiveSection({
                 )}
             </div>
 
-            {/* Fullscreen Toggle Button - Visible on hover */}
-            {isHovered && (
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onToggleFullscreen}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 transition-transform duration-200 hover:scale-110"
-                    title={
-                        isFullscreen
-                            ? 'Exit fullscreen mode'
-                            : 'Enter fullscreen mode'
-                    }
-                >
-                    {isFullscreen ? (
-                        <Minimize className="h-5 w-5" />
-                    ) : (
-                        <Maximize className="h-5 w-5" />
-                    )}
-                </Button>
-            )}
+            {/* Fullscreen Toggle Button - Visible on hover or focus */}
+            <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggleFullscreen}
+                className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 transition-all duration-200 hover:scale-110 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100"
+                title={
+                    isFullscreen
+                        ? 'Exit fullscreen mode'
+                        : 'Enter fullscreen mode'
+                }
+            >
+                {isFullscreen ? (
+                    <Minimize className="h-5 w-5" />
+                ) : (
+                    <Maximize className="h-5 w-5" />
+                )}
+            </Button>
         </div>
     );
 }
