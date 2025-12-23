@@ -151,7 +151,7 @@ export function OgsmDetailPage() {
         );
     }
 
-    // Success state - render OGSM
+    // Success state - render OGSM with header
     return (
         <ReadOnlyProvider>
             <div className="flex h-full flex-col">
