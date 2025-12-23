@@ -155,7 +155,11 @@ export function OgsmDetailPage() {
     return (
         <ReadOnlyProvider>
             <div className="flex h-full flex-col">
-                <OgsmHeader name={ogsm.name} onNameChange={handleNameChange} />
+                <OgsmHeader
+                    name={ogsm.name}
+                    onNameChange={handleNameChange}
+                    ogsm={ogsm}
+                />
                 <OgsmBoard
                     ogsm={ogsm}
                     onObjectiveChange={handleObjectiveChange}
