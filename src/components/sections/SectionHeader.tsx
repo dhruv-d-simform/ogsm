@@ -6,6 +6,31 @@ import {
     HoverCardTrigger,
 } from '@/components/ui/hover-card';
 
+/**
+ * Custom scrollbar styling for hover card
+ */
+const CUSTOM_SCROLLBAR_CLASSES =
+    '[&::-webkit-scrollbar]:w-2 ' +
+    '[&::-webkit-scrollbar-track]:bg-transparent ' +
+    '[&::-webkit-scrollbar-thumb]:bg-border ' +
+    '[&::-webkit-scrollbar-thumb]:rounded-full';
+
+/**
+ * Markdown content styling for comprehensive formatting
+ */
+const MARKDOWN_CONTENT_CLASSES =
+    'markdown-content text-sm text-muted-foreground ' +
+    '[&>h1]:text-lg [&>h1]:font-bold [&>h1]:mb-3 [&>h1]:text-foreground ' +
+    '[&>h2]:text-base [&>h2]:font-semibold [&>h2]:mb-2 [&>h2]:mt-4 [&>h2]:text-foreground ' +
+    '[&>h3]:text-sm [&>h3]:font-semibold [&>h3]:mb-1 [&>h3]:mt-3 [&>h3]:text-foreground ' +
+    '[&>p]:mb-3 [&>p]:leading-relaxed ' +
+    '[&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-3 [&>ul]:space-y-1 ' +
+    '[&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-3 [&>ol]:space-y-1 ' +
+    '[&>li]:leading-relaxed ' +
+    '[&>strong]:font-semibold [&>strong]:text-foreground ' +
+    '[&>em]:italic ' +
+    '[&>code]:bg-muted [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded [&>code]:text-xs [&>code]:font-mono';
+
 interface SectionHeaderProps {
     /**
      * The letter to display in the circle icon (O, G, S, M)
@@ -55,7 +80,7 @@ export function SectionHeader({
                     </button>
                 </HoverCardTrigger>
                 <HoverCardContent
-                    className={`${hoverCardWidth} shadow-lg max-h-96 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full`}
+                    className={`${hoverCardWidth} shadow-lg max-h-96 overflow-y-auto ${CUSTOM_SCROLLBAR_CLASSES}`}
                     side="bottom"
                     align="start"
                     sideOffset={8}
@@ -67,7 +92,7 @@ export function SectionHeader({
                             </h4>
                         )}
                         {isMarkdown ? (
-                            <div className="markdown-content text-sm text-muted-foreground [&>h1]:text-lg [&>h1]:font-bold [&>h1]:mb-3 [&>h1]:text-foreground [&>h2]:text-base [&>h2]:font-semibold [&>h2]:mb-2 [&>h2]:mt-4 [&>h2]:text-foreground [&>h3]:text-sm [&>h3]:font-semibold [&>h3]:mb-1 [&>h3]:mt-3 [&>h3]:text-foreground [&>p]:mb-3 [&>p]:leading-relaxed [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-3 [&>ul]:space-y-1 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-3 [&>ol]:space-y-1 [&>li]:leading-relaxed [&>strong]:font-semibold [&>strong]:text-foreground [&>em]:italic [&>code]:bg-muted [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded [&>code]:text-xs [&>code]:font-mono">
+                            <div className={MARKDOWN_CONTENT_CLASSES}>
                                 <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
                                     {displayContent}
                                 </ReactMarkdown>
