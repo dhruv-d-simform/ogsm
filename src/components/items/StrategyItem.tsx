@@ -81,6 +81,20 @@ export function StrategyItem({
     const [isActionHovered, setIsActionHovered] = useState(false);
     const [newActionName, setNewActionName] = useState('');
 
+    // Local state to track reordered KPI and Action IDs for instant visual feedback
+    const [localDashboardKpiIds, setLocalDashboardKpiIds] = useState<string[]>(
+        []
+    );
+    const [localActionIds, setLocalActionIds] = useState<string[]>([]);
+
+    // Update local state when strategy data changes
+    useEffect(() => {
+        if (strategy) {
+            setLocalDashboardKpiIds(strategy.dashboardKpiIds);
+            setLocalActionIds(strategy.actionIds);
+        }
+    }, [strategy]);
+
     // Sensors for drag and drop of Dashboard KPIs and Actions
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -99,20 +113,23 @@ export function StrategyItem({
             return;
         }
 
-        const oldIndex = strategy.dashboardKpiIds.indexOf(active.id as string);
-        const newIndex = strategy.dashboardKpiIds.indexOf(over.id as string);
+        const oldIndex = localDashboardKpiIds.indexOf(active.id as string);
+        const newIndex = localDashboardKpiIds.indexOf(over.id as string);
 
         if (oldIndex === -1 || newIndex === -1) {
             return;
         }
 
         const newDashboardKpiIds = arrayMove(
-            strategy.dashboardKpiIds,
+            localDashboardKpiIds,
             oldIndex,
             newIndex
         );
 
-        // Optimistic update - update the strategy with new KPI order immediately
+        // Update local state immediately for instant visual feedback
+        setLocalDashboardKpiIds(newDashboardKpiIds);
+
+        // Optimistic update - update the strategy with new KPI order
         updateStrategyMutation.mutate(
             {
                 id: strategyId,
@@ -121,7 +138,10 @@ export function StrategyItem({
             {
                 // Optimistic update handled by mutation
                 onError: () => {
-                    // On error, React Query will automatically refetch and restore the previous state
+                    // On error, revert to original order
+                    if (strategy) {
+                        setLocalDashboardKpiIds(strategy.dashboardKpiIds);
+                    }
                 },
             }
         );
@@ -137,16 +157,19 @@ export function StrategyItem({
             return;
         }
 
-        const oldIndex = strategy.actionIds.indexOf(active.id as string);
-        const newIndex = strategy.actionIds.indexOf(over.id as string);
+        const oldIndex = localActionIds.indexOf(active.id as string);
+        const newIndex = localActionIds.indexOf(over.id as string);
 
         if (oldIndex === -1 || newIndex === -1) {
             return;
         }
 
-        const newActionIds = arrayMove(strategy.actionIds, oldIndex, newIndex);
+        const newActionIds = arrayMove(localActionIds, oldIndex, newIndex);
 
-        // Optimistic update - update the strategy with new action order immediately
+        // Update local state immediately for instant visual feedback
+        setLocalActionIds(newActionIds);
+
+        // Optimistic update - update the strategy with new action order
         updateStrategyMutation.mutate(
             {
                 id: strategyId,
@@ -155,7 +178,10 @@ export function StrategyItem({
             {
                 // Optimistic update handled by mutation
                 onError: () => {
-                    // On error, React Query will automatically refetch and restore the previous state
+                    // On error, revert to original order
+                    if (strategy) {
+                        setLocalActionIds(strategy.actionIds);
+                    }
                 },
             }
         );
@@ -473,7 +499,7 @@ export function StrategyItem({
                     onMouseEnter={() => setIsKpiHovered(true)}
                     onMouseLeave={() => setIsKpiHovered(false)}
                 >
-                    {strategy.dashboardKpiIds.length > 0 ? (
+                    {localDashboardKpiIds.length > 0 ? (
                         <div>
                             <DndContext
                                 sensors={sensors}
@@ -481,10 +507,10 @@ export function StrategyItem({
                                 onDragEnd={handleDashboardKpiDragEnd}
                             >
                                 <SortableContext
-                                    items={strategy.dashboardKpiIds}
+                                    items={localDashboardKpiIds}
                                     strategy={verticalListSortingStrategy}
                                 >
-                                    {strategy.dashboardKpiIds.map(
+                                    {localDashboardKpiIds.map(
                                         (kpiId, index) => (
                                             <DashboardKpiItem
                                                 key={kpiId}
@@ -545,7 +571,7 @@ export function StrategyItem({
                     onMouseEnter={() => setIsActionHovered(true)}
                     onMouseLeave={() => setIsActionHovered(false)}
                 >
-                    {strategy.actionIds.length > 0 ? (
+                    {localActionIds.length > 0 ? (
                         <div>
                             <DndContext
                                 sensors={sensors}
@@ -553,28 +579,26 @@ export function StrategyItem({
                                 onDragEnd={handleActionDragEnd}
                             >
                                 <SortableContext
-                                    items={strategy.actionIds}
+                                    items={localActionIds}
                                     strategy={verticalListSortingStrategy}
                                 >
-                                    {strategy.actionIds.map(
-                                        (actionId, index) => (
-                                            <div
-                                                key={actionId}
-                                                className={
-                                                    index > 0
-                                                        ? 'border-t border-border'
-                                                        : ''
+                                    {localActionIds.map((actionId, index) => (
+                                        <div
+                                            key={actionId}
+                                            className={
+                                                index > 0
+                                                    ? 'border-t border-border'
+                                                    : ''
+                                            }
+                                        >
+                                            <ActionItem
+                                                actionId={actionId}
+                                                onActionDeleted={
+                                                    handleActionDeleted
                                                 }
-                                            >
-                                                <ActionItem
-                                                    actionId={actionId}
-                                                    onActionDeleted={
-                                                        handleActionDeleted
-                                                    }
-                                                />
-                                            </div>
-                                        )
-                                    )}
+                                            />
+                                        </div>
+                                    ))}
                                 </SortableContext>
                             </DndContext>
 

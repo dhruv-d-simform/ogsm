@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { StrategyItem } from '@/components/items/StrategyItem';
@@ -45,6 +45,14 @@ export function StrategySection({
     const createStrategyMutation = useCreateStrategy();
     const updateOGSMMutation = useUpdateOGSM();
 
+    // Local state to track reordered strategy IDs for instant visual feedback
+    const [localStrategyIds, setLocalStrategyIds] = useState(strategyIds);
+
+    // Update local state when prop changes (from parent or refetch)
+    useEffect(() => {
+        setLocalStrategyIds(strategyIds);
+    }, [strategyIds]);
+
     // Configure sensors for drag-and-drop
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -63,16 +71,19 @@ export function StrategySection({
             return;
         }
 
-        const oldIndex = strategyIds.indexOf(active.id as string);
-        const newIndex = strategyIds.indexOf(over.id as string);
+        const oldIndex = localStrategyIds.indexOf(active.id as string);
+        const newIndex = localStrategyIds.indexOf(over.id as string);
 
         if (oldIndex === -1 || newIndex === -1) {
             return;
         }
 
-        const newStrategyIds = arrayMove(strategyIds, oldIndex, newIndex);
+        const newStrategyIds = arrayMove(localStrategyIds, oldIndex, newIndex);
 
-        // Optimistic update - update the OGSM with new strategy order immediately
+        // Update local state immediately for instant visual feedback
+        setLocalStrategyIds(newStrategyIds);
+
+        // Optimistic update - update the OGSM with new strategy order
         updateOGSMMutation.mutate(
             {
                 id: ogsmId,
@@ -81,7 +92,8 @@ export function StrategySection({
             {
                 // Optimistic update handled by mutation
                 onError: () => {
-                    // On error, React Query will automatically refetch and restore the previous state
+                    // On error, revert to original order
+                    setLocalStrategyIds(strategyIds);
                 },
             }
         );
@@ -172,12 +184,12 @@ export function StrategySection({
                         onDragEnd={handleDragEnd}
                     >
                         <SortableContext
-                            items={strategyIds}
+                            items={localStrategyIds}
                             strategy={verticalListSortingStrategy}
                         >
                             <div className="flex flex-col gap-4">
-                                {strategyIds.length > 0
-                                    ? strategyIds.map((strategyId) => (
+                                {localStrategyIds.length > 0
+                                    ? localStrategyIds.map((strategyId) => (
                                           <StrategyItem
                                               key={strategyId}
                                               strategyId={strategyId}

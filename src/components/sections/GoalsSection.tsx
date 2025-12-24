@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { GoalItem } from '@/components/items/GoalItem';
@@ -45,6 +45,14 @@ export function GoalsSection({
     const createGoalMutation = useCreateGoal();
     const updateOGSMMutation = useUpdateOGSM();
 
+    // Local state to track reordered goal IDs for instant visual feedback
+    const [localGoalIds, setLocalGoalIds] = useState(goalIds);
+
+    // Update local state when prop changes (from parent or refetch)
+    useEffect(() => {
+        setLocalGoalIds(goalIds);
+    }, [goalIds]);
+
     // Configure sensors for drag-and-drop
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -63,16 +71,19 @@ export function GoalsSection({
             return;
         }
 
-        const oldIndex = goalIds.indexOf(active.id as string);
-        const newIndex = goalIds.indexOf(over.id as string);
+        const oldIndex = localGoalIds.indexOf(active.id as string);
+        const newIndex = localGoalIds.indexOf(over.id as string);
 
         if (oldIndex === -1 || newIndex === -1) {
             return;
         }
 
-        const newGoalIds = arrayMove(goalIds, oldIndex, newIndex);
+        const newGoalIds = arrayMove(localGoalIds, oldIndex, newIndex);
 
-        // Optimistic update - update the OGSM with new goal order immediately
+        // Update local state immediately for instant visual feedback
+        setLocalGoalIds(newGoalIds);
+
+        // Optimistic update - update the OGSM with new goal order
         updateOGSMMutation.mutate(
             {
                 id: ogsmId,
@@ -81,7 +92,8 @@ export function GoalsSection({
             {
                 // Optimistic update handled by mutation
                 onError: () => {
-                    // On error, React Query will automatically refetch and restore the previous state
+                    // On error, revert to original order
+                    setLocalGoalIds(goalIds);
                 },
             }
         );
@@ -145,13 +157,13 @@ export function GoalsSection({
                         onDragEnd={handleDragEnd}
                     >
                         <SortableContext
-                            items={goalIds}
+                            items={localGoalIds}
                             strategy={verticalListSortingStrategy}
                         >
                             {/* Goals List */}
                             <div>
-                                {goalIds.length > 0
-                                    ? goalIds.map((goalId) => (
+                                {localGoalIds.length > 0
+                                    ? localGoalIds.map((goalId) => (
                                           <GoalItem
                                               key={goalId}
                                               goalId={goalId}

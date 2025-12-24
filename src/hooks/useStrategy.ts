@@ -3,9 +3,14 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { CreateStrategyInput, UpdateStrategyInput } from '@/types';
+import type {
+    CreateStrategyInput,
+    UpdateStrategyInput,
+    Strategy,
+} from '@/types';
 import * as strategyApi from '@/api/strategies';
 import { strategyKeys } from '@/lib/queryKeys';
+import { createOptimisticUpdateOptions } from '@/utils/optimisticUpdate';
 
 /**
  * Hook to fetch all strategies
@@ -69,13 +74,11 @@ export const useUpdateStrategy = () => {
             id: string;
             input: UpdateStrategyInput;
         }) => strategyApi.updateStrategy(id, input),
-        onSuccess: (_data, variables) => {
-            // Invalidate and refetch both list and detail
-            queryClient.invalidateQueries({ queryKey: strategyKeys.lists() });
-            queryClient.invalidateQueries({
-                queryKey: strategyKeys.detail(variables.id),
-            });
-        },
+        ...createOptimisticUpdateOptions<Strategy, UpdateStrategyInput>({
+            queryClient,
+            getDetailKey: strategyKeys.detail,
+            getListKey: strategyKeys.lists,
+        }),
     });
 };
 
