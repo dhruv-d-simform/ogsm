@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import { useKPI, useUpdateKPI, useDeleteKPI } from '@/hooks/useKpi';
 import { Skeleton } from '@/components/ui/skeleton';
-import { X } from 'lucide-react';
+import { X, GripVertical } from 'lucide-react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface DashboardKpiItemProps {
     kpiId: string;
@@ -14,6 +16,7 @@ interface DashboardKpiItemProps {
  * DashboardKpiItem Component
  * Fetches and displays a single KPI in the Dashboard column
  * Supports inline editing and deletion
+ * Supports drag-and-drop reordering
  */
 export function DashboardKpiItem({
     kpiId,
@@ -24,6 +27,22 @@ export function DashboardKpiItem({
     const { data: kpi, isLoading, isError, isFetching } = useKPI(kpiId);
     const updateKpiMutation = useUpdateKPI();
     const deleteKpiMutation = useDeleteKPI();
+
+    // Sortable hook for drag-and-drop
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: kpiId, disabled: isReadOnly });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
@@ -130,36 +149,53 @@ export function DashboardKpiItem({
     // Success state - render KPI with inline editing
     return (
         <div
+            ref={setNodeRef}
+            style={style}
             className={`relative p-4 pr-10 ${showBorder ? 'border-t border-border' : ''}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            {isEditing ? (
-                <input
-                    type="text"
-                    value={localValue}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    onKeyDown={handleKeyDown}
-                    autoFocus
-                    className="w-full bg-transparent text-sm outline-none"
-                />
-            ) : (
-                <p
-                    onClick={handleClick}
-                    className={`${
-                        isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
-                    } text-sm ${
-                        updateKpiMutation.isPending || pendingValue
-                            ? 'opacity-50'
-                            : ''
-                    }`}
-                    title={isReadOnly ? '' : 'Click to edit'}
-                >
-                    {pendingValue ||
-                        (updateKpiMutation.isPending ? localValue : kpi.name)}
-                </p>
-            )}
+            <div className="flex items-center gap-2">
+                {/* Drag Handle - Visible on hover, hidden in read-only */}
+                {isHovered && !isReadOnly && (
+                    <button
+                        className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+                        {...attributes}
+                        {...listeners}
+                        aria-label="Drag to reorder"
+                    >
+                        <GripVertical className="h-4 w-4" />
+                    </button>
+                )}
+                {isEditing ? (
+                    <input
+                        type="text"
+                        value={localValue}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        onKeyDown={handleKeyDown}
+                        autoFocus
+                        className="w-full bg-transparent text-sm outline-none"
+                    />
+                ) : (
+                    <p
+                        onClick={handleClick}
+                        className={`flex-1 ${
+                            isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
+                        } text-sm ${
+                            updateKpiMutation.isPending || pendingValue
+                                ? 'opacity-50'
+                                : ''
+                        }`}
+                        title={isReadOnly ? '' : 'Click to edit'}
+                    >
+                        {pendingValue ||
+                            (updateKpiMutation.isPending
+                                ? localValue
+                                : kpi.name)}
+                    </p>
+                )}
+            </div>
 
             {/* Delete Button - Visible on Hover, Hidden in Edit Mode and Read-Only */}
             {isHovered && !isEditing && !isReadOnly && (

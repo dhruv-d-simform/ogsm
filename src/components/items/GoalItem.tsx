@@ -3,7 +3,7 @@ import { useGoal, useUpdateGoal, useDeleteGoal } from '@/hooks/useGoal';
 import { useCreateKPI } from '@/hooks/useKpi';
 import { KPIItem } from '@/components/items/KPIItem';
 import { Skeleton } from '@/components/ui/skeleton';
-import { X } from 'lucide-react';
+import { X, GripVertical } from 'lucide-react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import {
     DndContext,
@@ -19,7 +19,9 @@ import {
     SortableContext,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
+    useSortable,
 } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface GoalItemProps {
     goalId: string;
@@ -31,6 +33,7 @@ interface GoalItemProps {
  * Fetches and displays a single goal with its associated KPIs
  * Supports inline editing and deletion
  * Supports drag-and-drop reordering of KPIs
+ * Supports drag-and-drop reordering of goals
  */
 export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     const { data: goal, isLoading, isError, isFetching } = useGoal(goalId);
@@ -39,6 +42,22 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     const deleteGoalMutation = useDeleteGoal();
     const { isReadOnly } = useReadOnly();
 
+    // Sortable hook for drag-and-drop of the goal itself
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: goalId, disabled: isReadOnly });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
@@ -46,7 +65,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     const [isKpiHovered, setIsKpiHovered] = useState(false);
     const [newKpiName, setNewKpiName] = useState('');
 
-    // Sensors for drag and drop
+    // Sensors for drag and drop of KPIs
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -251,6 +270,8 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     // Success state - render goal with KPIs
     return (
         <div
+            ref={setNodeRef}
+            style={style}
             className="relative border-b border-border last:border-b-0"
             onMouseEnter={() => {
                 setIsKpiHovered(true);
@@ -263,34 +284,49 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
         >
             {/* Goal Name - Inline Editable */}
             <div className="p-3 pr-10">
-                {isEditing ? (
-                    <input
-                        type="text"
-                        value={localValue}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        onKeyDown={handleKeyDown}
-                        autoFocus
-                        className="w-full bg-transparent text-sm font-medium outline-none"
-                    />
-                ) : (
-                    <p
-                        onClick={handleClick}
-                        className={`text-sm font-medium ${
-                            isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
-                        } ${
-                            updateGoalMutation.isPending || pendingValue
-                                ? 'opacity-50'
-                                : ''
-                        }`}
-                        title={isReadOnly ? '' : 'Click to edit'}
-                    >
-                        {pendingValue ||
-                            (updateGoalMutation.isPending
-                                ? localValue
-                                : goal.name)}
-                    </p>
-                )}
+                <div className="flex items-center gap-2">
+                    {/* Drag Handle - Visible on hover, hidden in read-only */}
+                    {isHovered && !isReadOnly && (
+                        <button
+                            className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+                            {...attributes}
+                            {...listeners}
+                            aria-label="Drag to reorder"
+                        >
+                            <GripVertical className="h-4 w-4" />
+                        </button>
+                    )}
+                    {isEditing ? (
+                        <input
+                            type="text"
+                            value={localValue}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            onKeyDown={handleKeyDown}
+                            autoFocus
+                            className="w-full bg-transparent text-sm font-medium outline-none"
+                        />
+                    ) : (
+                        <p
+                            onClick={handleClick}
+                            className={`flex-1 text-sm font-medium ${
+                                isReadOnly
+                                    ? ''
+                                    : 'cursor-pointer hover:opacity-70'
+                            } ${
+                                updateGoalMutation.isPending || pendingValue
+                                    ? 'opacity-50'
+                                    : ''
+                            }`}
+                            title={isReadOnly ? '' : 'Click to edit'}
+                        >
+                            {pendingValue ||
+                                (updateGoalMutation.isPending
+                                    ? localValue
+                                    : goal.name)}
+                        </p>
+                    )}
+                </div>
             </div>
 
             {/* Delete Button - Visible on Hover, Hidden in Edit Mode and Read-Only */}

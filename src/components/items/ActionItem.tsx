@@ -4,7 +4,7 @@ import { useAction, useUpdateAction, useDeleteAction } from '@/hooks/useAction';
 import { useCreateTask } from '@/hooks/useTask';
 import { TaskItem } from '@/components/items/TaskItem';
 import { Skeleton } from '@/components/ui/skeleton';
-import { X } from 'lucide-react';
+import { X, GripVertical } from 'lucide-react';
 import {
     DndContext,
     closestCenter,
@@ -19,7 +19,9 @@ import {
     SortableContext,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
+    useSortable,
 } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface ActionItemProps {
     actionId: string;
@@ -31,6 +33,7 @@ interface ActionItemProps {
  * Fetches and displays a single action with its tasks
  * Supports inline editing and deletion
  * Supports drag-and-drop reordering of tasks
+ * Supports drag-and-drop reordering of actions
  */
 export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
     const { isReadOnly } = useReadOnly();
@@ -43,6 +46,22 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
     const updateActionMutation = useUpdateAction();
     const createTaskMutation = useCreateTask();
     const deleteActionMutation = useDeleteAction();
+
+    // Sortable hook for drag-and-drop of the action itself
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: actionId, disabled: isReadOnly });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
 
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
@@ -260,6 +279,8 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
     // Success state - render action with tasks
     return (
         <div
+            ref={setNodeRef}
+            style={style}
             onMouseEnter={() => {
                 setIsTaskHovered(true);
                 setIsHovered(true);
@@ -271,34 +292,49 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
         >
             {/* Action Name - Inline Editable */}
             <div className="relative p-4 pr-10">
-                {isEditing ? (
-                    <input
-                        type="text"
-                        value={localValue}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        onKeyDown={handleKeyDown}
-                        autoFocus
-                        className="w-full bg-transparent text-sm font-medium outline-none"
-                    />
-                ) : (
-                    <p
-                        onClick={handleClick}
-                        className={`${
-                            isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
-                        } text-sm font-medium ${
-                            updateActionMutation.isPending || pendingValue
-                                ? 'opacity-50'
-                                : ''
-                        }`}
-                        title={isReadOnly ? '' : 'Click to edit'}
-                    >
-                        {pendingValue ||
-                            (updateActionMutation.isPending
-                                ? localValue
-                                : action.name)}
-                    </p>
-                )}
+                <div className="flex items-center gap-2">
+                    {/* Drag Handle - Visible on hover, hidden in read-only */}
+                    {isHovered && !isReadOnly && (
+                        <button
+                            className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+                            {...attributes}
+                            {...listeners}
+                            aria-label="Drag to reorder"
+                        >
+                            <GripVertical className="h-4 w-4" />
+                        </button>
+                    )}
+                    {isEditing ? (
+                        <input
+                            type="text"
+                            value={localValue}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            onKeyDown={handleKeyDown}
+                            autoFocus
+                            className="w-full bg-transparent text-sm font-medium outline-none"
+                        />
+                    ) : (
+                        <p
+                            onClick={handleClick}
+                            className={`flex-1 ${
+                                isReadOnly
+                                    ? ''
+                                    : 'cursor-pointer hover:opacity-70'
+                            } text-sm font-medium ${
+                                updateActionMutation.isPending || pendingValue
+                                    ? 'opacity-50'
+                                    : ''
+                            }`}
+                            title={isReadOnly ? '' : 'Click to edit'}
+                        >
+                            {pendingValue ||
+                                (updateActionMutation.isPending
+                                    ? localValue
+                                    : action.name)}
+                        </p>
+                    )}
+                </div>
 
                 {/* Delete Button - Visible on Hover, Hidden in Edit Mode and Read-Only */}
                 {isHovered && !isEditing && !isReadOnly && (

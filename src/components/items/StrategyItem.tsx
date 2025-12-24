@@ -10,7 +10,24 @@ import { useCreateAction } from '@/hooks/useAction';
 import { DashboardKpiItem } from '@/components/items/DashboardKpiItem';
 import { ActionItem } from '@/components/items/ActionItem';
 import { Skeleton } from '@/components/ui/skeleton';
-import { X } from 'lucide-react';
+import { X, GripVertical } from 'lucide-react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import {
+    DndContext,
+    closestCenter,
+    PointerSensor,
+    KeyboardSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    arrayMove,
+} from '@dnd-kit/sortable';
 
 interface StrategyItemProps {
     strategyId: string;
@@ -21,6 +38,7 @@ interface StrategyItemProps {
  * StrategyItem Component
  * Fetches and displays a single strategy with its dashboard KPIs and actions
  * Supports inline editing and deletion
+ * Supports drag-and-drop reordering of strategies
  */
 export function StrategyItem({
     strategyId,
@@ -38,6 +56,22 @@ export function StrategyItem({
     const createActionMutation = useCreateAction();
     const deleteStrategyMutation = useDeleteStrategy();
 
+    // Sortable hook for drag-and-drop of the strategy itself
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: strategyId, disabled: isReadOnly });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
@@ -46,6 +80,86 @@ export function StrategyItem({
     const [newKpiName, setNewKpiName] = useState('');
     const [isActionHovered, setIsActionHovered] = useState(false);
     const [newActionName, setNewActionName] = useState('');
+
+    // Sensors for drag and drop of Dashboard KPIs and Actions
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    /**
+     * Handle Dashboard KPI drag end - reorder KPIs with optimistic update
+     */
+    const handleDashboardKpiDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (!over || active.id === over.id || !strategy) {
+            return;
+        }
+
+        const oldIndex = strategy.dashboardKpiIds.indexOf(active.id as string);
+        const newIndex = strategy.dashboardKpiIds.indexOf(over.id as string);
+
+        if (oldIndex === -1 || newIndex === -1) {
+            return;
+        }
+
+        const newDashboardKpiIds = arrayMove(
+            strategy.dashboardKpiIds,
+            oldIndex,
+            newIndex
+        );
+
+        // Optimistic update - update the strategy with new KPI order immediately
+        updateStrategyMutation.mutate(
+            {
+                id: strategyId,
+                input: { dashboardKpiIds: newDashboardKpiIds },
+            },
+            {
+                // Optimistic update handled by mutation
+                onError: () => {
+                    // On error, React Query will automatically refetch and restore the previous state
+                },
+            }
+        );
+    };
+
+    /**
+     * Handle Action drag end - reorder actions with optimistic update
+     */
+    const handleActionDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (!over || active.id === over.id || !strategy) {
+            return;
+        }
+
+        const oldIndex = strategy.actionIds.indexOf(active.id as string);
+        const newIndex = strategy.actionIds.indexOf(over.id as string);
+
+        if (oldIndex === -1 || newIndex === -1) {
+            return;
+        }
+
+        const newActionIds = arrayMove(strategy.actionIds, oldIndex, newIndex);
+
+        // Optimistic update - update the strategy with new action order immediately
+        updateStrategyMutation.mutate(
+            {
+                id: strategyId,
+                input: { actionIds: newActionIds },
+            },
+            {
+                // Optimistic update handled by mutation
+                onError: () => {
+                    // On error, React Query will automatically refetch and restore the previous state
+                },
+            }
+        );
+    };
 
     /**
      * Sync local state when strategy data changes and no mutation is pending
@@ -286,6 +400,8 @@ export function StrategyItem({
     // Success state - render strategy with dashboard KPIs and actions
     return (
         <div
+            ref={setNodeRef}
+            style={style}
             className="relative shadow-sm dark:shadow-[0_1px_3px_0_rgba(255,255,255,0.1)]"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -293,36 +409,50 @@ export function StrategyItem({
             <div className="flex">
                 {/* Strategy Name Column - 25% - Inline Editable */}
                 <div className="relative w-[25%] border-r border-border p-4 pr-10">
-                    {isEditing ? (
-                        <input
-                            type="text"
-                            value={localValue}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            onKeyDown={handleKeyDown}
-                            autoFocus
-                            className="w-full bg-transparent text-sm font-medium outline-none"
-                        />
-                    ) : (
-                        <p
-                            onClick={handleClick}
-                            className={`${
-                                isReadOnly
-                                    ? ''
-                                    : 'cursor-pointer hover:opacity-70'
-                            } text-sm font-medium ${
-                                updateStrategyMutation.isPending || pendingValue
-                                    ? 'opacity-50'
-                                    : ''
-                            }`}
-                            title={isReadOnly ? '' : 'Click to edit'}
-                        >
-                            {pendingValue ||
-                                (updateStrategyMutation.isPending
-                                    ? localValue
-                                    : strategy.name)}
-                        </p>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {/* Drag Handle - Visible on hover, hidden in read-only */}
+                        {isHovered && !isReadOnly && (
+                            <button
+                                className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+                                {...attributes}
+                                {...listeners}
+                                aria-label="Drag to reorder"
+                            >
+                                <GripVertical className="h-4 w-4" />
+                            </button>
+                        )}
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                value={localValue}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                onKeyDown={handleKeyDown}
+                                autoFocus
+                                className="w-full bg-transparent text-sm font-medium outline-none"
+                            />
+                        ) : (
+                            <p
+                                onClick={handleClick}
+                                className={`flex-1 ${
+                                    isReadOnly
+                                        ? ''
+                                        : 'cursor-pointer hover:opacity-70'
+                                } text-sm font-medium ${
+                                    updateStrategyMutation.isPending ||
+                                    pendingValue
+                                        ? 'opacity-50'
+                                        : ''
+                                }`}
+                                title={isReadOnly ? '' : 'Click to edit'}
+                            >
+                                {pendingValue ||
+                                    (updateStrategyMutation.isPending
+                                        ? localValue
+                                        : strategy.name)}
+                            </p>
+                        )}
+                    </div>
 
                     {/* Delete Button - Visible on Hover, Hidden in Edit Mode and Read-Only */}
                     {isHovered && !isEditing && !isReadOnly && (
@@ -345,14 +475,27 @@ export function StrategyItem({
                 >
                     {strategy.dashboardKpiIds.length > 0 ? (
                         <div>
-                            {strategy.dashboardKpiIds.map((kpiId, index) => (
-                                <DashboardKpiItem
-                                    key={kpiId}
-                                    kpiId={kpiId}
-                                    showBorder={index > 0}
-                                    onKpiDeleted={handleKpiDeleted}
-                                />
-                            ))}
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDashboardKpiDragEnd}
+                            >
+                                <SortableContext
+                                    items={strategy.dashboardKpiIds}
+                                    strategy={verticalListSortingStrategy}
+                                >
+                                    {strategy.dashboardKpiIds.map(
+                                        (kpiId, index) => (
+                                            <DashboardKpiItem
+                                                key={kpiId}
+                                                kpiId={kpiId}
+                                                showBorder={index > 0}
+                                                onKpiDeleted={handleKpiDeleted}
+                                            />
+                                        )
+                                    )}
+                                </SortableContext>
+                            </DndContext>
 
                             {/* Add New KPI Input - Visible on Hover or when input has text, Hidden in Read-Only */}
                             {(isKpiHovered || newKpiName) && !isReadOnly && (
@@ -404,21 +547,36 @@ export function StrategyItem({
                 >
                     {strategy.actionIds.length > 0 ? (
                         <div>
-                            {strategy.actionIds.map((actionId, index) => (
-                                <div
-                                    key={actionId}
-                                    className={
-                                        index > 0
-                                            ? 'border-t border-border'
-                                            : ''
-                                    }
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleActionDragEnd}
+                            >
+                                <SortableContext
+                                    items={strategy.actionIds}
+                                    strategy={verticalListSortingStrategy}
                                 >
-                                    <ActionItem
-                                        actionId={actionId}
-                                        onActionDeleted={handleActionDeleted}
-                                    />
-                                </div>
-                            ))}
+                                    {strategy.actionIds.map(
+                                        (actionId, index) => (
+                                            <div
+                                                key={actionId}
+                                                className={
+                                                    index > 0
+                                                        ? 'border-t border-border'
+                                                        : ''
+                                                }
+                                            >
+                                                <ActionItem
+                                                    actionId={actionId}
+                                                    onActionDeleted={
+                                                        handleActionDeleted
+                                                    }
+                                                />
+                                            </div>
+                                        )
+                                    )}
+                                </SortableContext>
+                            </DndContext>
 
                             {/* Add New Action Input - Visible on Hover or when input has text, Hidden in Read-Only */}
                             {(isActionHovered || newActionName) &&

@@ -4,8 +4,25 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { StrategyItem } from '@/components/items/StrategyItem';
 import { useCreateStrategy } from '@/hooks/useStrategy';
 import { SectionHeader } from '@/components/sections/SectionHeader';
+import { useUpdateOGSM } from '@/hooks/useOgsm';
+import {
+    DndContext,
+    closestCenter,
+    PointerSensor,
+    KeyboardSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    arrayMove,
+} from '@dnd-kit/sortable';
 
 interface StrategySectionProps {
+    ogsmId: string;
     strategyIds: string[];
     onStrategyCreated?: (strategyId: string) => void;
     onStrategyDeleted?: (strategyId: string) => void;
@@ -14,8 +31,10 @@ interface StrategySectionProps {
 /**
  * Strategy Section Component
  * Displays the strategies in a grid on the right side of the board
+ * Supports drag-and-drop reordering of strategies
  */
 export function StrategySection({
+    ogsmId,
     strategyIds,
     onStrategyCreated,
     onStrategyDeleted,
@@ -24,6 +43,49 @@ export function StrategySection({
     const [isHovered, setIsHovered] = useState(false);
     const [newStrategyName, setNewStrategyName] = useState('');
     const createStrategyMutation = useCreateStrategy();
+    const updateOGSMMutation = useUpdateOGSM();
+
+    // Configure sensors for drag-and-drop
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    /**
+     * Handle strategy drag end - reorder strategies with optimistic update
+     */
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (!over || active.id === over.id) {
+            return;
+        }
+
+        const oldIndex = strategyIds.indexOf(active.id as string);
+        const newIndex = strategyIds.indexOf(over.id as string);
+
+        if (oldIndex === -1 || newIndex === -1) {
+            return;
+        }
+
+        const newStrategyIds = arrayMove(strategyIds, oldIndex, newIndex);
+
+        // Optimistic update - update the OGSM with new strategy order immediately
+        updateOGSMMutation.mutate(
+            {
+                id: ogsmId,
+                input: { strategyIds: newStrategyIds },
+            },
+            {
+                // Optimistic update handled by mutation
+                onError: () => {
+                    // On error, React Query will automatically refetch and restore the previous state
+                },
+            }
+        );
+    };
 
     /**
      * Handle creating a new strategy
@@ -104,55 +166,73 @@ export function StrategySection({
             {/* Content Area - Scrollable Strategy List */}
             <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
-                    <div className="flex flex-col gap-4">
-                        {strategyIds.length > 0
-                            ? strategyIds.map((strategyId) => (
-                                  <StrategyItem
-                                      key={strategyId}
-                                      strategyId={strategyId}
-                                      onStrategyDeleted={onStrategyDeleted}
-                                  />
-                              ))
-                            : // Show empty state only in read-only mode or when input is not visible
-                              (isReadOnly ||
-                                  (!isHovered && !newStrategyName)) && (
-                                  <div className="p-8 text-center text-sm text-muted-foreground">
-                                      No strategies yet. Add your first
-                                      strategy!
-                                  </div>
-                              )}
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <SortableContext
+                            items={strategyIds}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            <div className="flex flex-col gap-4">
+                                {strategyIds.length > 0
+                                    ? strategyIds.map((strategyId) => (
+                                          <StrategyItem
+                                              key={strategyId}
+                                              strategyId={strategyId}
+                                              onStrategyDeleted={
+                                                  onStrategyDeleted
+                                              }
+                                          />
+                                      ))
+                                    : // Show empty state only in read-only mode or when input is not visible
+                                      (isReadOnly ||
+                                          (!isHovered && !newStrategyName)) && (
+                                          <div className="p-8 text-center text-sm text-muted-foreground">
+                                              No strategies yet. Add your first
+                                              strategy!
+                                          </div>
+                                      )}
 
-                        {/* Add New Strategy Input - Visible on Hover or when input has text, Hidden in Read-Only */}
-                        {(isHovered || newStrategyName) && !isReadOnly && (
-                            <div className="shadow-sm">
-                                <div className="flex">
-                                    {/* Strategy Name Input - 25% */}
-                                    <div className="w-[25%] border-r border-border p-4">
-                                        <input
-                                            type="text"
-                                            value={newStrategyName}
-                                            onChange={(e) =>
-                                                setNewStrategyName(
-                                                    e.target.value
-                                                )
-                                            }
-                                            onKeyDown={handleKeyDown}
-                                            onBlur={handleCreateStrategy}
-                                            placeholder="Add a new Strategy"
-                                            disabled={
-                                                createStrategyMutation.isPending
-                                            }
-                                            className="w-full bg-transparent text-sm font-medium text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
-                                        />
-                                    </div>
+                                {/* Add New Strategy Input - Visible on Hover or when input has text, Hidden in Read-Only */}
+                                {(isHovered || newStrategyName) &&
+                                    !isReadOnly && (
+                                        <div className="shadow-sm">
+                                            <div className="flex">
+                                                {/* Strategy Name Input - 25% */}
+                                                <div className="w-[25%] border-r border-border p-4">
+                                                    <input
+                                                        type="text"
+                                                        value={newStrategyName}
+                                                        onChange={(e) =>
+                                                            setNewStrategyName(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        onKeyDown={
+                                                            handleKeyDown
+                                                        }
+                                                        onBlur={
+                                                            handleCreateStrategy
+                                                        }
+                                                        placeholder="Add a new Strategy"
+                                                        disabled={
+                                                            createStrategyMutation.isPending
+                                                        }
+                                                        className="w-full bg-transparent text-sm font-medium text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
+                                                    />
+                                                </div>
 
-                                    {/* Placeholder columns */}
-                                    <div className="w-[25%] border-r border-border p-4" />
-                                    <div className="w-[50%] p-4" />
-                                </div>
+                                                {/* Placeholder columns */}
+                                                <div className="w-[25%] border-r border-border p-4" />
+                                                <div className="w-[50%] p-4" />
+                                            </div>
+                                        </div>
+                                    )}
                             </div>
-                        )}
-                    </div>
+                        </SortableContext>
+                    </DndContext>
                 </ScrollArea>
             </div>
         </div>

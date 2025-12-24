@@ -4,8 +4,25 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { GoalItem } from '@/components/items/GoalItem';
 import { useCreateGoal } from '@/hooks/useGoal';
 import { SectionHeader } from '@/components/sections/SectionHeader';
+import { useUpdateOGSM } from '@/hooks/useOgsm';
+import {
+    DndContext,
+    closestCenter,
+    PointerSensor,
+    KeyboardSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    arrayMove,
+} from '@dnd-kit/sortable';
 
 interface GoalsSectionProps {
+    ogsmId: string;
     goalIds: string[];
     onGoalCreated?: (goalId: string) => void;
     onGoalDeleted?: (goalId: string) => void;
@@ -14,8 +31,10 @@ interface GoalsSectionProps {
 /**
  * Goals Section Component
  * Displays the goals list on the left side of the board
+ * Supports drag-and-drop reordering of goals
  */
 export function GoalsSection({
+    ogsmId,
     goalIds,
     onGoalCreated,
     onGoalDeleted,
@@ -24,6 +43,49 @@ export function GoalsSection({
     const [isHovered, setIsHovered] = useState(false);
     const [newGoalName, setNewGoalName] = useState('');
     const createGoalMutation = useCreateGoal();
+    const updateOGSMMutation = useUpdateOGSM();
+
+    // Configure sensors for drag-and-drop
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    /**
+     * Handle goal drag end - reorder goals with optimistic update
+     */
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (!over || active.id === over.id) {
+            return;
+        }
+
+        const oldIndex = goalIds.indexOf(active.id as string);
+        const newIndex = goalIds.indexOf(over.id as string);
+
+        if (oldIndex === -1 || newIndex === -1) {
+            return;
+        }
+
+        const newGoalIds = arrayMove(goalIds, oldIndex, newIndex);
+
+        // Optimistic update - update the OGSM with new goal order immediately
+        updateOGSMMutation.mutate(
+            {
+                id: ogsmId,
+                input: { goalIds: newGoalIds },
+            },
+            {
+                // Optimistic update handled by mutation
+                onError: () => {
+                    // On error, React Query will automatically refetch and restore the previous state
+                },
+            }
+        );
+    };
 
     /**
      * Handle creating a new goal
@@ -77,41 +139,55 @@ export function GoalsSection({
             {/* Content Area - Scrollable List */}
             <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
-                    {/* Goals List */}
-                    <div>
-                        {goalIds.length > 0
-                            ? goalIds.map((goalId) => (
-                                  <GoalItem
-                                      key={goalId}
-                                      goalId={goalId}
-                                      onGoalDeleted={onGoalDeleted}
-                                  />
-                              ))
-                            : // Show empty state only in read-only mode or when input is not visible
-                              (isReadOnly || (!isHovered && !newGoalName)) && (
-                                  <div className="p-4 text-center text-sm text-muted-foreground">
-                                      No goals yet. Add your first goal!
-                                  </div>
-                              )}
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <SortableContext
+                            items={goalIds}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {/* Goals List */}
+                            <div>
+                                {goalIds.length > 0
+                                    ? goalIds.map((goalId) => (
+                                          <GoalItem
+                                              key={goalId}
+                                              goalId={goalId}
+                                              onGoalDeleted={onGoalDeleted}
+                                          />
+                                      ))
+                                    : // Show empty state only in read-only mode or when input is not visible
+                                      (isReadOnly ||
+                                          (!isHovered && !newGoalName)) && (
+                                          <div className="p-4 text-center text-sm text-muted-foreground">
+                                              No goals yet. Add your first goal!
+                                          </div>
+                                      )}
 
-                        {/* Add New Goal Input - Visible on Hover or when input has text, Hidden in Read-Only */}
-                        {(isHovered || newGoalName) && !isReadOnly && (
-                            <div className="border-t border-border p-3">
-                                <input
-                                    type="text"
-                                    value={newGoalName}
-                                    onChange={(e) =>
-                                        setNewGoalName(e.target.value)
-                                    }
-                                    onKeyDown={handleKeyDown}
-                                    onBlur={handleCreateGoal}
-                                    placeholder="Add a new Goal"
-                                    disabled={createGoalMutation.isPending}
-                                    className="w-full bg-transparent text-sm font-medium text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
-                                />
+                                {/* Add New Goal Input - Visible on Hover or when input has text, Hidden in Read-Only */}
+                                {(isHovered || newGoalName) && !isReadOnly && (
+                                    <div className="border-t border-border p-3">
+                                        <input
+                                            type="text"
+                                            value={newGoalName}
+                                            onChange={(e) =>
+                                                setNewGoalName(e.target.value)
+                                            }
+                                            onKeyDown={handleKeyDown}
+                                            onBlur={handleCreateGoal}
+                                            placeholder="Add a new Goal"
+                                            disabled={
+                                                createGoalMutation.isPending
+                                            }
+                                            className="w-full bg-transparent text-sm font-medium text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
+                                        />
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
+                        </SortableContext>
+                    </DndContext>
                 </ScrollArea>
             </div>
         </div>
