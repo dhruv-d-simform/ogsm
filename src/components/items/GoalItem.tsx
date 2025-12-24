@@ -65,6 +65,9 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     const [isKpiHovered, setIsKpiHovered] = useState(false);
     const [newKpiName, setNewKpiName] = useState('');
 
+    // Local state for KPI IDs to prevent flicker during drag-and-drop
+    const [localKpiIds, setLocalKpiIds] = useState<string[]>([]);
+
     // Sensors for drag and drop of KPIs
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -72,6 +75,15 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
+
+    /**
+     * Sync local KPI IDs with goal data
+     */
+    useEffect(() => {
+        if (goal?.kpiIds) {
+            setLocalKpiIds(goal.kpiIds);
+        }
+    }, [goal?.kpiIds]);
 
     /**
      * Sync local state when goal data changes and no mutation is pending
@@ -216,14 +228,17 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
             return;
         }
 
-        const oldIndex = goal.kpiIds.indexOf(active.id as string);
-        const newIndex = goal.kpiIds.indexOf(over.id as string);
+        const oldIndex = localKpiIds.indexOf(active.id as string);
+        const newIndex = localKpiIds.indexOf(over.id as string);
 
         if (oldIndex === -1 || newIndex === -1) {
             return;
         }
 
-        const newKpiIds = arrayMove(goal.kpiIds, oldIndex, newIndex);
+        const newKpiIds = arrayMove(localKpiIds, oldIndex, newIndex);
+
+        // Update local state immediately for instant visual feedback
+        setLocalKpiIds(newKpiIds);
 
         // Optimistic update - update the goal with new KPI order immediately
         updateGoalMutation.mutate(
@@ -234,7 +249,10 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
             {
                 // Optimistic update handled by mutation
                 onError: () => {
-                    // On error, React Query will automatically refetch and restore the previous state
+                    // On error, revert to original order
+                    if (goal?.kpiIds) {
+                        setLocalKpiIds(goal.kpiIds);
+                    }
                 },
             }
         );
@@ -342,7 +360,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
             )}
 
             {/* KPIs List */}
-            {goal.kpiIds.length > 0 && (
+            {localKpiIds.length > 0 && (
                 <div className="bg-muted/50">
                     <DndContext
                         sensors={sensors}
@@ -350,10 +368,10 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                         onDragEnd={handleDragEnd}
                     >
                         <SortableContext
-                            items={goal.kpiIds}
+                            items={localKpiIds}
                             strategy={verticalListSortingStrategy}
                         >
-                            {goal.kpiIds.map((kpiId) => (
+                            {localKpiIds.map((kpiId) => (
                                 <KPIItem
                                     key={kpiId}
                                     kpiId={kpiId}
@@ -382,7 +400,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
             )}
 
             {/* Show KPI section even when empty, on hover or when input has text, but not in Read-Only */}
-            {goal.kpiIds.length === 0 &&
+            {localKpiIds.length === 0 &&
                 (isKpiHovered || newKpiName) &&
                 !isReadOnly && (
                     <div className="bg-muted/50">

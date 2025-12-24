@@ -70,6 +70,9 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
     const [isTaskHovered, setIsTaskHovered] = useState(false);
     const [newTaskName, setNewTaskName] = useState('');
 
+    // Local state for task IDs to prevent flicker during drag-and-drop
+    const [localTaskIds, setLocalTaskIds] = useState<string[]>([]);
+
     // Sensors for drag and drop
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -77,6 +80,15 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
+
+    /**
+     * Sync local task IDs with action data
+     */
+    useEffect(() => {
+        if (action?.taskIds) {
+            setLocalTaskIds(action.taskIds);
+        }
+    }, [action?.taskIds]);
 
     /**
      * Sync local state when action data changes and no mutation is pending
@@ -222,14 +234,17 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
             return;
         }
 
-        const oldIndex = action.taskIds.indexOf(active.id as string);
-        const newIndex = action.taskIds.indexOf(over.id as string);
+        const oldIndex = localTaskIds.indexOf(active.id as string);
+        const newIndex = localTaskIds.indexOf(over.id as string);
 
         if (oldIndex === -1 || newIndex === -1) {
             return;
         }
 
-        const newTaskIds = arrayMove(action.taskIds, oldIndex, newIndex);
+        const newTaskIds = arrayMove(localTaskIds, oldIndex, newIndex);
+
+        // Update local state immediately for instant visual feedback
+        setLocalTaskIds(newTaskIds);
 
         // Optimistic update - update the action with new task order immediately
         updateActionMutation.mutate(
@@ -240,7 +255,10 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
             {
                 // Optimistic update handled by mutation
                 onError: () => {
-                    // On error, React Query will automatically refetch and restore the previous state
+                    // On error, revert to original order
+                    if (action?.taskIds) {
+                        setLocalTaskIds(action.taskIds);
+                    }
                 },
             }
         );
@@ -350,7 +368,7 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
             </div>
 
             {/* Tasks */}
-            {action.taskIds.length > 0 && (
+            {localTaskIds.length > 0 && (
                 <div className="bg-muted/50">
                     <DndContext
                         sensors={sensors}
@@ -358,10 +376,10 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                         onDragEnd={handleDragEnd}
                     >
                         <SortableContext
-                            items={action.taskIds}
+                            items={localTaskIds}
                             strategy={verticalListSortingStrategy}
                         >
-                            {action.taskIds.map((taskId) => (
+                            {localTaskIds.map((taskId) => (
                                 <TaskItem
                                     key={taskId}
                                     taskId={taskId}
@@ -390,7 +408,7 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
             )}
 
             {/* Show Task section even when empty, on hover or when input has text, Hidden in Read-Only */}
-            {action.taskIds.length === 0 &&
+            {localTaskIds.length === 0 &&
                 (isTaskHovered || newTaskName) &&
                 !isReadOnly && (
                     <div className="bg-muted/50">
