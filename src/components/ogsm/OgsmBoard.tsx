@@ -130,6 +130,7 @@ export function OgsmBoard({ ogsm, onObjectiveChange }: OgsmBoardProps) {
                     {/* Goals Section - 20% width */}
                     <div className="w-[20%]">
                         <GoalsSection
+                            ogsmId={ogsm.id}
                             goalIds={ogsm.goalIds}
                             onGoalCreated={handleGoalCreated}
                             onGoalDeleted={handleGoalDeleted}
@@ -139,6 +140,7 @@ export function OgsmBoard({ ogsm, onObjectiveChange }: OgsmBoardProps) {
                     {/* Strategy Section - 80% width */}
                     <div className="w-[80%]">
                         <StrategySection
+                            ogsmId={ogsm.id}
                             strategyIds={ogsm.strategyIds}
                             onStrategyCreated={handleStrategyCreated}
                             onStrategyDeleted={handleStrategyDeleted}

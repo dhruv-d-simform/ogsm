@@ -4,7 +4,7 @@ import { useAction, useUpdateAction, useDeleteAction } from '@/hooks/useAction';
 import { useCreateTask } from '@/hooks/useTask';
 import { TaskItem } from '@/components/items/TaskItem';
 import { Skeleton } from '@/components/ui/skeleton';
-import { X } from 'lucide-react';
+import { X, GripVertical } from 'lucide-react';
 import {
     DndContext,
     closestCenter,
@@ -19,7 +19,9 @@ import {
     SortableContext,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
+    useSortable,
 } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface ActionItemProps {
     actionId: string;
@@ -31,6 +33,7 @@ interface ActionItemProps {
  * Fetches and displays a single action with its tasks
  * Supports inline editing and deletion
  * Supports drag-and-drop reordering of tasks
+ * Supports drag-and-drop reordering of actions
  */
 export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
     const { isReadOnly } = useReadOnly();
@@ -44,12 +47,30 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
     const createTaskMutation = useCreateTask();
     const deleteActionMutation = useDeleteAction();
 
+    // Sortable hook for drag-and-drop of the action itself
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: actionId, disabled: isReadOnly });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
     const [isHovered, setIsHovered] = useState(false);
-    const [isTaskHovered, setIsTaskHovered] = useState(false);
     const [newTaskName, setNewTaskName] = useState('');
+
+    // Local state for task IDs to prevent flicker during drag-and-drop
+    const [localTaskIds, setLocalTaskIds] = useState<string[]>([]);
 
     // Sensors for drag and drop
     const sensors = useSensors(
@@ -58,6 +79,15 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
+
+    /**
+     * Sync local task IDs with action data
+     */
+    useEffect(() => {
+        if (action?.taskIds) {
+            setLocalTaskIds(action.taskIds);
+        }
+    }, [action?.taskIds]);
 
     /**
      * Sync local state when action data changes and no mutation is pending
@@ -203,14 +233,17 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
             return;
         }
 
-        const oldIndex = action.taskIds.indexOf(active.id as string);
-        const newIndex = action.taskIds.indexOf(over.id as string);
+        const oldIndex = localTaskIds.indexOf(active.id as string);
+        const newIndex = localTaskIds.indexOf(over.id as string);
 
         if (oldIndex === -1 || newIndex === -1) {
             return;
         }
 
-        const newTaskIds = arrayMove(action.taskIds, oldIndex, newIndex);
+        const newTaskIds = arrayMove(localTaskIds, oldIndex, newIndex);
+
+        // Update local state immediately for instant visual feedback
+        setLocalTaskIds(newTaskIds);
 
         // Optimistic update - update the action with new task order immediately
         updateActionMutation.mutate(
@@ -221,7 +254,10 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
             {
                 // Optimistic update handled by mutation
                 onError: () => {
-                    // On error, React Query will automatically refetch and restore the previous state
+                    // On error, revert to original order
+                    if (action?.taskIds) {
+                        setLocalTaskIds(action.taskIds);
+                    }
                 },
             }
         );
@@ -259,46 +295,57 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
 
     // Success state - render action with tasks
     return (
-        <div
-            onMouseEnter={() => {
-                setIsTaskHovered(true);
-                setIsHovered(true);
-            }}
-            onMouseLeave={() => {
-                setIsTaskHovered(false);
-                setIsHovered(false);
-            }}
-        >
+        <div ref={setNodeRef} style={style} className="overflow-visible">
             {/* Action Name - Inline Editable */}
-            <div className="relative p-4 pr-10">
-                {isEditing ? (
-                    <input
-                        type="text"
-                        value={localValue}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        onKeyDown={handleKeyDown}
-                        autoFocus
-                        className="w-full bg-transparent text-sm font-medium outline-none"
-                    />
-                ) : (
-                    <p
-                        onClick={handleClick}
-                        className={`${
-                            isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
-                        } text-sm font-medium ${
-                            updateActionMutation.isPending || pendingValue
-                                ? 'opacity-50'
-                                : ''
-                        }`}
-                        title={isReadOnly ? '' : 'Click to edit'}
-                    >
-                        {pendingValue ||
-                            (updateActionMutation.isPending
-                                ? localValue
-                                : action.name)}
-                    </p>
-                )}
+            <div
+                className="relative p-4 pr-10"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+            >
+                <div className="flex items-center gap-2">
+                    {/* Drag Handle - Positioned outside on the left with background and shadow */}
+                    {isHovered && !isReadOnly && (
+                        <button
+                            className="absolute h-full left-0 z-10 -translate-x-full cursor-grab rounded-l-md bg-card p-1 text-muted-foreground shadow-md hover:text-foreground active:cursor-grabbing"
+                            {...attributes}
+                            {...listeners}
+                            aria-label="Drag to reorder"
+                            onMouseEnter={() => setIsHovered(true)}
+                        >
+                            <GripVertical className="h-4 w-4" />
+                        </button>
+                    )}
+                    {isEditing ? (
+                        <input
+                            type="text"
+                            value={localValue}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            onKeyDown={handleKeyDown}
+                            autoFocus
+                            className="w-full bg-transparent text-sm font-medium outline-none"
+                        />
+                    ) : (
+                        <p
+                            onClick={handleClick}
+                            className={`flex-1 ${
+                                isReadOnly
+                                    ? ''
+                                    : 'cursor-pointer hover:opacity-70'
+                            } text-sm font-medium ${
+                                updateActionMutation.isPending || pendingValue
+                                    ? 'opacity-50'
+                                    : ''
+                            }`}
+                            title={isReadOnly ? '' : 'Click to edit'}
+                        >
+                            {pendingValue ||
+                                (updateActionMutation.isPending
+                                    ? localValue
+                                    : action.name)}
+                        </p>
+                    )}
+                </div>
 
                 {/* Delete Button - Visible on Hover, Hidden in Edit Mode and Read-Only */}
                 {isHovered && !isEditing && !isReadOnly && (
@@ -314,7 +361,7 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
             </div>
 
             {/* Tasks */}
-            {action.taskIds.length > 0 && (
+            {localTaskIds.length > 0 && (
                 <div className="bg-muted/50">
                     <DndContext
                         sensors={sensors}
@@ -322,10 +369,10 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                         onDragEnd={handleDragEnd}
                     >
                         <SortableContext
-                            items={action.taskIds}
+                            items={localTaskIds}
                             strategy={verticalListSortingStrategy}
                         >
-                            {action.taskIds.map((taskId) => (
+                            {localTaskIds.map((taskId) => (
                                 <TaskItem
                                     key={taskId}
                                     taskId={taskId}
@@ -336,7 +383,7 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                     </DndContext>
 
                     {/* Add New Task Input - Visible on Hover or when input has text, Hidden in Read-Only */}
-                    {(isTaskHovered || newTaskName) && !isReadOnly && (
+                    {newTaskName && !isReadOnly && (
                         <div className="border-t border-border py-2 pl-8 pr-4">
                             <input
                                 type="text"
@@ -354,24 +401,22 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
             )}
 
             {/* Show Task section even when empty, on hover or when input has text, Hidden in Read-Only */}
-            {action.taskIds.length === 0 &&
-                (isTaskHovered || newTaskName) &&
-                !isReadOnly && (
-                    <div className="bg-muted/50">
-                        <div className="py-2 pl-8 pr-4">
-                            <input
-                                type="text"
-                                value={newTaskName}
-                                onChange={(e) => setNewTaskName(e.target.value)}
-                                onKeyDown={handleTaskKeyDown}
-                                onBlur={handleCreateTask}
-                                placeholder="Add a new Task"
-                                disabled={createTaskMutation.isPending}
-                                className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
-                            />
-                        </div>
+            {localTaskIds.length === 0 && newTaskName && !isReadOnly && (
+                <div className="bg-muted/50">
+                    <div className="py-2 pl-8 pr-4">
+                        <input
+                            type="text"
+                            value={newTaskName}
+                            onChange={(e) => setNewTaskName(e.target.value)}
+                            onKeyDown={handleTaskKeyDown}
+                            onBlur={handleCreateTask}
+                            placeholder="Add a new Task"
+                            disabled={createTaskMutation.isPending}
+                            className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
+                        />
                     </div>
-                )}
+                </div>
+            )}
         </div>
     );
 }

@@ -3,7 +3,7 @@ import { useGoal, useUpdateGoal, useDeleteGoal } from '@/hooks/useGoal';
 import { useCreateKPI } from '@/hooks/useKpi';
 import { KPIItem } from '@/components/items/KPIItem';
 import { Skeleton } from '@/components/ui/skeleton';
-import { X } from 'lucide-react';
+import { X, GripVertical } from 'lucide-react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
 import {
     DndContext,
@@ -19,7 +19,9 @@ import {
     SortableContext,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
+    useSortable,
 } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface GoalItemProps {
     goalId: string;
@@ -31,6 +33,7 @@ interface GoalItemProps {
  * Fetches and displays a single goal with its associated KPIs
  * Supports inline editing and deletion
  * Supports drag-and-drop reordering of KPIs
+ * Supports drag-and-drop reordering of goals
  */
 export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     const { data: goal, isLoading, isError, isFetching } = useGoal(goalId);
@@ -39,20 +42,47 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     const deleteGoalMutation = useDeleteGoal();
     const { isReadOnly } = useReadOnly();
 
+    // Sortable hook for drag-and-drop of the goal itself
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: goalId, disabled: isReadOnly });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
     const [isEditing, setIsEditing] = useState(false);
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
     const [isHovered, setIsHovered] = useState(false);
-    const [isKpiHovered, setIsKpiHovered] = useState(false);
     const [newKpiName, setNewKpiName] = useState('');
 
-    // Sensors for drag and drop
+    // Local state for KPI IDs to prevent flicker during drag-and-drop
+    const [localKpiIds, setLocalKpiIds] = useState<string[]>([]);
+
+    // Sensors for drag and drop of KPIs
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
+
+    /**
+     * Sync local KPI IDs with goal data
+     */
+    useEffect(() => {
+        if (goal?.kpiIds) {
+            setLocalKpiIds(goal.kpiIds);
+        }
+    }, [goal?.kpiIds]);
 
     /**
      * Sync local state when goal data changes and no mutation is pending
@@ -197,14 +227,17 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
             return;
         }
 
-        const oldIndex = goal.kpiIds.indexOf(active.id as string);
-        const newIndex = goal.kpiIds.indexOf(over.id as string);
+        const oldIndex = localKpiIds.indexOf(active.id as string);
+        const newIndex = localKpiIds.indexOf(over.id as string);
 
         if (oldIndex === -1 || newIndex === -1) {
             return;
         }
 
-        const newKpiIds = arrayMove(goal.kpiIds, oldIndex, newIndex);
+        const newKpiIds = arrayMove(localKpiIds, oldIndex, newIndex);
+
+        // Update local state immediately for instant visual feedback
+        setLocalKpiIds(newKpiIds);
 
         // Optimistic update - update the goal with new KPI order immediately
         updateGoalMutation.mutate(
@@ -215,7 +248,10 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
             {
                 // Optimistic update handled by mutation
                 onError: () => {
-                    // On error, React Query will automatically refetch and restore the previous state
+                    // On error, revert to original order
+                    if (goal?.kpiIds) {
+                        setLocalKpiIds(goal.kpiIds);
+                    }
                 },
             }
         );
@@ -251,46 +287,60 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     // Success state - render goal with KPIs
     return (
         <div
-            className="relative border-b border-border last:border-b-0"
-            onMouseEnter={() => {
-                setIsKpiHovered(true);
-                setIsHovered(true);
-            }}
-            onMouseLeave={() => {
-                setIsKpiHovered(false);
-                setIsHovered(false);
-            }}
+            ref={setNodeRef}
+            style={style}
+            className="overflow-visible border-b border-border last:border-b-0"
         >
             {/* Goal Name - Inline Editable */}
-            <div className="p-3 pr-10">
-                {isEditing ? (
-                    <input
-                        type="text"
-                        value={localValue}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        onKeyDown={handleKeyDown}
-                        autoFocus
-                        className="w-full bg-transparent text-sm font-medium outline-none"
-                    />
-                ) : (
-                    <p
-                        onClick={handleClick}
-                        className={`text-sm font-medium ${
-                            isReadOnly ? '' : 'cursor-pointer hover:opacity-70'
-                        } ${
-                            updateGoalMutation.isPending || pendingValue
-                                ? 'opacity-50'
-                                : ''
-                        }`}
-                        title={isReadOnly ? '' : 'Click to edit'}
-                    >
-                        {pendingValue ||
-                            (updateGoalMutation.isPending
-                                ? localValue
-                                : goal.name)}
-                    </p>
-                )}
+            <div
+                className="p-3 pr-10 relative"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+            >
+                <div className="flex items-center gap-2">
+                    {/* Drag Handle - Positioned outside on the left with background and shadow */}
+                    {isHovered && !isReadOnly && (
+                        <button
+                            className="absolute h-full left-0 z-10 -translate-x-full cursor-grab rounded-l-md bg-card p-1 text-muted-foreground shadow-md hover:text-foreground active:cursor-grabbing"
+                            {...attributes}
+                            {...listeners}
+                            aria-label="Drag to reorder"
+                            onMouseEnter={() => setIsHovered(true)}
+                        >
+                            <GripVertical className="h-4 w-4" />
+                        </button>
+                    )}
+                    {isEditing ? (
+                        <input
+                            type="text"
+                            value={localValue}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            onKeyDown={handleKeyDown}
+                            autoFocus
+                            className="w-full bg-transparent text-sm font-medium outline-none"
+                        />
+                    ) : (
+                        <p
+                            onClick={handleClick}
+                            className={`flex-1 text-sm font-medium ${
+                                isReadOnly
+                                    ? ''
+                                    : 'cursor-pointer hover:opacity-70'
+                            } ${
+                                updateGoalMutation.isPending || pendingValue
+                                    ? 'opacity-50'
+                                    : ''
+                            }`}
+                            title={isReadOnly ? '' : 'Click to edit'}
+                        >
+                            {pendingValue ||
+                                (updateGoalMutation.isPending
+                                    ? localValue
+                                    : goal.name)}
+                        </p>
+                    )}
+                </div>
             </div>
 
             {/* Delete Button - Visible on Hover, Hidden in Edit Mode and Read-Only */}
@@ -306,7 +356,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
             )}
 
             {/* KPIs List */}
-            {goal.kpiIds.length > 0 && (
+            {localKpiIds.length > 0 && (
                 <div className="bg-muted/50">
                     <DndContext
                         sensors={sensors}
@@ -314,10 +364,10 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                         onDragEnd={handleDragEnd}
                     >
                         <SortableContext
-                            items={goal.kpiIds}
+                            items={localKpiIds}
                             strategy={verticalListSortingStrategy}
                         >
-                            {goal.kpiIds.map((kpiId) => (
+                            {localKpiIds.map((kpiId) => (
                                 <KPIItem
                                     key={kpiId}
                                     kpiId={kpiId}
@@ -328,7 +378,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                     </DndContext>
 
                     {/* Add New KPI Input - Visible on Hover or when input has text, Hidden in Read-Only */}
-                    {(isKpiHovered || newKpiName) && !isReadOnly && (
+                    {newKpiName && !isReadOnly && (
                         <div className="border-t border-border py-2 pl-6 pr-3">
                             <input
                                 type="text"
@@ -346,24 +396,22 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
             )}
 
             {/* Show KPI section even when empty, on hover or when input has text, but not in Read-Only */}
-            {goal.kpiIds.length === 0 &&
-                (isKpiHovered || newKpiName) &&
-                !isReadOnly && (
-                    <div className="bg-muted/50">
-                        <div className="py-2 pl-6 pr-3">
-                            <input
-                                type="text"
-                                value={newKpiName}
-                                onChange={(e) => setNewKpiName(e.target.value)}
-                                onKeyDown={handleKpiKeyDown}
-                                onBlur={handleCreateKpi}
-                                placeholder="Add a new KPI"
-                                disabled={createKpiMutation.isPending}
-                                className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
-                            />
-                        </div>
+            {localKpiIds.length === 0 && newKpiName && !isReadOnly && (
+                <div className="bg-muted/50">
+                    <div className="py-2 pl-6 pr-3">
+                        <input
+                            type="text"
+                            value={newKpiName}
+                            onChange={(e) => setNewKpiName(e.target.value)}
+                            onKeyDown={handleKpiKeyDown}
+                            onBlur={handleCreateKpi}
+                            placeholder="Add a new KPI"
+                            disabled={createKpiMutation.isPending}
+                            className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
+                        />
                     </div>
-                )}
+                </div>
+            )}
         </div>
     );
 }
