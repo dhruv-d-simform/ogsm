@@ -1,8 +1,35 @@
+import ReactMarkdown from 'react-markdown';
+import rehypeSanitize from 'rehype-sanitize';
 import {
     HoverCard,
     HoverCardContent,
     HoverCardTrigger,
 } from '@/components/ui/hover-card';
+
+/**
+ * Custom scrollbar styling for hover card
+ */
+const CUSTOM_SCROLLBAR_CLASSES =
+    '[&::-webkit-scrollbar]:w-2 ' +
+    '[&::-webkit-scrollbar-track]:bg-transparent ' +
+    '[&::-webkit-scrollbar-thumb]:bg-border ' +
+    '[&::-webkit-scrollbar-thumb]:rounded-full';
+
+/**
+ * Markdown content styling for comprehensive formatting
+ */
+const MARKDOWN_CONTENT_CLASSES =
+    'markdown-content text-sm text-muted-foreground ' +
+    '[&>h1]:text-lg [&>h1]:font-bold [&>h1]:mb-3 [&>h1]:text-foreground ' +
+    '[&>h2]:text-base [&>h2]:font-semibold [&>h2]:mb-2 [&>h2]:mt-4 [&>h2]:text-foreground ' +
+    '[&>h3]:text-sm [&>h3]:font-semibold [&>h3]:mb-1 [&>h3]:mt-3 [&>h3]:text-foreground ' +
+    '[&>p]:mb-3 [&>p]:leading-relaxed ' +
+    '[&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-3 [&>ul]:space-y-1 ' +
+    '[&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-3 [&>ol]:space-y-1 ' +
+    '[&>li]:leading-relaxed ' +
+    '[&>strong]:font-semibold [&>strong]:text-foreground ' +
+    '[&>em]:italic ' +
+    '[&>code]:bg-muted [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded [&>code]:text-xs [&>code]:font-mono';
 
 interface SectionHeaderProps {
     /**
@@ -17,6 +44,14 @@ interface SectionHeaderProps {
      * Description explaining what this section represents in the OGSM framework
      */
     description: string;
+    /**
+     * Optional custom markdown description (overrides the default description)
+     */
+    customDescription?: string;
+    /**
+     * Optional width for the hover card (default: 'w-80')
+     */
+    hoverCardWidth?: string;
 }
 
 /**
@@ -27,31 +62,46 @@ export function SectionHeader({
     initial,
     label,
     description,
+    customDescription,
+    hoverCardWidth = 'w-80',
 }: SectionHeaderProps) {
+    const displayContent = customDescription || description;
+    const isMarkdown = Boolean(customDescription);
+
     return (
         <div className="flex items-center gap-3">
             <HoverCard>
                 <HoverCardTrigger asChild>
                     <button
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-background text-primary transition-all hover:scale-110 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-primary"
+                        className="flex h-8 w-8 cursor-help items-center justify-center rounded-full bg-background text-primary transition-all hover:scale-110 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-primary"
                         aria-label={`Information about ${label}`}
                     >
                         <span className="text-base font-bold">{initial}</span>
                     </button>
                 </HoverCardTrigger>
                 <HoverCardContent
-                    className="w-80"
+                    className={`${hoverCardWidth} shadow-lg max-h-96 overflow-y-auto ${CUSTOM_SCROLLBAR_CLASSES}`}
                     side="bottom"
                     align="start"
                     sideOffset={8}
                 >
                     <div className="space-y-2">
-                        <h4 className="font-semibold text-foreground">
-                            {label}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                            {description}
-                        </p>
+                        {!isMarkdown && (
+                            <h4 className="font-semibold text-foreground">
+                                {label}
+                            </h4>
+                        )}
+                        {isMarkdown ? (
+                            <div className={MARKDOWN_CONTENT_CLASSES}>
+                                <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
+                                    {displayContent}
+                                </ReactMarkdown>
+                            </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">
+                                {displayContent}
+                            </p>
+                        )}
                     </div>
                 </HoverCardContent>
             </HoverCard>

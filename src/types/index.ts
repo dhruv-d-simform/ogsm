@@ -71,6 +71,7 @@ export interface OGSM {
     id: string;
     name: string;
     objective: string;
+    description?: string; // Optional markdown description
     goalIds: string[]; // References to Goal objects
     strategyIds: string[]; // References to Strategy objects
     createdAt: string;

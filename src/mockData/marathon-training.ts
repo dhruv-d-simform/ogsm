@@ -361,6 +361,33 @@ export const createMarathonTrainingData = (
         name: 'Marathon Training Plan',
         objective:
             'Successfully complete my first marathon in under 4 hours within the next 4 months, building the endurance, strength, and confidence needed while staying injury-free throughout training.',
+        description: `# Marathon Training Strategy
+
+Prepare for and successfully complete a first marathon through progressive training that builds endurance safely while targeting a sub-4-hour finish time.
+
+## The Sub-4-Hour Challenge
+
+A sub-4-hour marathon requires maintaining approximately 9:09 per mile pace for 26.2 miles—an ambitious but achievable goal for a first-timer with proper training. This demands not just physical conditioning but mental resilience and strategic race execution.
+
+## Training Philosophy
+
+This plan follows proven marathon training principles:
+
+1. **Progressive Overload**: Gradually increase weekly mileage (10% rule) to build aerobic capacity without overtraining
+2. **Specificity**: Long runs prepare the body for marathon distance demands
+3. **Recovery**: Rest days and easy runs are when the body adapts and grows stronger
+4. **Cross-Training**: Strength work and cross-training prevent injuries and improve running economy
+
+## 16-Week Program Structure
+
+- **Weeks 1-4 (Base Building)**: Establish consistent mileage foundation (25-30 miles/week)
+- **Weeks 5-10 (Development)**: Build to peak mileage (40-45 miles/week) with longer weekend runs
+- **Weeks 11-14 (Peak Training)**: Include 20+ mile long runs and race-pace workouts
+- **Weeks 15-16 (Taper)**: Reduce volume while maintaining intensity for race day freshness
+
+## Injury Prevention
+
+The biggest risk in marathon training isn't running slow—it's getting injured. This plan prioritizes sustainability through proper rest, cross-training, nutrition, and listening to your body.`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,

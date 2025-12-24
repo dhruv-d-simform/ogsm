@@ -361,6 +361,46 @@ export const createMobileAppLaunchData = (
         name: 'Mobile App Launch Plan',
         objective:
             'Successfully launch our mobile app and reach 10,000 downloads within 3 months, building an engaged user base and generating $15K in monthly recurring revenue to prove product-market fit.',
+        description: `# Mobile App Launch & Growth Strategy
+
+Execute a successful app launch that validates product-market fit through user adoption metrics and revenue generation, establishing foundation for long-term growth.
+
+## Product-Market Fit Validation
+
+The combination of 10,000 downloads and $15K MRR within 3 months provides clear signals:
+- **Download Volume**: Proves market demand and acquisition capability
+- **Revenue Target**: Demonstrates users find enough value to pay (~150 paying users at $100/month OR 1,500 at $10/month)
+- **Engagement Metrics**: Shows product stickiness and retention
+
+## Launch Strategy
+
+This isn't a "build it and they will come" approach. Success requires orchestrated efforts across product quality, marketing, and user experience.
+
+### Pre-Launch Phase (Month 0)
+- Final beta testing with 50+ users for feedback
+- App store optimization (ASO) preparation
+- Marketing assets and launch plan finalization
+- Pre-launch buzz building on social media
+
+### Launch Phase (Month 1)
+- Coordinated launch across App Store and Google Play
+- Product Hunt and similar platform launches
+- Influencer and press outreach
+- Early user feedback collection and rapid iteration
+
+### Growth Phase (Months 2-3)
+- User acquisition optimization based on channel performance
+- Feature improvements driven by user requests
+- Referral program implementation
+- Conversion rate optimization for free-to-paid funnel
+
+## Critical Success Metrics
+
+Beyond vanity metrics, focus on actionable indicators:
+- Cost per acquisition (CPA) vs lifetime value (LTV)
+- Day 1, 7, and 30 retention rates
+- Free-to-paid conversion rate
+- User engagement frequency`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,

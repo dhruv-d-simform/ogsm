@@ -119,6 +119,7 @@ export function OgsmBoard({ ogsm, onObjectiveChange }: OgsmBoardProps) {
                 {/* Objective Section */}
                 <ObjectiveSection
                     objective={ogsm.objective}
+                    description={ogsm.description}
                     onObjectiveChange={onObjectiveChange}
                     isFullscreen={isFullscreen}
                     onToggleFullscreen={handleToggleFullscreen}

@@ -315,6 +315,33 @@ export const createFitnessTransformationData = (
         name: 'Personal Fitness Transformation',
         objective:
             'Transform my health and fitness over the next 12 months, losing 30 pounds, building strength and endurance, and developing sustainable habits that will keep me healthy for life.',
+        description: `# Personal Fitness Transformation Journey
+
+A comprehensive 12-month plan to achieve lasting health and fitness improvements through sustainable lifestyle changes, not quick fixes or fad diets.
+
+## The Mindset Shift
+
+This transformation is built on the foundation that **lasting change comes from sustainable habits**, not extreme measures. We're not just losing weight; we're building a healthier version of ourselves that can be maintained for life.
+
+## Holistic Approach
+
+Success requires addressing three interconnected pillars:
+
+- **Nutrition**: Clean eating with balanced macros, not restrictive dieting
+- **Exercise**: Progressive strength training combined with cardiovascular fitness
+- **Lifestyle**: Adequate sleep, stress management, and recovery protocols
+
+## Progressive Goals
+
+The 30-pound weight loss target is structured as 2.5 pounds per month, a sustainable pace that preserves muscle mass and prevents metabolic adaptation. Strength and endurance goals follow a progressive overload principle, gradually increasing intensity.
+
+## Long-term Sustainability
+
+Unlike crash diets or extreme workout programs, this plan focuses on building habits that become part of daily life. The goal isn't just to reach a number on the scale, but to develop a relationship with health and fitness that lasts beyond these 12 months.
+
+## Success Metrics Beyond the Scale
+
+While weight is one measure, we'll also track strength gains, cardiovascular improvements, body measurements, energy levels, and most importantly, how sustainable and enjoyable the process feels.`,
         goalIds: goals.map((g) => g.id),
         strategyIds: strategies.map((s) => s.id),
         createdAt: now,
