@@ -48,8 +48,7 @@ export function SectionHeader({
             <HoverCard>
                 <HoverCardTrigger asChild>
                     <button
-                        className="flex h-8 w-8 items-center justify-center rounded-full bg-background text-primary transition-all hover:scale-110 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-primary"
-                        style={{ cursor: 'help' }}
+                        className="flex h-8 w-8 cursor-help items-center justify-center rounded-full bg-background text-primary transition-all hover:scale-110 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-primary"
                         aria-label={`Information about ${label}`}
                     >
                         <span className="text-base font-bold">{initial}</span>

@@ -45,11 +45,13 @@ const createOgsmSchema = z
     .refine(
         (data) => {
             if (!data.description) return true;
-            return data.description.length > data.objective.length;
+            // Require description to be at least 1.5x longer than objective
+            // to account for markdown syntax overhead
+            return data.description.length >= data.objective.length * 1.5;
         },
         {
             message:
-                'Description should provide more detail than the objective',
+                'Description should be significantly more detailed than the objective (at least 1.5x longer)',
             path: ['description'],
         }
     );
@@ -235,8 +237,10 @@ export function CreateOgsmDialog({ children }: CreateOgsmDialogProps) {
                                 </p>
                             )}
                             <p className="text-xs text-muted-foreground">
-                                Supports markdown formatting. This description
-                                will appear in a hover card on the OGSM board.
+                                Supports markdown formatting. The description
+                                should be significantly more detailed than the
+                                objective (at least 1.5x longer). This will
+                                appear in a hover card on the OGSM board.
                             </p>
                         </div>
                     </div>
