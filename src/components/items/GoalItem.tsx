@@ -62,7 +62,6 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
     const [isHovered, setIsHovered] = useState(false);
-    const [isKpiHovered, setIsKpiHovered] = useState(false);
     const [newKpiName, setNewKpiName] = useState('');
 
     // Local state for KPI IDs to prevent flicker during drag-and-drop
@@ -290,26 +289,23 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
         <div
             ref={setNodeRef}
             style={style}
-            className="relative border-b border-border last:border-b-0"
-            onMouseEnter={() => {
-                setIsKpiHovered(true);
-                setIsHovered(true);
-            }}
-            onMouseLeave={() => {
-                setIsKpiHovered(false);
-                setIsHovered(false);
-            }}
+            className="overflow-visible border-b border-border last:border-b-0"
         >
             {/* Goal Name - Inline Editable */}
-            <div className="p-3 pr-10">
+            <div
+                className="p-3 pr-10 relative"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+            >
                 <div className="flex items-center gap-2">
-                    {/* Drag Handle - Visible on hover, hidden in read-only */}
+                    {/* Drag Handle - Positioned outside on the left with background and shadow */}
                     {isHovered && !isReadOnly && (
                         <button
-                            className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+                            className="absolute h-full left-0 z-10 -translate-x-full cursor-grab rounded-l-md bg-card p-1 text-muted-foreground shadow-md hover:text-foreground active:cursor-grabbing"
                             {...attributes}
                             {...listeners}
                             aria-label="Drag to reorder"
+                            onMouseEnter={() => setIsHovered(true)}
                         >
                             <GripVertical className="h-4 w-4" />
                         </button>
@@ -382,7 +378,7 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
                     </DndContext>
 
                     {/* Add New KPI Input - Visible on Hover or when input has text, Hidden in Read-Only */}
-                    {(isKpiHovered || newKpiName) && !isReadOnly && (
+                    {newKpiName && !isReadOnly && (
                         <div className="border-t border-border py-2 pl-6 pr-3">
                             <input
                                 type="text"
@@ -400,24 +396,22 @@ export function GoalItem({ goalId, onGoalDeleted }: GoalItemProps) {
             )}
 
             {/* Show KPI section even when empty, on hover or when input has text, but not in Read-Only */}
-            {localKpiIds.length === 0 &&
-                (isKpiHovered || newKpiName) &&
-                !isReadOnly && (
-                    <div className="bg-muted/50">
-                        <div className="py-2 pl-6 pr-3">
-                            <input
-                                type="text"
-                                value={newKpiName}
-                                onChange={(e) => setNewKpiName(e.target.value)}
-                                onKeyDown={handleKpiKeyDown}
-                                onBlur={handleCreateKpi}
-                                placeholder="Add a new KPI"
-                                disabled={createKpiMutation.isPending}
-                                className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
-                            />
-                        </div>
+            {localKpiIds.length === 0 && newKpiName && !isReadOnly && (
+                <div className="bg-muted/50">
+                    <div className="py-2 pl-6 pr-3">
+                        <input
+                            type="text"
+                            value={newKpiName}
+                            onChange={(e) => setNewKpiName(e.target.value)}
+                            onKeyDown={handleKpiKeyDown}
+                            onBlur={handleCreateKpi}
+                            placeholder="Add a new KPI"
+                            disabled={createKpiMutation.isPending}
+                            className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
+                        />
                     </div>
-                )}
+                </div>
+            )}
         </div>
     );
 }

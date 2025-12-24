@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { StrategyItem } from '@/components/items/StrategyItem';
 import { useCreateStrategy } from '@/hooks/useStrategy';
 import { SectionHeader } from '@/components/sections/SectionHeader';
@@ -136,7 +135,7 @@ export function StrategySection({
 
     return (
         <div
-            className="flex h-full flex-col rounded-lg border border-border"
+            className="flex h-full flex-col rounded-lg border border-border overflow-visible"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -176,8 +175,8 @@ export function StrategySection({
             </div>
 
             {/* Content Area - Scrollable Strategy List */}
-            <div className="flex-1 overflow-hidden">
-                <ScrollArea className="h-full">
+            <div className="flex-1 overflow-y-auto overflow-x-visible">
+                <div className="h-full">
                     <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}
@@ -187,7 +186,7 @@ export function StrategySection({
                             items={localStrategyIds}
                             strategy={verticalListSortingStrategy}
                         >
-                            <div className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-4 overflow-visible">
                                 {localStrategyIds.length > 0
                                     ? localStrategyIds.map((strategyId) => (
                                           <StrategyItem
@@ -245,7 +244,7 @@ export function StrategySection({
                             </div>
                         </SortableContext>
                     </DndContext>
-                </ScrollArea>
+                </div>
             </div>
         </div>
     );

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useReadOnly } from '@/contexts/ReadOnlyContext';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { GoalItem } from '@/components/items/GoalItem';
 import { useCreateGoal } from '@/hooks/useGoal';
 import { SectionHeader } from '@/components/sections/SectionHeader';
@@ -149,8 +148,8 @@ export function GoalsSection({
             </div>
 
             {/* Content Area - Scrollable List */}
-            <div className="flex-1 overflow-hidden">
-                <ScrollArea className="h-full">
+            <div className="flex-1 overflow-y-auto overflow-x-visible">
+                <div className="h-full">
                     <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}
@@ -161,7 +160,7 @@ export function GoalsSection({
                             strategy={verticalListSortingStrategy}
                         >
                             {/* Goals List */}
-                            <div>
+                            <div className="overflow-visible">
                                 {localGoalIds.length > 0
                                     ? localGoalIds.map((goalId) => (
                                           <GoalItem
@@ -200,7 +199,7 @@ export function GoalsSection({
                             </div>
                         </SortableContext>
                     </DndContext>
-                </ScrollArea>
+                </div>
             </div>
         </div>
     );

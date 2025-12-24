@@ -151,18 +151,19 @@ export function DashboardKpiItem({
         <div
             ref={setNodeRef}
             style={style}
-            className={`relative p-4 pr-10 ${showBorder ? 'border-t border-border' : ''}`}
+            className={`relative overflow-visible p-4 pr-10 ${showBorder ? 'border-t border-border' : ''}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
             <div className="flex items-center gap-2">
-                {/* Drag Handle - Visible on hover, hidden in read-only */}
+                {/* Drag Handle - Positioned outside on the left with background and shadow */}
                 {isHovered && !isReadOnly && (
                     <button
-                        className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+                        className="absolute h-full left-0 z-10 -translate-x-full cursor-grab rounded-l-md bg-card p-1 text-muted-foreground shadow-md hover:text-foreground active:cursor-grabbing"
                         {...attributes}
                         {...listeners}
                         aria-label="Drag to reorder"
+                        onMouseEnter={() => setIsHovered(true)}
                     >
                         <GripVertical className="h-4 w-4" />
                     </button>

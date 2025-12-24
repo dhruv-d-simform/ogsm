@@ -67,7 +67,6 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
     const [localValue, setLocalValue] = useState('');
     const [pendingValue, setPendingValue] = useState<string | null>(null);
     const [isHovered, setIsHovered] = useState(false);
-    const [isTaskHovered, setIsTaskHovered] = useState(false);
     const [newTaskName, setNewTaskName] = useState('');
 
     // Local state for task IDs to prevent flicker during drag-and-drop
@@ -296,28 +295,22 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
 
     // Success state - render action with tasks
     return (
-        <div
-            ref={setNodeRef}
-            style={style}
-            onMouseEnter={() => {
-                setIsTaskHovered(true);
-                setIsHovered(true);
-            }}
-            onMouseLeave={() => {
-                setIsTaskHovered(false);
-                setIsHovered(false);
-            }}
-        >
+        <div ref={setNodeRef} style={style} className="overflow-visible">
             {/* Action Name - Inline Editable */}
-            <div className="relative p-4 pr-10">
+            <div
+                className="relative p-4 pr-10"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+            >
                 <div className="flex items-center gap-2">
-                    {/* Drag Handle - Visible on hover, hidden in read-only */}
+                    {/* Drag Handle - Positioned outside on the left with background and shadow */}
                     {isHovered && !isReadOnly && (
                         <button
-                            className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+                            className="absolute h-full left-0 z-10 -translate-x-full cursor-grab rounded-l-md bg-card p-1 text-muted-foreground shadow-md hover:text-foreground active:cursor-grabbing"
                             {...attributes}
                             {...listeners}
                             aria-label="Drag to reorder"
+                            onMouseEnter={() => setIsHovered(true)}
                         >
                             <GripVertical className="h-4 w-4" />
                         </button>
@@ -390,7 +383,7 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
                     </DndContext>
 
                     {/* Add New Task Input - Visible on Hover or when input has text, Hidden in Read-Only */}
-                    {(isTaskHovered || newTaskName) && !isReadOnly && (
+                    {newTaskName && !isReadOnly && (
                         <div className="border-t border-border py-2 pl-8 pr-4">
                             <input
                                 type="text"
@@ -408,24 +401,22 @@ export function ActionItem({ actionId, onActionDeleted }: ActionItemProps) {
             )}
 
             {/* Show Task section even when empty, on hover or when input has text, Hidden in Read-Only */}
-            {localTaskIds.length === 0 &&
-                (isTaskHovered || newTaskName) &&
-                !isReadOnly && (
-                    <div className="bg-muted/50">
-                        <div className="py-2 pl-8 pr-4">
-                            <input
-                                type="text"
-                                value={newTaskName}
-                                onChange={(e) => setNewTaskName(e.target.value)}
-                                onKeyDown={handleTaskKeyDown}
-                                onBlur={handleCreateTask}
-                                placeholder="Add a new Task"
-                                disabled={createTaskMutation.isPending}
-                                className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
-                            />
-                        </div>
+            {localTaskIds.length === 0 && newTaskName && !isReadOnly && (
+                <div className="bg-muted/50">
+                    <div className="py-2 pl-8 pr-4">
+                        <input
+                            type="text"
+                            value={newTaskName}
+                            onChange={(e) => setNewTaskName(e.target.value)}
+                            onKeyDown={handleTaskKeyDown}
+                            onBlur={handleCreateTask}
+                            placeholder="Add a new Task"
+                            disabled={createTaskMutation.isPending}
+                            className="w-full bg-transparent text-sm text-muted-foreground outline-none placeholder:text-muted-foreground focus:text-foreground"
+                        />
                     </div>
-                )}
+                </div>
+            )}
         </div>
     );
 }

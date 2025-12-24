@@ -428,21 +428,24 @@ export function StrategyItem({
         <div
             ref={setNodeRef}
             style={style}
-            className="relative shadow-sm dark:shadow-[0_1px_3px_0_rgba(255,255,255,0.1)]"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            className="relative overflow-visible shadow-sm dark:shadow-[0_1px_3px_0_rgba(255,255,255,0.1)]"
         >
             <div className="flex">
                 {/* Strategy Name Column - 25% - Inline Editable */}
-                <div className="relative w-[25%] border-r border-border p-4 pr-10">
+                <div
+                    className="relative w-[25%] border-r border-border p-4 pr-10"
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                >
                     <div className="flex items-center gap-2">
-                        {/* Drag Handle - Visible on hover, hidden in read-only */}
+                        {/* Drag Handle - Positioned outside on the left with background and shadow */}
                         {isHovered && !isReadOnly && (
                             <button
-                                className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+                                className="absolute h-full left-0 z-10 -translate-x-full cursor-grab rounded-l-md bg-card p-1 text-muted-foreground shadow-md hover:text-foreground active:cursor-grabbing"
                                 {...attributes}
                                 {...listeners}
                                 aria-label="Drag to reorder"
+                                onMouseEnter={() => setIsHovered(true)}
                             >
                                 <GripVertical className="h-4 w-4" />
                             </button>
@@ -495,12 +498,12 @@ export function StrategyItem({
 
                 {/* Dashboard KPIs Column - 25% */}
                 <div
-                    className="w-[25%] border-r border-border"
+                    className="w-[25%] overflow-visible border-r border-border"
                     onMouseEnter={() => setIsKpiHovered(true)}
                     onMouseLeave={() => setIsKpiHovered(false)}
                 >
                     {localDashboardKpiIds.length > 0 ? (
-                        <div>
+                        <div className="overflow-visible">
                             <DndContext
                                 sensors={sensors}
                                 collisionDetection={closestCenter}
@@ -567,12 +570,12 @@ export function StrategyItem({
 
                 {/* Actions Column - 50% */}
                 <div
-                    className="w-[50%]"
+                    className="w-[50%] overflow-visible"
                     onMouseEnter={() => setIsActionHovered(true)}
                     onMouseLeave={() => setIsActionHovered(false)}
                 >
                     {localActionIds.length > 0 ? (
-                        <div>
+                        <div className="overflow-visible">
                             <DndContext
                                 sensors={sensors}
                                 collisionDetection={closestCenter}
