@@ -3,9 +3,10 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { CreateOGSMInput, UpdateOGSMInput } from '@/types';
+import type { CreateOGSMInput, UpdateOGSMInput, OGSM } from '@/types';
 import * as ogsmApi from '@/api/ogsm';
 import { ogsmKeys } from '@/lib/queryKeys';
+import { createOptimisticUpdateOptions } from '@/utils/optimisticUpdate';
 
 /**
  * Hook to fetch all OGSM plans
@@ -52,13 +53,11 @@ export const useUpdateOGSM = () => {
     return useMutation({
         mutationFn: ({ id, input }: { id: string; input: UpdateOGSMInput }) =>
             ogsmApi.updateOGSM(id, input),
-        onSuccess: (_data, variables) => {
-            // Invalidate and refetch both list and detail
-            queryClient.invalidateQueries({ queryKey: ogsmKeys.lists() });
-            queryClient.invalidateQueries({
-                queryKey: ogsmKeys.detail(variables.id),
-            });
-        },
+        ...createOptimisticUpdateOptions<OGSM, UpdateOGSMInput>({
+            queryClient,
+            getDetailKey: ogsmKeys.detail,
+            getListKey: ogsmKeys.lists,
+        }),
     });
 };
 
